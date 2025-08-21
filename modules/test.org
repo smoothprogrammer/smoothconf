@@ -1,0 +1,12 @@
+#+title: Go Customer Test Suite
+#+property: :tangle no
+
+* Go Customer                            :verb:
+
+template https://go-customer.dev.amartha.id
+Accept: application/json
+
+** Health
+
+GET /api/v1/health/check
+Accept: application/json
