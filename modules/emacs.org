@@ -1,0 +1,786 @@
+#+title: Emacs Configurations
+#+property: header-args:elisp :mkdirp yes :results silent :tangle ~/.emacs.d/init.el
+#+property: header-args:nix :results silent :tangle ./emacs.nix
+
+* Reading material
+
+I'm still new to emacs, try reading this in the future:
+
+- https://taingram.org/blog/intro-to-emacs-tempo.html
+
+* Key binding
+
+Finding key binding is easy, just use =C-h m=. Here I'm just list all the
+binding I care about and some overriding.
+
+** Help
+
+#+begin_src elisp :tangle no :noweb-ref help-map
+  ;; show help for mode
+  ("C-h m" . describe-mode)
+
+  ;; show dynamic help at point
+  ("C-h ." . helpful-at-point)
+
+  ;; show help for variable
+  ("C-h v" . helpful-variable)
+
+  ;; show help for function
+  ("C-h v" . helpful-callable)
+
+  ;; show help for key
+  ("C-h k" . helpful-key)
+
+  ;; show help for command
+  ("C-h x" . helpful-command)
+
+  ;; show macroexpand
+  ("C-h j" . pp-macroexpand-last-sexp)
+#+end_src
+
+** Org
+
+*** Structure template
+
+#+begin_src elisp :tangle no :noweb-ref org-mode-map
+  ;; insert structure template
+  ;; see: org-structure-template-alist
+  ("C-x C-," . org-insert-structure-template)
+#+end_src
+
+*** Code block
+
+#+begin_src elisp :tangle no :noweb-ref org-mode-map
+  ;; execute code block
+  ("C-c C-c" . org-ctrl-c-ctrl-c)
+
+  ;; insert header argument
+  ("C-c C-v j" . org-babel-insert-header-arg)
+
+  ;; tangle code blocks in current file
+  ("C-c C-v t" . org-babel-tangle)
+#+end_src
+
+* Emacs modules
+
+Noweb reference:
+- epkgs :: emacs packages
+- pkgs :: nix packages
+- config :: nix configuration
+
+#+begin_src nix :noweb yes
+  {
+    config,
+    lib,
+    pkgs,
+    ...
+  }:
+
+  with lib;
+
+  let
+    minimalEmacs = pkgs.emacs.overrideAttrs (oldAttrs: {
+  	preBuild = (oldAttrs.preBuild or "") + ''
+        rm -rf lisp/play
+  	  rm -rf lisp/obsolete
+        rm -f lisp/isearchb.el
+  	'';
+    });
+
+    emacs = minimalEmacs.pkgs.withPackages (epkgs: [
+      <<epkgs>>
+    ]);
+
+    cfg = config.mod.emacs;
+  in
+
+  {
+    options.mod.emacs = {
+      enable = mkEnableOption "emacs";
+    };
+
+    config = mkIf cfg.enable {
+      environment.systemPackages = [
+  	  emacs
+  	  <<pkgs>>
+  	];
+
+  	<<config>>
+
+      mod.activationScripts.tangleEmacsConfig.text = ''
+        ${emacs}/bin/emacs ${./.}/emacs.org \
+          -Q --batch --eval '(org-babel-tangle nil nil "^elisp$")' --kill
+      '';
+    };
+  }
+#+end_src
+
+* Startup performance and default
+:properties:
+:header-args:elisp: :mkdirp yes :result silent :tangle ~/.emacs.d/early-init.el
+:end:
+
+Startup performance matters, I've seen a friend of mine opening Emacs and fully
+load after 40 seconds. So keep the startup time low.
+
+Emacs is featureful but has some bad default. Without 3rd party packages, we
+will try to make QoL better.
+
+** Measure startup time and gc counts
+
+This will give us base information wether our configuration is optimized or not.
+If possible keep the startup time low.
+
+#+begin_src elisp
+  (add-hook 'emacs-startup-hook
+            (lambda ()
+              (message "Emacs loaded in %s with %d garbage collections."
+                       (format "%.2f seconds"
+                               (float-time
+                                (time-subtract after-init-time before-init-time)))
+                       gcs-done)))
+#+end_src
+
+** GC
+
+Temporary increase gc threshold during startup.
+
+#+begin_src elisp
+  (setq gc-cons-threshold most-positive-fixnum
+        gc-cons-percentage 0.5)
+
+  (add-hook 'emacs-startup-hook
+            (lambda ()
+              (setq gc-cons-threshold (* 8 100 100)
+                    gc-cons-percentage 0.1)))
+#+end_src
+
+** UI
+
+Maximize the frame.
+
+#+begin_src elisp
+  (add-to-list 'initial-frame-alist '(fullscreen . maximized))
+  (add-to-list 'default-frame-alist '(fullscreen . maximized))
+#+end_src
+
+Removing some UI elements. Most of them are ugly. Prefer minimal look.
+
+#+begin_src elisp
+  (unless (memq window-system '(mac ns))
+    (menu-bar-mode -1))
+  (tool-bar-mode -1)
+  (scroll-bar-mode -1)
+  (horizontal-scroll-bar-mode -1)
+  (tooltip-mode -1)
+#+end_src
+
+** QoL
+
+Less noise, more peace.
+
+#+begin_src elisp
+  (setopt inhibit-startup-screen t
+          inhibit-startup-buffer-menu t
+          initial-scratch-message nil
+          ring-bell-function 'ignore
+          use-short-answers t)
+#+end_src
+
+Disable backup and lockfiles.
+
+#+begin_src elisp
+  (setopt make-backup-files nil
+          create-lockfiles nil)
+#+end_src
+
+Still experiment for a better mapping in =macOS=.
+
+#+begin_src elisp :tangle no
+  (setopt mac-command-modifier 'control
+          mac-right-command-modifier 'meta
+          mac-option-modifier 'super)
+#+end_src
+
+Better main buffer default.
+
+#+begin_src elisp
+   (setopt sentence-end-double-space nil
+           kill-whole-line t)
+#+end_src
+
+* Environment and Nix
+
+Makes Emacs aware of the environment, especially within [[https://nixos.org/][Nix]] ecosystems. This is
+something you want to be setup early on.
+
+** System path =exec-path-from-shell=
+
+Read the system path from shell.
+
+#+begin_src nix :tangle no :noweb-ref epkgs
+  epkgs.exec-path-from-shell
+#+end_src
+
+#+begin_src elisp
+  (use-package exec-path-from-shell
+    :config
+    (when (or (memq window-system '(mac ns x)) (daemonp))
+      (dolist (var '("PATH"
+                     "NIX_PATH"
+                     "NIX_PROFILES"
+                     "NIX_SSL_CERT_FILE"
+                     "NIX_USER_PROFILE_DIR"
+                     "__ETC_PROFILE_NIX_SOURCED"
+                     "__NIX_DARWIN_SET_ENVIRONMENT_DONE"
+                     "DIRENV_CONFIG"))
+        (add-to-list 'exec-path-from-shell-variables var))
+      (exec-path-from-shell-initialize)))
+#+end_src
+
+** Direnv =envrc=
+
+#+begin_src nix :tangle no :noweb-ref config
+  programs.direnv = {
+    enable = true;
+    nix-direnv.enable = true;
+  };
+#+end_src
+
+#+begin_src nix :tangle no :noweb-ref epkgs
+  epkgs.envrc
+#+end_src
+
+#+begin_src elisp
+  (use-package envrc
+    :init (setopt envrc-debug t)
+    :hook (after-init . envrc-global-mode))
+#+end_src
+
+* Help system
+
+I'm still an Emacs noob, more help are welcome.
+
+** Better help =helpful=
+
+#+begin_src nix :tangle no :noweb-ref epkgs
+  epkgs.helpful
+#+end_src
+
+#+begin_src elisp :noweb yes
+  (use-package helpful
+    :bind
+    <<help-map>>)
+#+end_src
+
+** Forget which key? =which-key=
+
+#+begin_src nix :tangle no :noweb-ref epkgs
+  epkgs.which-key
+#+end_src
+
+#+begin_src elisp
+  (use-package which-key
+    :hook (after-init . which-key-mode))
+#+end_src
+
+** Keycast =keycast=
+
+#+begin_src nix :tangle no :noweb-ref epkgs
+  epkgs.keycast
+#+end_src
+
+** Better documentation UI =eldoc-box=
+
+#+begin_src nix :tangle no :noweb-ref epkgs
+  epkgs.eldoc-box
+#+end_src
+
+#+begin_src elisp
+  (use-package eldoc-box
+    :hook (eglot-managed-mode . eldoc-box-hover-mode))
+#+end_src
+
+** Markdown =markdown-mode=
+
+#+begin_src nix :tangle no :noweb-ref epkgs
+  epkgs.markdown-mode
+#+end_src
+
+#+begin_src elisp
+  (use-package markdown-mode
+    :mode (rx ".md" eos))
+#+end_src
+
+* UI
+
+Who doesn't want a better UI?
+
+** Fonts and icons =nerd-icons=
+
+Nerd Fonts all the way.
+
+#+begin_src nix :tangle no :noweb-ref config
+  fonts.packages = [ pkgs.nerd-fonts.iosevka ];
+#+end_src
+
+#+begin_src nix :tangle no :noweb-ref epkgs
+  epkgs.nerd-icons
+#+end_src
+
+#+begin_src elisp
+  (use-package nerd-icons
+    :config (setopt nerd-icons-font-family "Iosevka Nerd Font"))
+#+end_src
+
+** Themes =doom-themes=
+
+Not a fan of dark themes, but light themes also too bright. Solarized with warm
+and low contrast is a sweet spot for me.
+
+#+begin_src nix :tangle no :noweb-ref epkgs
+  epkgs.doom-themes
+#+end_src
+
+#+begin_src elisp
+  (use-package doom-themes
+    :config
+    (load-theme 'doom-solarized-light t)
+    (doom-themes-org-config))
+#+end_src
+
+** Mode line =doom-modeline=
+
+Doom modeline to complement the themes.
+
+#+begin_src nix :tangle no :noweb-ref epkgs
+  epkgs.doom-modeline
+#+end_src
+
+#+begin_src elisp
+  (use-package doom-modeline
+    :config (doom-modeline-mode 1))
+#+end_src
+
+** QoL
+
+Give Emacs some space to breath.
+
+#+begin_src nix :tangle no :noweb-ref epkgs
+  epkgs.spacious-padding
+#+end_src
+
+#+begin_src elisp
+  (use-package spacious-padding
+    :config (spacious-padding-mode 1))
+#+end_src
+
+* Completion
+
+Completion are essential feature for modern text editor / IDE.
+
+#+begin_src elisp
+  (setq read-file-name-completion-ignore-case t
+        read-buffer-completion-ignore-case t
+        completion-ignore-case t)
+#+end_src
+
+** Completion style / logic =orderless=
+
+#+begin_src nix :tangle no :noweb-ref epkgs
+  epkgs.orderless
+#+end_src
+
+#+begin_src elisp
+  (use-package orderless
+    :config
+    (setq completion-styles '(orderless basic)
+          completion-category-default nil
+          completion-category-overrides '((file (styles partial-completion)))
+          orderless-matching-styles '(orderless-flex)))
+#+end_src
+
+** Completion UI for minibuffer =vertico=
+
+#+begin_src nix :tangle no :noweb-ref epkgs
+  epkgs.vertico
+#+end_src
+
+#+begin_src elisp
+  (use-package vertico
+    :hook       (after-init . vertico-mode)
+    :custom (vertico-cycle t)
+    :bind (:map vertico-map
+                ("RET" . vertico-directory-enter)
+                ("DEL" . vertico-directory-delete-char)
+                ("M-DEL" . vertico-directory-delete-word)))
+#+end_src
+
+* Minibuffer
+
+** Annotation =marginalia=
+
+#+begin_src nix :tangle no :noweb-ref epkgs
+  epkgs.marginalia
+  epkgs.nerd-icons-completion
+#+end_src
+
+#+begin_src elisp
+  (use-package marginalia
+    :init (marginalia-mode))
+  (use-package nerd-icons-completion
+    :after marginalia
+    :config
+    (nerd-icons-completion-mode)
+    (add-hook 'marginalia-mode-hook #'nerd-icons-completion-marginalia-setup))
+#+end_src
+
+* Smooth default =built-in=
+
+Emacs are featureful out of the box, but has a bad default configuration. This
+is an attempt to make a smooth default without 3rd party packages.
+
+** Zooming
+
+Smooth zooming with =0 - += and its shift counter part key.
+
+#+begin_src elisp
+  (define-key global-map (kbd "C-0") (lambda () (interactive) (text-scale-set 0)))
+  (define-key global-map (kbd "C-)") (lambda () (interactive) (text-scale-set 0)))
+  (define-key global-map (kbd "C--") 'text-scale-decrease)
+  (define-key global-map (kbd "C-_") 'text-scale-decrease)
+  (define-key global-map (kbd "C-=") 'text-scale-increase)
+  (define-key global-map (kbd "C-+") 'text-scale-increase)
+#+end_src
+
+** Files, buffers, and minibuffer
+
+EditorConfig cover some file formatting in an editor-agnostic way.
+
+#+begin_src elisp
+  (editorconfig-mode t)
+#+end_src
+
+Make the buffer and its corresponding file in sync.
+
+#+begin_src elisp
+  (global-auto-revert-mode t)
+#+end_src
+
+Replace active region when insert text.
+
+#+begin_src elisp
+  (delete-selection-mode t)
+#+end_src
+
+Set tab to 4. We will define a global variable ~global-tab-width~ since other
+major mode might have their own setting for this, we can override them with this
+variable.
+
+#+begin_src elisp
+  (defvar global-tab-width 4)
+  (setq-default tab-width global-tab-width)
+#+end_src
+
+Limit the column to 80 character.
+
+#+begin_src elisp
+  (setq-default fill-column 80)
+  (add-hook 'text-mode-hook 'auto-fill-mode)
+#+end_src
+
+Treat subword movement for camel case in programming mode.
+
+#+begin_src elisp
+  (add-hook 'prog-mode-hook 'subword-mode)
+#+end_src
+
+Make script with shebang in it executable.
+
+#+begin_src elisp
+  (add-hook 'after-save-hook 'executable-make-buffer-file-executable-if-script-p)
+#+end_src
+
+* Main buffer
+
+** Completion UI =corfu=
+
+#+begin_src nix :tangle no :noweb-ref epkgs
+  epkgs.corfu
+#+end_src
+
+#+begin_src elisp
+  (use-package corfu
+    :init (global-corfu-mode)
+    :custom (corfu-cycle t))
+#+end_src
+
+* Smooth text jump =avy=
+
+#+begin_src nix :tangle no :noweb-ref epkgs
+  epkgs.avy
+#+end_src
+
+#+begin_src elisp
+  (use-package avy
+    :bind ("C-;" . avy-goto-char-timer)
+    :custom
+    (defun avy-action-helpful (pt)
+      (save-excursion
+        (goto-char pt)
+        (helpful-at-point))
+      (select-window
+       (cdr ( avy-ring 0)))
+      t)
+    (setf (alist-get ?H avy-dispatch-alist) 'avy-action-helpful)
+    (avy-timeout-seconds 0.3))
+#+end_src
+
+* TODO Programming mode
+
+Syntax highlighting require [[https://tree-sitter.github.io/tree-sitter/][Tree-sitter]] grammars, this will install
+all available grammars.
+
+#+begin_src nix :tangle no :noweb-ref epkgs
+  epkgs.treesit-grammars.with-all-grammars
+#+end_src
+
+We will use built-in =eglot= for LSP. Most major mode are already mapped to the
+corresponding LSP, so just ensure the LSP is installed in the system path.
+Others require to configure through =eglot-server-programs=.
+
+#+begin_src elisp :noweb yes
+  (use-package eglot
+    :hook
+    (prog-mode . eglot-ensure)
+    (prog-mode . (lambda ()
+                                 (add-hook 'before-save-hook 'eglot-format-buffer)))
+    :config
+    (setq eglot-server-programs
+                '(
+                  <<eglot-server-programs>>
+                  ))
+    (setq-default eglot-workspace-configuration
+                                '(
+                                  <<eglot-workspace-configuration>>
+                                  )))
+#+end_src
+
++ C-h v eglot-server-programs RET :: see registered major mode x LSP
+
+Boost LSP performance with =eglot-booster=.
+
+#+begin_src nix :tangle no :noweb-ref epkgs
+  (pkgs.emacsPackages.trivialBuild {
+    pname = "eglot-booster";
+    version = "20250428";
+    src = pkgs.fetchFromGitHub {
+      owner = "jdtsmith";
+      repo = "eglot-booster";
+      rev = "1260d2f7dd18619b42359aa3e1ba6871aa52fd26";
+      sha256 = "sha256-teAKWDDL7IrCBiZUVIVlB3W22G9H6IrWiRV/P62dFy0=";
+    };
+  })
+#+end_src
+
+#+begin_src elisp
+  (use-package eglot-booster
+    :after eglot
+    :config (eglot-booster-mode))
+#+end_src
+
+** Elisp
+
+Emacs at the heart is a Lisp interpreter, so everything already
+available out of the box.
+
+** Nix
+
+Emacs has built-in major mode for Nix and already mapped the LSP. However its
+uses non-Tree-sitter one. We will override them with the Tree-sitter version.
+
+#+begin_src nix :tangle no :noweb-ref epkgs
+  epkgs.nix-ts-mode
+#+end_src
+
+#+begin_src elisp
+  (use-package nix-ts-mode
+    :mode (rx ".nix" eos))
+#+end_src
+
+#+begin_src elisp :tangle no :noweb-ref eglot-server-programs
+  (nix-ts-mode . ("nil"))
+#+end_src
+
+#+begin_src elisp :tangle no :noweb-ref eglot-workspace-configuration
+  (:nil . (:formatting (:command ["nixfmt"])))
+#+end_src
+
+Fontify Org mode noweb reference for Nix.
+
+#+begin_src elisp
+  (defun smooth/nix-ts-mode-noweb-comment ()
+    "Treat `<<...>>` as comment in nix-mode to avoid indentation errors."
+    (font-lock-add-keywords
+     nil '(("<<.*?>>" . font-lock-comment-face))))
+
+  (add-hook 'nix-ts-mode-hook #'smooth/nix-ts-mode-noweb-comment)
+#+end_src
+
+** JSON
+
+#+begin_src elisp
+  (use-package json-ts-mode
+    :mode (rx ".json" eos))
+#+end_src
+
+** Go
+
+Emacs has built-in major mode for Go and already mapped the LSP.
+
+#+begin_src elisp
+  (use-package go-ts-mode
+    :mode (rx ".go" eos)
+    :custom (go-ts-mode-indent-offset global-tab-width))
+#+end_src
+
+#+begin_src elisp :tangle no :noweb-ref eglot-server-programs
+  ((go-mode go-dot-mod-mode go-dot-work-mode go-ts-mode go-mod-ts-mode) . ("gopls"))
+#+end_src
+
+#+begin_src elisp :tangle no :noweb-ref eglot-workspace-configuration
+  (:gopls . (:gofumpt t))
+#+end_src
+
+** Gleam
+
+#+begin_src nix :tangle no :noweb-ref epkgs
+  epkgs.gleam-ts-mode
+#+end_src
+
+#+begin_src elisp
+  (use-package gleam-ts-mode
+    :mode (rx ".gleam" eos))
+#+end_src
+
+#+begin_src elisp :tangle no :noweb-ref eglot-server-programs
+  (gleam-ts-mode . ("gleam" "lsp"))
+#+end_src
+
+* Org =built-in=
+
+[[https://orgmode.org/][Org]] can be anything, one of them is =literate programming=. While the idea of
+literate programming sounds cool, its not played well with most programming
+languages. The more exciting uses is =literate configuration=. The example of
+literate configuration is this document, the whole Emacs configuration is
+configured by single Org file as a source of truth.
+
+#+begin_src elisp :noweb yes
+  (use-package org
+    :bind
+    (:map org-mode-map
+  		<<org-mode-map>>)
+    :custom
+    ;; Edit settings
+    (org-auto-align-tags nil)
+    (org-tags-column 0)
+    (org-catch-invisible-edits 'show-and-error)
+    (org-special-ctrl-a/e t)
+    (org-insert-heading-respect-content t)
+    ;; Org styling, hide markup etc.
+    (org-startup-indented t)
+    (org-startup-folded 'content)
+    (org-hide-emphasis-markers t)
+    (org-pretty-entities t)
+    (org-agenda-tags-column 0)
+    (org-ellipsis "…")
+    (org-cycle-separator-lines 0))
+#+end_src
+
+** Tangle on save =org-auto-tangle=
+
+Keep the tangled file in sync.
+
+#+begin_src nix :tangle no :noweb-ref epkgs
+  epkgs.org-auto-tangle
+#+end_src
+
+#+begin_src elisp
+  (use-package org-auto-tangle
+    :hook (org-mode . org-auto-tangle-mode)
+    :custom (org-auto-tangle-default t))
+#+end_src
+
+** Modern look =org-modern=
+
+The default look is old with no icon, make the look modern.
+
+#+begin_src nix :tangle no :noweb-ref epkgs
+  epkgs.org-modern
+#+end_src
+
+#+begin_src elisp
+  (use-package org-modern
+    :hook (org-mode . org-modern-mode))
+  #+end_src
+
+** Better indent =org-modern-indent=
+
+Package =org-modern-mode= is [[https://github.com/minad/org-modern?tab=readme-ov-file#incompatibilities][incompatible]] with built-in =org-indent-mode=, fix them with =org-modern-indent-mode=.
+
+#+begin_src nix :tangle no :noweb-ref epkgs
+  (pkgs.emacsPackages.trivialBuild {
+    pname = "org-modern-indent";
+    version = "0.5.1";
+    src = pkgs.fetchFromGitHub {
+      owner = "jdtsmith";
+      repo = "org-modern-indent";
+      rev = "v0.5.1";
+      sha256 = "sha256-st3338Jk9kZ5BLEPRJZhjqdncMpLoWNwp60ZwKEObyU=";
+    };
+  })
+#+end_src
+
+#+begin_src elisp
+  (use-package org-modern-indent
+    :hook (org-mode . org-modern-indent-mode))
+#+end_src
+
+** Babel =built-in=
+
+Register the programming languages to support in evaluation. See [[https://orgmode.org/worg/org-contrib/babel/languages/index.html][Babel language support]].
+
+#+begin_src elisp
+  (org-babel-do-load-languages
+   'org-babel-load-languages
+   '((emacs-lisp . t)))
+  (setq org-confirm-babel-evaluate nil)
+#+end_src
+
+Register missing major mode for some programing languages.
+
++ C-h v org-src-lang-modes RET :: see registered major mode (some already registered by default)
+
+#+begin_src elisp
+  (add-to-list 'org-src-lang-modes '("nix" . nix-ts))
+  (add-to-list 'org-src-lang-modes '("json" . json-ts))
+#+end_src
+
+** TODO Presentation with =org-present=
+
+#+begin_src nix :tangle no :noweb-ref epkgs
+  epkgs.org-present
+#+end_src
+
+** TODO Roam =org-roam=
+
+#+begin_src nix :tangle no :noweb-ref epkgs
+  epkgs.org-roam
+  epkgs.org-roam-ui
+#+end_src
+
+** TODO HTTP request =verb=
+
+#+begin_src nix :tangle no :noweb-ref epkgs
+  epkgs.verb
+#+end_src

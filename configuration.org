@@ -1,0 +1,211 @@
+#+title: Smoothr Configuration
+#+property: header-args:nix :mkdirp yes :result silent :tangle ./configuration.nix
+
+* The config
+
+Noweb reference:
+- modules :: list of nix modules
+- pkgs :: list of nix packages
+- casks :: list of brew casks
+- config :: nix configuration
+
+#+begin_src nix :noweb yes
+  {
+    config,
+    lib,
+    pkgs,
+    username,
+    platform,
+    ...
+  }:
+
+  with lib;
+
+  {
+    imports = [
+      <<modules>>
+    ];
+
+    environment.systemPackages = with pkgs; [
+      git
+      gnumake
+      emacs-lsp-booster
+      nixd
+      nil
+      nixfmt-rfc-style
+      go
+      gopls
+      <<pkgs>>
+    ];
+
+    homebrew.enable = true;
+    homebrew.casks = [
+  	<<casks>>
+    ];
+
+    <<config>>
+  }
+#+end_src
+
+* System
+
+** System version
+
+#+begin_src nix :tangle no :noweb-ref config
+  system.stateVersion = 6;
+#+end_src
+
+** Activation scripts
+
+#+begin_src nix :tangle no :noweb-ref modules
+  ({
+    options.mod.activationScripts = mkOption {
+      type = types.attrsOf (
+        types.submodule {
+          options.text = mkOption {
+            type = types.lines;
+            description = "Shell script content to run during activation.";
+          };
+        }
+      );
+      default = { };
+    };
+
+    config.system.activationScripts.postActivation.text = ''
+      # Apply changes without logout/login cycle.
+      /System/Library/PrivateFrameworks/SystemAdministration.framework/Resources/activateSettings -u
+
+      echo "running user activation scripts as ${username}..."
+      sudo -u ${username} --login bash <<'EOF'
+        set -euo pipefail
+        ${concatStringsSep "\n\n" (
+          mapAttrsToList (
+            name: script: "# --- ${name} ---\n${script.text}\n# --- end ${name} ---"
+          ) config.mod.activationScripts
+        )}
+      EOF
+    '';
+  })
+#+end_src
+
+** User
+
+#+begin_src nix :tangle no :noweb-ref config
+  system.primaryUser = username;
+  users.users.${username}.home = "/Users/${username}";
+#+end_src
+
+** Nix
+
+#+begin_src nix :tangle no :noweb-ref config
+  nix.extraOptions = ''
+    experimental-features = nix-command flakes
+    warn-dirty = false
+    keep-outputs = true
+    keep-derivations = true
+  '';
+#+end_src
+
+** Nixpkgs
+
+#+begin_src nix :tangle no :noweb-ref config
+  nixpkgs.hostPlatform = platform;
+  nixpkgs.config.allowUnfree = true;
+  nixpkgs.config.allowBroken = true;
+#+end_src
+
+** macOS
+
+#+begin_src nix :tangle no :noweb-ref config
+  security.pam.services.sudo_local.touchIdAuth = true;
+  system.defaults.NSGlobalDomain = {
+    "com.apple.swipescrolldirection" = true;
+  };
+#+end_src
+
+* Keyboard mapper =karabiner-elements=
+
+Karabiner-Elements v15.x.x is broken at the moment, fallback to v14.x.x.
+See: https://github.com/nix-darwin/nix-darwin/issues/1041
+
+#+begin_src nix :tangle no :noweb-ref config
+  services.karabiner-elements = {
+    enable = true;
+    package = pkgs.karabiner-elements.overrideAttrs (old: {
+      version = "14.13.0";
+      src = pkgs.fetchurl {
+        inherit (old.src) url;
+        hash = "sha256-gmJwoht/Tfm5qMecmq1N6PSAIfWOqsvuHU8VDJY8bLw=";
+      };
+      dontFixup = true;
+    });
+  };
+#+end_src
+
+#+begin_src json :mkdirp yes :tangle ~/.config/karabiner/karabiner.json
+  {
+    "profiles": [{
+      "name": "Default profile",
+      "complex_modifications": {
+        "rules": [
+          {
+            "description": "extend homerow by remapping capslock and ; into useful modifier",
+            "manipulators": [
+              {
+                "type": "basic",
+                "from": {
+                  "key_code": "caps_lock",
+                  "modifiers": { "optional": [ "any" ] }
+                },
+                "to": [{"key_code": "left_control"}],
+                "to_if_alone": [{ "key_code": "escape" }]
+              },
+              {
+                "type": "basic",
+                "from": {
+                  "key_code": "right_command",
+                  "modifiers": { "optional": [ "any" ] }
+                },
+                "to": [{ "key_code": "right_option" }]
+              }
+            ]
+          }
+        ]
+      }
+    }]
+  }
+#+end_src
+
+* Text editor / IDE =emacs=
+
+#+begin_src nix :tangle no :noweb-ref modules
+  ./modules/emacs.nix
+#+end_src
+
+#+begin_src nix :tangle no :noweb-ref config
+  mod.emacs.enable = true;
+#+end_src
+
+* Personal
+
+#+begin_src nix :tangle no :noweb-ref casks
+  "whatsapp"
+  "discord"
+#+end_src
+
+* Work
+
+#+begin_src nix :tangle no :noweb-ref casks
+  "slack"
+  "chatgpt"
+  "dbeaver-community"
+  "mongodb-compass"
+  "postman"
+#+end_src
+
+VMWare download information https://knowledge.broadcom.com/external/article/368667/download-and-license-information-for-vmw.html
+
+* Game Dev
+
+#+begin_src nix :tangle no :noweb-ref pkgs
+#+end_src
