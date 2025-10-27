@@ -191,6 +191,9 @@ See: https://github.com/nix-darwin/nix-darwin/issues/1041
 #+begin_src nix :tangle no :noweb-ref casks
   "whatsapp"
   "discord"
+  "godot"
+  "robloxstudio"
+  "roblox"
 #+end_src
 
 * Work
@@ -201,6 +204,10 @@ See: https://github.com/nix-darwin/nix-darwin/issues/1041
   "dbeaver-community"
   "mongodb-compass"
   "postman"
+  "figma"
+  "blender"
+  "audacity"
+  "inkscape"
 #+end_src
 
 VMWare download information https://knowledge.broadcom.com/external/article/368667/download-and-license-information-for-vmw.html
@@ -208,4 +215,6 @@ VMWare download information https://knowledge.broadcom.com/external/article/3686
 * Game Dev
 
 #+begin_src nix :tangle no :noweb-ref pkgs
+  pkgs.potrace
+  pkgs.imagemagick
 #+end_src

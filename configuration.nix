@@ -51,18 +51,26 @@ with lib;
     nixfmt-rfc-style
     go
     gopls
-    
+    pkgs.potrace
+    pkgs.imagemagick
   ];
 
   homebrew.enable = true;
   homebrew.casks = [
 	"whatsapp"
 	"discord"
+	"godot"
+	"robloxstudio"
+	"roblox"
 	"slack"
 	"chatgpt"
 	"dbeaver-community"
 	"mongodb-compass"
 	"postman"
+	"figma"
+	"blender"
+	"audacity"
+	"inkscape"
   ];
 
   system.stateVersion = 6;
