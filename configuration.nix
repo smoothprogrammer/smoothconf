@@ -71,6 +71,7 @@ with lib;
 	"blender"
 	"audacity"
 	"inkscape"
+	"affinity"
   ];
 
   system.stateVersion = 6;
