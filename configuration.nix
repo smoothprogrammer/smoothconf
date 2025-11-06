@@ -4,6 +4,7 @@
   pkgs,
   username,
   platform,
+  inputs,
   ...
 }:
 
@@ -43,6 +44,7 @@ with lib;
   ];
 
   environment.systemPackages = with pkgs; [
+	inputs.ctools.packages."${platform}".shadowify
     git
     gnumake
     emacs-lsp-booster
@@ -53,6 +55,7 @@ with lib;
     gopls
     pkgs.potrace
     pkgs.imagemagick
+    pkgs.backgroundremover
   ];
 
   homebrew.enable = true;

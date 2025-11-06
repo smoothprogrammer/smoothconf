@@ -1,5 +1,25 @@
 {
   "nodes": {
+    "ctools": {
+      "inputs": {
+        "nixpkgs": [
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1762466483,
+        "narHash": "sha256-T4ermRUYv0jxfpMCuW4VaU9+St5UP/bSFaK5zEXgegk=",
+        "owner": "pinggirjurangstudio",
+        "repo": "ctools",
+        "rev": "eed245db557cac9690515c1d79eedf5bffddac68",
+        "type": "github"
+      },
+      "original": {
+        "owner": "pinggirjurangstudio",
+        "repo": "ctools",
+        "type": "github"
+      }
+    },
     "nix-darwin": {
       "inputs": {
         "nixpkgs": [
@@ -39,6 +59,7 @@
     },
     "root": {
       "inputs": {
+        "ctools": "ctools",
         "nix-darwin": "nix-darwin",
         "nixpkgs": "nixpkgs"
       }

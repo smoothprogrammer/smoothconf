@@ -16,6 +16,7 @@ Noweb reference:
     pkgs,
     username,
     platform,
+    inputs,
     ...
   }:
 
@@ -27,6 +28,7 @@ Noweb reference:
     ];
 
     environment.systemPackages = with pkgs; [
+  	inputs.ctools.packages."${platform}".shadowify
       git
       gnumake
       emacs-lsp-booster
@@ -218,4 +220,5 @@ VMWare download information https://knowledge.broadcom.com/external/article/3686
 #+begin_src nix :tangle no :noweb-ref pkgs
   pkgs.potrace
   pkgs.imagemagick
+  pkgs.backgroundremover
 #+end_src
