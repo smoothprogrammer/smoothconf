@@ -118,7 +118,8 @@ binding I care about and some overriding.
      ("v g" vc-annotate)
      ("v =" vc-diff)
      ("v v" vc-next-action)
-     ("v l" vc-print-log))))
+     ("v l" vc-print-log)
+     ("v p" vc-push))))
 #+end_src
 
 ** Project
