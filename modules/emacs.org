@@ -869,3 +869,17 @@ Register missing major mode for some programing languages.
 #+begin_src nix :tangle no :noweb-ref epkgs
   epkgs.verb
 #+end_src
+
+** Ledger =ledger-mode=
+
+#+begin_src nix :tangle no :noweb-ref pkgs
+  pkgs.ledger
+#+end_src
+
+#+begin_src nix :tangle no :noweb-ref epkgs
+  epkgs.ledger-mode
+#+end_src
+
+#+begin_src elisp
+  (use-package ledger-mode)
+#+end_src

@@ -17,6 +17,7 @@ let
   });
 
   emacs = minimalEmacs.pkgs.withPackages (epkgs: [
+    epkgs.ryo-modal
     epkgs.exec-path-from-shell
     epkgs.envrc
     epkgs.helpful
@@ -59,10 +60,12 @@ let
         sha256 = "sha256-st3338Jk9kZ5BLEPRJZhjqdncMpLoWNwp60ZwKEObyU=";
       };
     })
+    epkgs.ox-hugo
     epkgs.org-present
     epkgs.org-roam
     epkgs.org-roam-ui
     epkgs.verb
+    epkgs.ledger-mode
   ]);
 
   cfg = config.mod.emacs;
@@ -76,7 +79,7 @@ in
   config = mkIf cfg.enable {
     environment.systemPackages = [
 	  emacs
-	  
+	  pkgs.ledger
 	];
 
 	programs.direnv = {
