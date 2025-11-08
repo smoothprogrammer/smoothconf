@@ -2,141 +2,11 @@
 #+property: header-args:elisp :mkdirp yes :results silent :tangle ~/.emacs.d/init.el
 #+property: header-args:nix :results silent :tangle ./emacs.nix
 
-* Key binding
-
-#+begin_src nix :tangle no :noweb-ref epkgs
-  epkgs.ryo-modal
-#+end_src
-
-#+begin_src elisp :noweb yes
-  (defvar ryo-modal-blacklist
-    '((predicate . minibufferp)
-      (mode . eshell-mode)
-      (mode . term-mode)
-      (mode . vterm-mode)
-  	(mode . vc-git-log-edit-mode))
-    "Alist of conditions where `ryo-modal-mode` should not be enabled.")
-
-  (defun ryo-modal-blacklisted-p ()
-  "Return non-nil if current buffer should not enable `ryo-modal-mode`."
-  (cl-some
-   (lambda (entry)
-     (pcase entry
-       (`(predicate . ,fn) (funcall fn))
-       (`(mode . ,mode) (eq major-mode mode))))
-   ryo-modal-blacklist))
-
-  (use-package ryo-modal
-    :bind ("<escape>" . ryo-modal-mode)
-    :config
-    (define-globalized-minor-mode global-ryo-modal-mode
-      ryo-modal-mode
-      (lambda ()
-        (unless (ryo-modal-blacklisted-p)
-    		(ryo-modal-mode 1))))
-    (global-ryo-modal-mode 1)
-    (ryo-modal-keys
-     ("i" ryo-modal-mode)
-     ("<escape>" keyboard-quit))
-    <<bind>>)
-#+end_src
-
-Finding key binding is easy, just use =C-h m=. Here I'm just list all the
-binding I care about and some overriding.
-
-** Basic
-
-*** Movement
-
-#+begin_src elisp :tangle no :noweb-ref bind
-  (ryo-modal-keys
-   ("h" backward-char)
-   ("j" next-line)
-   ("k" previous-line)
-   ("l" forward-char))
-#+end_src
-
-#+begin_src elisp :tangle no :noweb-ref bind
-  (ryo-modal-keys
-   ("g"
-    (("h" beginning-of-line)
-     ("j" end-of-buffer)
-     ("k" beginning-of-buffer)
-     ("l" end-of-line))))
-#+end_src
-
-*** Selection
-
-#+begin_src elisp :tangle no :noweb-ref bind
-  (ryo-modal-keys
-   ("v" set-mark-command))
-#+end_src
-
-** Help
-
-#+begin_src elisp :tangle no :noweb-ref bind
-  (ryo-modal-keys
-   ("SPC"
-    (("h m" describe-mode)
-     ("h ." helpful-at-point)
-     ("h v" helpful-variable)
-     ("h f" helpful-callable)
-     ("h k" helpful-key)
-     ("h x" helpful-command)
-     ("h j" pp-macroexpand-last-sexp))))
-#+end_src
-
-** Org
-
-*** Structure template
-
-#+begin_src elisp :tangle no :noweb-ref org-mode-map
-  ;; insert structure template
-  ;; see: org-structure-template-alist
-  ("C-x C-," . org-insert-structure-template)
-#+end_src
-
-*** Code block
-
-#+begin_src elisp :tangle no :noweb-ref org-mode-map
-  ;; execute code block
-  ("C-c C-c" . org-ctrl-c-ctrl-c)
-
-  ;; insert header argument
-  ("C-c C-v j" . org-babel-insert-header-arg)
-
-  ;; tangle code blocks in current file
-  ("C-c C-v t" . org-babel-tangle)
-#+end_src
-
-** VC
-
-#+begin_src elisp :tangle no :noweb-ref bind
-  (ryo-modal-keys
-   ("SPC"
-    (("v d" vc-dir)
-     ("v g" vc-annotate)
-     ("v =" vc-diff)
-     ("v v" vc-next-action)
-     ("v l" vc-print-log)
-     ("v p" vc-push))))
-#+end_src
-
-** Project
-
-#+begin_src elisp :tangle no :noweb-ref bind
-  (ryo-modal-keys
-   ("SPC"
-    (("p f" project-find-file))))
-#+end_src
-
-* Reading material
+* The config
 
 I'm still new to emacs, try reading this in the future:
 
 - https://taingram.org/blog/intro-to-emacs-tempo.html
-
-* Emacs modules
 
 Noweb reference:
 - epkgs :: emacs packages
@@ -284,6 +154,129 @@ Better main buffer default.
            kill-whole-line t)
 #+end_src
 
+** Key binding
+
+#+begin_src elisp :tangle no :noweb-ref normal-mode
+  ("i" ryo-modal-mode)
+  ("<escape>" keyboard-quit)
+#+end_src
+
+#+begin_src elisp :tangle no :noweb-ref insert-mode
+  ("<escape>" . ryo-modal-mode)
+#+end_src
+
+*** ryo
+
+#+begin_src nix :tangle no :noweb-ref epkgs
+  epkgs.ryo-modal
+#+end_src
+
+#+begin_src elisp :noweb yes
+  (defvar ryo-modal-blacklist
+    '((predicate . minibufferp)
+      (mode . eshell-mode)
+      (mode . term-mode)
+      (mode . vterm-mode)
+  	(mode . vc-git-log-edit-mode))
+    "Alist of conditions where `ryo-modal-mode` should not be enabled.")
+
+  (defun ryo-modal-blacklisted-p ()
+    "Return non-nil if current buffer should not enable `ryo-modal-mode`."
+    (cl-some
+     (lambda (entry)
+  	 (pcase entry
+         (`(predicate . ,fn) (funcall fn))
+         (`(mode . ,mode) (eq major-mode mode))))
+     ryo-modal-blacklist))
+
+  (use-package ryo-modal
+    :bind
+    <<insert-mode>>
+    :config
+    (define-globalized-minor-mode global-ryo-modal-mode
+      ryo-modal-mode
+      (lambda ()
+        (unless (ryo-modal-blacklisted-p)
+    		(ryo-modal-mode 1))))
+    (global-ryo-modal-mode 1)
+    (ryo-modal-keys
+     <<normal-mode>>))
+#+end_src
+
+Finding key binding is easy, just use =C-h m=. Here I'm just list all the
+binding I care about and some overriding.
+
+** Directory :SPC:d:f:
+
+#+begin_src elisp :tangle no :noweb-ref directory
+  ("SPC d" project-dired :name "dired")
+  ("SPC f" project-find-file :name "find file")
+#+end_src
+
+*** dired
+
+#+begin_src elisp :noweb yes
+  (use-package dired
+    :ryo
+    <<directory>>)
+#+end_src
+
+** Movement and selection
+
+#+begin_src elisp :tangle no :noweb-ref movement
+  ("h" backward-char)
+  ("j" next-line)
+  ("k" previous-line)
+  ("l" forward-char)
+#+end_src
+
+#+begin_src elisp :tangle no :noweb-ref jump
+  ("g h" beginning-of-line)
+  ("g j" end-of-buffer)
+  ("g k" beginning-of-buffer)
+  ("g l" end-of-line)
+#+end_src
+
+#+begin_src elisp :tangle no :noweb-ref smooth-jump
+  ("g g" avy-goto-char-timer)
+#+end_src
+
+#+begin_src elisp :tangle no :noweb-ref selection
+  ("v" set-mark-command)
+#+end_src
+
+*** simple
+
+#+begin_src elisp :noweb yes
+  (use-package simple
+    :ryo
+    <<movement>>
+    <<jump>>
+    <<selection>>)
+#+end_src
+
+*** avy
+
+#+begin_src nix :tangle no :noweb-ref epkgs
+  epkgs.avy
+#+end_src
+
+#+begin_src elisp :noweb yes
+  (use-package avy
+    :ryo
+    <<smooth-jump>>
+    :custom
+    (defun avy-action-helpful (pt)
+      (save-excursion
+        (goto-char pt)
+        (helpful-at-point))
+      (select-window
+       (cdr ( avy-ring 0)))
+      t)
+    (setf (alist-get ?H avy-dispatch-alist) 'avy-action-helpful)
+    (avy-timeout-seconds 0.3))
+#+end_src
+
 ** Environment and Nix
 
 Makes Emacs aware of the environment, especially within [[https://nixos.org/][Nix]] ecosystems. This is
@@ -332,11 +325,21 @@ Read the system path from shell.
     :hook (after-init . envrc-global-mode))
 #+end_src
 
-** Help system
+** Help system :SPC:h:
 
-I'm still an Emacs noob, more help are welcome.
+#+begin_src elisp :tangle no :noweb-ref help
+  ("SPC h"
+   (("m" describe-mode :name "describe mode")
+    ("." helpful-at-point :name "describe at point")
+    ("v" helpful-variable :name "describe variable")
+    ("f" helpful-callable :name "describe function")
+    ("k" helpful-key :name "describe key")
+    ("x" helpful-command :name "describe command")
+    ("j" pp-macroexpand-last-sexp))
+   :name "help")
+#+end_src
 
-*** Better help =helpful=
+*** helpful
 
 #+begin_src nix :tangle no :noweb-ref epkgs
   epkgs.helpful
@@ -344,11 +347,11 @@ I'm still an Emacs noob, more help are welcome.
 
 #+begin_src elisp :noweb yes
   (use-package helpful
-    :bind
-    <<help-map>>)
+    :ryo
+    <<help>>)
 #+end_src
 
-*** Forget which key? =which-key=
+*** which-key
 
 #+begin_src nix :tangle no :noweb-ref epkgs
   epkgs.which-key
@@ -359,7 +362,7 @@ I'm still an Emacs noob, more help are welcome.
     :hook (after-init . which-key-mode))
 #+end_src
 
-*** Keycast =keycast=
+*** keycast
 
 #+begin_src nix :tangle no :noweb-ref epkgs
   epkgs.keycast
@@ -590,27 +593,6 @@ Make script with shebang in it executable.
     :custom (corfu-cycle t))
 #+end_src
 
-** Smooth text jump =avy=
-
-#+begin_src nix :tangle no :noweb-ref epkgs
-  epkgs.avy
-#+end_src
-
-#+begin_src elisp
-  (use-package avy
-    :bind ("C-;" . avy-goto-char-timer)
-    :custom
-    (defun avy-action-helpful (pt)
-      (save-excursion
-        (goto-char pt)
-        (helpful-at-point))
-      (select-window
-       (cdr ( avy-ring 0)))
-      t)
-    (setf (alist-get ?H avy-dispatch-alist) 'avy-action-helpful)
-    (avy-timeout-seconds 0.3))
-#+end_src
-
 ** TODO Programming mode
 
 Syntax highlighting require [[https://tree-sitter.github.io/tree-sitter/][Tree-sitter]] grammars, this will install
@@ -742,21 +724,36 @@ Emacs has built-in major mode for Go and already mapped the LSP.
   (gleam-ts-mode . ("gleam" "lsp"))
 #+end_src
 
-** Org =built-in=
+** Org
 
-[[https://orgmode.org/][Org]] can be anything, one of them is =literate programming=. While the idea of
-literate programming sounds cool, its not played well with most programming
-languages. The more exciting uses is =literate configuration=. The example of
-literate configuration is this document, the whole Emacs configuration is
-configured by single Org file as a source of truth.
+#+begin_src elisp :tangle no :noweb-ref org
+  ("SPC SPC c" org-ctrl-c-ctrl-c)
+  ;; insert structure template
+  ;; see: org-structure-template-alist
+#+end_src
+
+#+begin_src elisp :tangle no :noweb-ref org-insert
+  ("SPC i"
+   (("t" org-insert-structure-template :name "insert template")
+    ("h" org-babel-insert-header-arg :name "insert header"))
+   :name "org insert")
+#+end_src
+
+#+begin_src elisp :tangle no :noweb-ref babel
+  ("SPC SPC t" org-babel-tangle)
+#+end_src
+
+*** org
 
 #+begin_src elisp :noweb yes
   (use-package org
-    :bind
-    (:map org-mode-map
-  		<<org-mode-map>>)
+    :ryo
+    (:mode 'org-mode)
+    <<org>>
+    <<org-insert>>
+    <<babel>>
     :custom
-    ;; Edit settings
+    ;; Edit settings.
     (org-auto-align-tags nil)
     (org-tags-column 0)
     (org-catch-invisible-edits 'show-and-error)
@@ -772,7 +769,7 @@ configured by single Org file as a source of truth.
     (org-cycle-separator-lines 0))
 #+end_src
 
-*** Tangle on save =org-auto-tangle=
+*** org-auto-tangle
 
 Keep the tangled file in sync.
 
@@ -786,7 +783,7 @@ Keep the tangled file in sync.
     :custom (org-auto-tangle-default t))
 #+end_src
 
-*** Modern look =org-modern=
+*** org-modern
 
 The default look is old with no icon, make the look modern.
 
@@ -799,7 +796,7 @@ The default look is old with no icon, make the look modern.
     :hook (org-mode . org-modern-mode))
   #+end_src
 
-*** Better indent =org-modern-indent=
+*** org-modern-indent
 
 Package =org-modern-mode= is [[https://github.com/minad/org-modern?tab=readme-ov-file#incompatibilities][incompatible]] with built-in =org-indent-mode=, fix them with =org-modern-indent-mode=.
 
@@ -821,14 +818,15 @@ Package =org-modern-mode= is [[https://github.com/minad/org-modern?tab=readme-ov
     :hook (org-mode . org-modern-indent-mode))
 #+end_src
 
-*** Babel =built-in=
+*** ob-babel
 
 Register the programming languages to support in evaluation. See [[https://orgmode.org/worg/org-contrib/babel/languages/index.html][Babel language support]].
 
 #+begin_src elisp
   (org-babel-do-load-languages
    'org-babel-load-languages
-   '((emacs-lisp . t)))
+   '((emacs-lisp . t)
+     (verb . t)))
   (setq org-confirm-babel-evaluate nil)
 #+end_src
 
@@ -841,7 +839,7 @@ Register missing major mode for some programing languages.
   (add-to-list 'org-src-lang-modes '("json" . json-ts))
 #+end_src
 
-*** Blog =ox-hugo=
+*** ox-hugo
 
 #+begin_src nix :tangle no :noweb-ref epkgs
   epkgs.ox-hugo
@@ -852,26 +850,52 @@ Register missing major mode for some programing languages.
     :after ox)
 #+end_src
 
-*** TODO Presentation with =org-present=
+*** TODO org-present
 
 #+begin_src nix :tangle no :noweb-ref epkgs
   epkgs.org-present
 #+end_src
 
-*** TODO Roam =org-roam=
+*** TODO org-roam
 
 #+begin_src nix :tangle no :noweb-ref epkgs
   epkgs.org-roam
   epkgs.org-roam-ui
 #+end_src
 
-*** TODO HTTP request =verb=
+*** TODO verb
 
 #+begin_src nix :tangle no :noweb-ref epkgs
   epkgs.verb
 #+end_src
 
-** Ledger =ledger-mode=
+** Version control :SPC:v:
+
+#+begin_src elisp :tangle no :noweb-ref vc
+  ("SPC v"
+   (("v" vc-next-action :name "next action")
+    ("s" project-vc-dir :name "status")
+    ("h" vc-annotate :name "annotate")
+    ("d" vc-diff :name "diff")
+    ("l" vc-print-log :name "log")
+    ("p" vc-push :name "push"))
+   :name "version control")
+#+end_src
+
+*** vc
+
+#+begin_src elisp :noweb yes
+  (use-package vc
+    :ryo
+    <<vc>>
+    :custom
+    (vc-follow-symlink t)
+    (vc-handled-backends '(Git)))
+#+end_src
+
+** Accounting
+
+*** ledger-mode
 
 #+begin_src nix :tangle no :noweb-ref pkgs
   pkgs.ledger

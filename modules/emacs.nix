@@ -18,6 +18,7 @@ let
 
   emacs = minimalEmacs.pkgs.withPackages (epkgs: [
     epkgs.ryo-modal
+    epkgs.avy
     epkgs.exec-path-from-shell
     epkgs.envrc
     epkgs.helpful
@@ -34,7 +35,6 @@ let
     epkgs.marginalia
     epkgs.nerd-icons-completion
     epkgs.corfu
-    epkgs.avy
     epkgs.treesit-grammars.with-all-grammars
     (pkgs.emacsPackages.trivialBuild {
       pname = "eglot-booster";
