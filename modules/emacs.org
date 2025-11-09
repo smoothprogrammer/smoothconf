@@ -25,11 +25,11 @@ Noweb reference:
 
   let
     minimalEmacs = pkgs.emacs.overrideAttrs (oldAttrs: {
-  	preBuild = (oldAttrs.preBuild or "") + ''
+      preBuild = (oldAttrs.preBuild or "") + ''
         rm -rf lisp/play
-  	  rm -rf lisp/obsolete
+        rm -rf lisp/obsolete
         rm -f lisp/isearchb.el
-  	'';
+      '';
     });
 
     emacs = minimalEmacs.pkgs.withPackages (epkgs: [
@@ -46,11 +46,11 @@ Noweb reference:
 
     config = mkIf cfg.enable {
       environment.systemPackages = [
-  	  emacs
-  	  <<pkgs>>
-  	];
+        emacs
+        <<pkgs>>
+      ];
 
-  	<<config>>
+      <<config>>
 
       mod.activationScripts.tangleEmacsConfig.text = ''
         ${emacs}/bin/emacs ${./.}/emacs.org \
@@ -157,8 +157,13 @@ Better main buffer default.
 ** Key binding
 
 #+begin_src elisp :tangle no :noweb-ref normal-mode
-  ("i" ryo-modal-mode)
   ("<escape>" keyboard-quit)
+  ("i" ignore :exit t)
+  ("I" beginning-of-line :exit t)
+  ("a" forward-char :exit t)
+  ("A" end-of-line :exit t)
+  ("o" ryo-open-line-below :exit t)
+  ("O" ryo-open-line-above :exit t)
 #+end_src
 
 #+begin_src elisp :tangle no :noweb-ref insert-mode
@@ -172,22 +177,7 @@ Better main buffer default.
 #+end_src
 
 #+begin_src elisp :noweb yes
-  (defvar ryo-modal-blacklist
-    '((predicate . minibufferp)
-      (mode . eshell-mode)
-      (mode . term-mode)
-      (mode . vterm-mode)
-  	(mode . vc-git-log-edit-mode))
-    "Alist of conditions where `ryo-modal-mode` should not be enabled.")
-
-  (defun ryo-modal-blacklisted-p ()
-    "Return non-nil if current buffer should not enable `ryo-modal-mode`."
-    (cl-some
-     (lambda (entry)
-  	 (pcase entry
-         (`(predicate . ,fn) (funcall fn))
-         (`(mode . ,mode) (eq major-mode mode))))
-     ryo-modal-blacklist))
+  <<ryo-helper>>
 
   (use-package ryo-modal
     :bind
@@ -197,16 +187,43 @@ Better main buffer default.
       ryo-modal-mode
       (lambda ()
         (unless (ryo-modal-blacklisted-p)
-    		(ryo-modal-mode 1))))
+          (ryo-modal-mode 1))))
     (global-ryo-modal-mode 1)
     (ryo-modal-keys
      <<normal-mode>>))
 #+end_src
 
-Finding key binding is easy, just use =C-h m=. Here I'm just list all the
-binding I care about and some overriding.
+#+begin_src elisp :tangle no :noweb-ref ryo-helper
+  (defvar ryo-modal-blacklist
+    '((predicate . minibufferp)
+      (mode . eshell-mode)
+      (mode . term-mode)
+      (mode . vterm-mode)
+      (mode . vc-git-log-edit-mode))
+    "Alist of conditions where `ryo-modal-mode` should not be enabled.")
 
-** Directory :SPC:d:f:
+  (defun ryo-modal-blacklisted-p ()
+    "Return non-nil if current buffer should not enable `ryo-modal-mode`."
+    (cl-some
+     (lambda (entry)
+       (pcase entry
+         (`(predicate . ,fn) (funcall fn))
+         (`(mode . ,mode) (eq major-mode mode))))
+     ryo-modal-blacklist))
+
+  (defun ryo-open-line-below ()
+    (interactive)
+    (end-of-line)
+    (open-line 1)
+    (forward-line 1))
+
+  (defun ryo-open-line-above ()
+    (interactive)
+    (beginning-of-line)
+    (open-line 1))
+#+end_src
+
+** Directory and file :SPC:d:f:
 
 #+begin_src elisp :tangle no :noweb-ref directory
   ("SPC d" project-dired :name "dired")
@@ -221,7 +238,7 @@ binding I care about and some overriding.
     <<directory>>)
 #+end_src
 
-** Movement and selection
+** Movement and selection :g:v:
 
 #+begin_src elisp :tangle no :noweb-ref movement
   ("h" backward-char)

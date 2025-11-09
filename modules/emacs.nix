@@ -9,11 +9,11 @@ with lib;
 
 let
   minimalEmacs = pkgs.emacs.overrideAttrs (oldAttrs: {
-	preBuild = (oldAttrs.preBuild or "") + ''
+    preBuild = (oldAttrs.preBuild or "") + ''
       rm -rf lisp/play
-	  rm -rf lisp/obsolete
+      rm -rf lisp/obsolete
       rm -f lisp/isearchb.el
-	'';
+    '';
   });
 
   emacs = minimalEmacs.pkgs.withPackages (epkgs: [
@@ -78,15 +78,15 @@ in
 
   config = mkIf cfg.enable {
     environment.systemPackages = [
-	  emacs
-	  pkgs.ledger
-	];
+      emacs
+      pkgs.ledger
+    ];
 
-	programs.direnv = {
-	  enable = true;
-	  nix-direnv.enable = true;
-	};
-	fonts.packages = [ pkgs.nerd-fonts.iosevka ];
+    programs.direnv = {
+      enable = true;
+      nix-direnv.enable = true;
+    };
+    fonts.packages = [ pkgs.nerd-fonts.iosevka ];
 
     mod.activationScripts.tangleEmacsConfig.text = ''
       ${emacs}/bin/emacs ${./.}/emacs.org \
