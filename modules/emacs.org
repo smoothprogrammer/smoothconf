@@ -630,68 +630,98 @@ Make script with shebang in it executable.
     :custom (corfu-cycle t))
 #+end_src
 
-** TODO Programming mode
+** LSP
 
-Syntax highlighting require [[https://tree-sitter.github.io/tree-sitter/][Tree-sitter]] grammars, this will install
-all available grammars.
+*** eglot
 
-#+begin_src nix :tangle no :noweb-ref epkgs
-  epkgs.treesit-grammars.with-all-grammars
-#+end_src
+We will use built-in =eglot= for LSP. Make sure the LSP server is installed in the system
+path and configure the following variable:
 
-We will use built-in =eglot= for LSP. Most major mode are already mapped to the
-corresponding LSP, so just ensure the LSP is installed in the system path.
-Others require to configure through =eglot-server-programs=.
++ eglot-server-programs :: mapping between major mode and the LSP server
++ eglot-workspace-configuration :: configuration for the LSP server
 
 #+begin_src elisp :noweb yes
   (use-package eglot
     :hook
     (prog-mode . eglot-ensure)
-    (prog-mode . (lambda ()
-                                 (add-hook 'before-save-hook 'eglot-format-buffer)))
+    (prog-mode . (lambda () (add-hook 'before-save-hook 'eglot-format-buffer)))
     :config
-    (setq eglot-server-programs
-                '(
-                  <<eglot-server-programs>>
-                  ))
-    (setq-default eglot-workspace-configuration
-                                '(
-                                  <<eglot-workspace-configuration>>
-                                  )))
+    (setq eglot-server-programs '( <<eglot-server-programs>> ))
+    (setq-default eglot-workspace-configuration '( <<eglot-workspace-configuration>> )))
 #+end_src
 
-+ C-h v eglot-server-programs RET :: see registered major mode x LSP
+*** eglot-booster
 
 Boost LSP performance with =eglot-booster=.
 
 #+begin_src nix :tangle no :noweb-ref epkgs
-  (pkgs.emacsPackages.trivialBuild {
-    pname = "eglot-booster";
-    version = "20250428";
-    src = pkgs.fetchFromGitHub {
-      owner = "jdtsmith";
-      repo = "eglot-booster";
-      rev = "1260d2f7dd18619b42359aa3e1ba6871aa52fd26";
-      sha256 = "sha256-teAKWDDL7IrCBiZUVIVlB3W22G9H6IrWiRV/P62dFy0=";
-    };
-  })
+  epkgs.eglot-booster
 #+end_src
 
 #+begin_src elisp
-  (use-package eglot-booster
-    :after eglot
-    :config (eglot-booster-mode))
+  (use-package eglot-booster :after eglot :config (eglot-booster-mode))
 #+end_src
 
-*** Elisp
+** TODO Programming language
 
-Emacs at the heart is a Lisp interpreter, so everything already
-available out of the box.
+Syntax highlighting require [[https://tree-sitter.github.io/tree-sitter/][Tree-sitter]] grammars, this will install all
+available grammars.
 
-*** Nix
+#+begin_src nix :tangle no :noweb-ref epkgs
+  epkgs.treesit-grammars.with-all-grammars
+#+end_src
 
-Emacs has built-in major mode for Nix and already mapped the LSP. However its
-uses non-Tree-sitter one. We will override them with the Tree-sitter version.
+*** go :main:
+
+#+begin_src nix :tangle no :noweb-ref pkgs
+  pkgs.go
+  pkgs.gopls
+  pkgs.delve
+#+end_src
+
+#+begin_src nix :tangle no :noweb-ref epkgs
+  # go-ts-mode is already emacs built-in major mode
+#+end_src
+
+#+begin_src elisp
+  (use-package go-ts-mode
+    :mode (rx ".go" eos)
+    :custom (go-ts-mode-indent-offset global-tab-width))
+#+end_src
+
+#+begin_src elisp :tangle no :noweb-ref eglot-server-programs
+  ((go-mode go-dot-mod-mode go-dot-work-mode go-ts-mode go-mod-ts-mode) . ("gopls"))
+#+end_src
+
+#+begin_src elisp :tangle no :noweb-ref eglot-workspace-configuration
+  (:gopls . (:gofumpt t))
+#+end_src
+
+*** gleam :main:
+
+#+begin_src nix :tangle no :noweb-ref pkgs
+  pkgs.gleam
+#+end_src
+
+#+begin_src nix :tangle no :noweb-ref epkgs
+  epkgs.gleam-ts-mode
+#+end_src
+
+#+begin_src elisp
+  (use-package gleam-ts-mode
+    :mode (rx ".gleam" eos))
+#+end_src
+
+#+begin_src elisp :tangle no :noweb-ref eglot-server-programs
+  (gleam-ts-mode . ("gleam" "lsp"))
+#+end_src
+
+*** elisp :conf:
+
+Emacs at the heart is a Lisp interpreter, so everything already available out of
+the box.
+
+*** nix :conf:
 
 #+begin_src nix :tangle no :noweb-ref epkgs
   epkgs.nix-ts-mode
@@ -721,44 +751,11 @@ Fontify Org mode noweb reference for Nix.
   (add-hook 'nix-ts-mode-hook #'smooth/nix-ts-mode-noweb-comment)
 #+end_src
 
-*** JSON
+*** json
 
 #+begin_src elisp
   (use-package json-ts-mode
     :mode (rx ".json" eos))
-#+end_src
-
-*** Go
-
-Emacs has built-in major mode for Go and already mapped the LSP.
-
-#+begin_src elisp
-  (use-package go-ts-mode
-    :mode (rx ".go" eos)
-    :custom (go-ts-mode-indent-offset global-tab-width))
-#+end_src
-
-#+begin_src elisp :tangle no :noweb-ref eglot-server-programs
-  ((go-mode go-dot-mod-mode go-dot-work-mode go-ts-mode go-mod-ts-mode) . ("gopls"))
-#+end_src
-
-#+begin_src elisp :tangle no :noweb-ref eglot-workspace-configuration
-  (:gopls . (:gofumpt t))
-#+end_src
-
-*** Gleam
-
-#+begin_src nix :tangle no :noweb-ref epkgs
-  epkgs.gleam-ts-mode
-#+end_src
-
-#+begin_src elisp
-  (use-package gleam-ts-mode
-    :mode (rx ".gleam" eos))
-#+end_src
-
-#+begin_src elisp :tangle no :noweb-ref eglot-server-programs
-  (gleam-ts-mode . ("gleam" "lsp"))
 #+end_src
 
 ** Org
@@ -772,7 +769,8 @@ Emacs has built-in major mode for Go and already mapped the LSP.
 #+begin_src elisp :tangle no :noweb-ref org-insert
   ("SPC i"
    (("t" org-insert-structure-template :name "insert template")
-    ("h" org-babel-insert-header-arg :name "insert header"))
+    ("h" org-babel-insert-header-arg :name "insert header")
+    ("l" org-insert-link :name "insert link"))
    :name "org insert")
 #+end_src
 

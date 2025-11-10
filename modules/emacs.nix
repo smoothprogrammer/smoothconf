@@ -35,19 +35,11 @@ let
     epkgs.marginalia
     epkgs.nerd-icons-completion
     epkgs.corfu
+    epkgs.eglot-booster
     epkgs.treesit-grammars.with-all-grammars
-    (pkgs.emacsPackages.trivialBuild {
-      pname = "eglot-booster";
-      version = "20250428";
-      src = pkgs.fetchFromGitHub {
-        owner = "jdtsmith";
-        repo = "eglot-booster";
-        rev = "1260d2f7dd18619b42359aa3e1ba6871aa52fd26";
-        sha256 = "sha256-teAKWDDL7IrCBiZUVIVlB3W22G9H6IrWiRV/P62dFy0=";
-      };
-    })
-    epkgs.nix-ts-mode
+    # go-ts-mode is already emacs built-in major mode
     epkgs.gleam-ts-mode
+    epkgs.nix-ts-mode
     epkgs.org-auto-tangle
     epkgs.org-modern
     (pkgs.emacsPackages.trivialBuild {
@@ -80,6 +72,10 @@ in
   config = mkIf cfg.enable {
     environment.systemPackages = [
       emacs
+      pkgs.go
+      pkgs.gopls
+      pkgs.delve
+      pkgs.gleam
       pkgs.ledger
     ];
 
