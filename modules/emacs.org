@@ -162,8 +162,8 @@ Better main buffer default.
   ("I" beginning-of-line :exit t)
   ("a" forward-char :exit t)
   ("A" end-of-line :exit t)
-  ("o" ryo-open-line-below :exit t)
-  ("O" ryo-open-line-above :exit t)
+  ("o" smooth/open-line-below :exit t)
+  ("O" smooth/open-line-above :exit t)
 #+end_src
 
 #+begin_src elisp :tangle no :noweb-ref insert-mode
@@ -186,7 +186,7 @@ Better main buffer default.
     (define-globalized-minor-mode global-ryo-modal-mode
       ryo-modal-mode
       (lambda ()
-        (unless (ryo-modal-blacklisted-p)
+        (unless (smooth/modal-blacklisted-p)
           (ryo-modal-mode 1))))
     (global-ryo-modal-mode 1)
     (ryo-modal-keys
@@ -194,7 +194,7 @@ Better main buffer default.
 #+end_src
 
 #+begin_src elisp :tangle no :noweb-ref ryo-helper
-  (defvar ryo-modal-blacklist
+  (defvar smooth/modal-blacklist
     '((predicate . minibufferp)
       (mode . eshell-mode)
       (mode . term-mode)
@@ -202,40 +202,60 @@ Better main buffer default.
       (mode . vc-git-log-edit-mode))
     "Alist of conditions where `ryo-modal-mode` should not be enabled.")
 
-  (defun ryo-modal-blacklisted-p ()
+  (defun smooth/modal-blacklisted-p ()
     "Return non-nil if current buffer should not enable `ryo-modal-mode`."
     (cl-some
      (lambda (entry)
        (pcase entry
          (`(predicate . ,fn) (funcall fn))
          (`(mode . ,mode) (eq major-mode mode))))
-     ryo-modal-blacklist))
+     smooth/modal-blacklist))
 
-  (defun ryo-open-line-below ()
+  (defun smooth/open-line-below ()
     (interactive)
     (end-of-line)
     (open-line 1)
     (forward-line 1))
 
-  (defun ryo-open-line-above ()
+  (defun smooth/open-line-above ()
     (interactive)
     (beginning-of-line)
     (open-line 1))
 #+end_src
 
-** Directory and file :SPC:d:f:
+** Directory and file :SPC:d:f:g:
 
 #+begin_src elisp :tangle no :noweb-ref directory
   ("SPC d" project-dired :name "dired")
   ("SPC f" project-find-file :name "find file")
 #+end_src
 
+#+begin_src elisp :tangle no :noweb-ref special-file
+  ("SPC g"
+   (("e" smooth/open-emacs-config :name "open emacs config")
+    ("w" smooth/open-work-readme :name "open work README"))
+   :name "special file")
+#+end_src
+
 *** dired
 
 #+begin_src elisp :noweb yes
+  <<dired-helper>>
+
   (use-package dired
     :ryo
-    <<directory>>)
+    <<directory>>
+    <<special-file>>)
+#+end_src
+
+#+begin_src elisp :tangle no :noweb-ref dired-helper
+  (defun smooth/open-emacs-config ()
+    (interactive)
+    (find-file "~/.config/smoothconf/modules/emacs.org"))
+
+  (defun smooth/open-work-readme ()
+    (interactive)
+    (find-file "~/work/README.org"))
 #+end_src
 
 ** Movement and selection :g:v:
