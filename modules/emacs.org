@@ -223,7 +223,7 @@ Better main buffer default.
     (open-line 1))
 #+end_src
 
-** Directory and file :SPC:d:f:g:
+** Directory and file :SPC:d:f:j:
 
 #+begin_src elisp :tangle no :noweb-ref directory
   ("SPC d" project-dired :name "dired")
@@ -231,10 +231,10 @@ Better main buffer default.
 #+end_src
 
 #+begin_src elisp :tangle no :noweb-ref special-file
-  ("SPC g"
+  ("SPC j"
    (("e" smooth/open-emacs-config :name "open emacs config")
     ("w" smooth/open-work-readme :name "open work README"))
-   :name "special file")
+   :name "jump to special file")
 #+end_src
 
 *** dired
@@ -906,7 +906,7 @@ Register missing major mode for some programing languages.
   epkgs.verb
 #+end_src
 
-** Version control :SPC:v:
+** Version control :SPC:v:g:
 
 #+begin_src elisp :tangle no :noweb-ref vc
   ("SPC v"
@@ -919,6 +919,12 @@ Register missing major mode for some programing languages.
    :name "version control")
 #+end_src
 
+#+begin_src elisp :tangle no :noweb-ref git
+  ("SPC g"
+   (("s" magit-status :name "status"))
+   :name "git")
+#+end_src
+
 *** vc
 
 #+begin_src elisp :noweb yes
@@ -928,6 +934,18 @@ Register missing major mode for some programing languages.
     :custom
     (vc-follow-symlink t)
     (vc-handled-backends '(Git)))
+#+end_src
+
+*** magit
+
+#+begin_src nix :tangle no :noweb-ref epkgs
+  epkgs.magit
+#+end_src
+
+#+begin_src elisp :noweb yes
+  (use-package magit
+    :ryo
+    <<git>>)
 #+end_src
 
 ** Accounting

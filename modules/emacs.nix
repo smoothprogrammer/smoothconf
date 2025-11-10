@@ -65,6 +65,7 @@ let
     epkgs.org-roam
     epkgs.org-roam-ui
     epkgs.verb
+    epkgs.magit
     epkgs.ledger-mode
   ]);
 
