@@ -760,17 +760,12 @@ Fontify Org mode noweb reference for Nix.
   (add-hook 'nix-ts-mode-hook #'smooth/nix-ts-mode-noweb-comment)
 #+end_src
 
-*** json
-
-Somehow I can't manage to get =json-ts-mode= working, so use =json-mode= for now.
-
-#+begin_src nix :tangle no :noweb-ref epkgs
-  epkgs.json-mode
-#+end_src
+*** js/json
 
 #+begin_src elisp
-  (use-package json-mode
-    :mode (rx ".json" eos)
+  (use-package js
+    :mode ((rx ".js" eos)
+  		 (rx ".json" eos))
     :custom (js-indent-level 2))
 #+end_src
 
@@ -887,7 +882,8 @@ Register missing major mode for some programing languages.
 
 #+begin_src elisp
   (add-to-list 'org-src-lang-modes '("nix" . nix-ts))
-  (add-to-list 'org-src-lang-modes '("json" . json))
+  (add-to-list 'org-src-lang-modes '("js" . js))
+  (add-to-list 'org-src-lang-modes '("json" . js))
 #+end_src
 
 *** ox-hugo
@@ -922,8 +918,8 @@ Register missing major mode for some programing languages.
 
 #+begin_src elisp
   (use-package verb
-    :after json-mode
-    :custom (verb-json-use-mode 'json-mode))
+    :hook
+    (org-mode . verb-mode))
 #+end_src
 
 ** Version control :SPC:v:g:

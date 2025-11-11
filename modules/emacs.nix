@@ -40,7 +40,6 @@ let
     # go-ts-mode is already emacs built-in major mode
     epkgs.gleam-ts-mode
     epkgs.nix-ts-mode
-    epkgs.json-mode
     epkgs.org-auto-tangle
     epkgs.org-modern
     (pkgs.emacsPackages.trivialBuild {
