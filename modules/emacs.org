@@ -285,7 +285,7 @@ Better main buffer default.
 #+end_src
 
 #+begin_src elisp :tangle no :noweb-ref smooth-jump
-  ("g g" avy-goto-char-timer)
+  (";" avy-goto-char-timer)
 #+end_src
 
 #+begin_src elisp :tangle no :noweb-ref selection
