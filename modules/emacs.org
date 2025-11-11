@@ -409,17 +409,6 @@ Read the system path from shell.
   epkgs.keycast
 #+end_src
 
-*** Better documentation UI =eldoc-box=
-
-#+begin_src nix :tangle no :noweb-ref epkgs
-  epkgs.eldoc-box
-#+end_src
-
-#+begin_src elisp
-  (use-package eldoc-box
-    :hook (eglot-managed-mode . eldoc-box-hover-mode))
-#+end_src
-
 *** Markdown =markdown-mode=
 
 #+begin_src nix :tangle no :noweb-ref epkgs
@@ -494,49 +483,6 @@ Give Emacs some space to breath.
     :config (spacious-padding-mode 1))
 #+end_src
 
-** Completion
-
-Completion are essential feature for modern text editor / IDE.
-
-#+begin_src elisp
-  (setq read-file-name-completion-ignore-case t
-        read-buffer-completion-ignore-case t
-        completion-ignore-case t)
-#+end_src
-
-*** Completion style / logic =orderless=
-
-#+begin_src nix :tangle no :noweb-ref epkgs
-  epkgs.orderless
-#+end_src
-
-#+begin_src elisp
-  (use-package orderless
-    :config
-    (setq completion-styles '(orderless basic)
-          completion-category-default nil
-          completion-category-overrides '((file (styles partial-completion)))
-          orderless-matching-styles '(orderless-flex)))
-#+end_src
-
-*** Completion UI for minibuffer =vertico=
-
-#+begin_src nix :tangle no :noweb-ref epkgs
-  epkgs.vertico
-#+end_src
-
-#+begin_src elisp
-  (use-package vertico
-    :hook (after-init . vertico-mode)
-    :custom (vertico-cycle t)
-    :bind (:map vertico-map
-                ("RET" . vertico-directory-enter)
-                ("DEL" . vertico-directory-delete-char)
-                ("M-DEL" . vertico-directory-delete-word)))
-#+end_src
-
-** Minibuffer
-
 *** Annotation =marginalia=
 
 #+begin_src nix :tangle no :noweb-ref epkgs
@@ -552,6 +498,16 @@ Completion are essential feature for modern text editor / IDE.
     :config
     (nerd-icons-completion-mode)
     (add-hook 'marginalia-mode-hook #'nerd-icons-completion-marginalia-setup))
+#+end_src
+
+** Completion
+
+Completion are essential feature for modern text editor / IDE.
+
+#+begin_src elisp
+  (setq read-file-name-completion-ignore-case t
+        read-buffer-completion-ignore-case t
+        completion-ignore-case t)
 #+end_src
 
 ** Smooth default =built-in=
@@ -620,21 +576,18 @@ Make script with shebang in it executable.
   (add-hook 'after-save-hook 'executable-make-buffer-file-executable-if-script-p)
 #+end_src
 
-** Main buffer
+** LSP :g:
 
-*** Completion UI =corfu=
-
-#+begin_src nix :tangle no :noweb-ref epkgs
-  epkgs.corfu
+#+begin_src elisp :tangle no :noweb-ref xref
+  ("g d" xref-find-definitions :name "go to definitions")
+  ("g r" xref-find-references :name "go to references")
+  ("g ," xref-go-back :name "go back")
+  ("g ." xref-go-forward :name "go forward")
 #+end_src
 
-#+begin_src elisp
-  (use-package corfu
-    :init (global-corfu-mode)
-    :custom (corfu-cycle t))
+#+begin_src elisp :tangle no :noweb-ref consult
+  ("g i" consult-imenu :name "go to imenu")
 #+end_src
-
-** LSP
 
 *** eglot
 
@@ -669,6 +622,84 @@ Boost LSP performance with =eglot-booster=.
 
 #+begin_src elisp
   (use-package eglot-booster :after eglot :config (eglot-booster-mode))
+#+end_src
+
+*** eldoc-box
+
+#+begin_src nix :tangle no :noweb-ref epkgs
+  epkgs.eldoc-box
+#+end_src
+
+#+begin_src elisp
+  (use-package eldoc-box
+    :hook (eglot-managed-mode . eldoc-box-hover-mode))
+#+end_src
+
+*** xref
+
+#+begin_src elisp :noweb yes
+  (use-package xref
+    :ryo
+    <<xref>>
+    )
+#+end_src
+
+*** corfu
+
+#+begin_src nix :tangle no :noweb-ref epkgs
+  epkgs.corfu
+#+end_src
+
+#+begin_src elisp
+  (use-package corfu
+    :init (global-corfu-mode)
+    :custom (corfu-cycle t))
+#+end_src
+
+*** vertico
+
+#+begin_src nix :tangle no :noweb-ref epkgs
+  epkgs.vertico
+#+end_src
+
+#+begin_src elisp
+  (use-package vertico
+    :hook (after-init . vertico-mode)
+    :custom (vertico-cycle t)
+    :bind (:map vertico-map
+                ("RET" . vertico-directory-enter)
+                ("DEL" . vertico-directory-delete-char)
+                ("M-DEL" . vertico-directory-delete-word)))
+#+end_src
+
+*** corderless
+
+#+begin_src nix :tangle no :noweb-ref epkgs
+  epkgs.orderless
+#+end_src
+
+#+begin_src elisp
+  (use-package orderless
+    :config
+    (setq completion-styles '(orderless basic)
+          completion-category-default nil
+          completion-category-overrides '((file (styles partial-completion)))
+          orderless-matching-styles '(orderless-flex)))
+#+end_src
+
+*** consult
+
+#+begin_src nix :tangle no :noweb-ref epkgs
+  epkgs.consult
+#+end_src
+
+#+begin_src elisp :noweb yes
+  (use-package consult
+    :ryo
+    <<consult>>
+    :init
+    (setq xref-show-xrefs-function #'consult-xref
+  		xref-show-definitions-function #'consult-xref))
 #+end_src
 
 ** TODO Programming language

@@ -24,18 +24,19 @@ let
     epkgs.helpful
     epkgs.which-key
     epkgs.keycast
-    epkgs.eldoc-box
     epkgs.markdown-mode
     epkgs.nerd-icons
     epkgs.doom-themes
     epkgs.doom-modeline
     epkgs.spacious-padding
-    epkgs.orderless
-    epkgs.vertico
     epkgs.marginalia
     epkgs.nerd-icons-completion
-    epkgs.corfu
     epkgs.eglot-booster
+    epkgs.eldoc-box
+    epkgs.corfu
+    epkgs.vertico
+    epkgs.orderless
+    epkgs.consult
     epkgs.treesit-grammars.with-all-grammars
     # go-ts-mode is already emacs built-in major mode
     epkgs.gleam-ts-mode
