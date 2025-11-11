@@ -69,6 +69,7 @@ let
       };
     })
     epkgs.magit
+    epkgs.diff-hl
     epkgs.ledger-mode
 	]);
 

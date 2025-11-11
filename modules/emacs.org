@@ -2,6 +2,17 @@
 #+property: header-args:elisp :mkdirp yes :results silent :tangle ~/.emacs.d/init.el
 #+property: header-args:nix :results silent :tangle ./emacs.nix
 
+* TODO LSP
+
+- [X] eglot-booster → performance boost
+- [ ] flymake (builtin) → diagnostics (already works with Eglot)
+- [ ] consult-flymake → better diagnostics browsing
+- [ ] tempel or yasnippet → snippets
+- [ ] marginalia → annotations in minibuffer
+- [ ] embark → context-sensitive actions
+- [ ] corfu → completion frontend (already compatible)
+- [ ] orderless → fuzzy matching in Corfu/Consult
+
 * The config
 
 I'm still new to emacs, try reading this in the future:
@@ -476,7 +487,16 @@ Give Emacs some space to breath.
 
 #+begin_src elisp
   (use-package spacious-padding
-    :config (spacious-padding-mode 1))
+    :config
+    (setq spacious-padding-widths
+  		'( :internal-border-width 15
+  		   :header-line-width 4
+  		   :mode-line-width 6
+  		   :tab-width 4
+  		   :right-divider-width 30
+  		   :scroll-bar-width 8
+  		   :fringe-width 4))
+    (spacious-padding-mode 1))
 #+end_src
 
 *** Annotation =marginalia=
@@ -1022,6 +1042,18 @@ Register missing major mode for some programing languages.
     :ryo
     <<git>>
     )
+#+end_src
+
+*** diff-hl
+
+#+begin_src nix :tangle no :noweb-ref epkgs
+  epkgs.diff-hl
+#+end_src
+
+#+begin_src elisp
+  (use-package diff-hl
+    :hook (after-init . global-diff-hl-mode)
+    :config (setq diff-hl-bmp-max-width 8))
 #+end_src
 
 ** Accounting
