@@ -260,20 +260,17 @@ Better main buffer default.
     (find-file "~/work/README.org"))
 #+end_src
 
-** Movement and selection :g:v:
+** Movement and selection :v:
 
 #+begin_src elisp :tangle no :noweb-ref movement
   ("h" backward-char)
   ("j" next-line)
   ("k" previous-line)
   ("l" forward-char)
-#+end_src
-
-#+begin_src elisp :tangle no :noweb-ref jump
-  ("g h" beginning-of-line)
-  ("g j" end-of-buffer)
-  ("g k" beginning-of-buffer)
-  ("g l" end-of-line)
+  ("H" beginning-of-line)
+  ("J" end-of-buffer)
+  ("K" beginning-of-buffer)
+  ("L" end-of-line)
 #+end_src
 
 #+begin_src elisp :tangle no :noweb-ref smooth-jump
@@ -290,7 +287,6 @@ Better main buffer default.
   (use-package simple
     :ryo
     <<movement>>
-    <<jump>>
     <<selection>>
     )
 #+end_src
