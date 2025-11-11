@@ -1056,6 +1056,19 @@ Register missing major mode for some programing languages.
     :config (setq diff-hl-bmp-max-width 8))
 #+end_src
 
+*** blamer
+
+#+begin_src nix :tangle no :noweb-ref epkgs
+  epkgs.blamer
+#+end_src
+
+#+begin_src elisp
+  (use-package blamer
+    :config
+    (setq blamer-idle-time 0.3)
+    (global-blamer-mode 1))
+#+end_src
+
 ** Accounting
 
 *** ledger-mode

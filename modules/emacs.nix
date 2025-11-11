@@ -70,6 +70,7 @@ let
     })
     epkgs.magit
     epkgs.diff-hl
+    epkgs.blamer
     epkgs.ledger-mode
 	]);
 
