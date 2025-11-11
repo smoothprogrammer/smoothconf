@@ -366,7 +366,7 @@ Read the system path from shell.
 #+begin_src elisp :tangle no :noweb-ref help
   ("SPC h"
    (("m" describe-mode :name "describe mode")
-    ("." helpful-at-point :name "describe at point")
+    ("h" helpful-at-point :name "describe at point")
     ("v" helpful-variable :name "describe variable")
     ("f" helpful-callable :name "describe function")
     ("k" helpful-key :name "describe key")
