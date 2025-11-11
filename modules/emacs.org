@@ -922,6 +922,30 @@ Register missing major mode for some programing languages.
     (org-mode . verb-mode))
 #+end_src
 
+*** hurl
+
+#+begin_src nix :tangle no :noweb-ref pkgs
+  pkgs.hurl
+#+end_src
+
+#+begin_src nix :tangle no :noweb-ref epkgs
+  (pkgs.emacsPackages.trivialBuild {
+    pname = "hurl-mode";
+    version = "0.0.0";
+    src = pkgs.fetchFromGitHub {
+  	owner = "JasZhe";
+  	repo = "hurl-mode";
+  	rev = "0753271bb4693924d3dcfa9d66a316086d7b7b72";
+  	sha256 = "sha256-56/XDXYG4pq3+liB9TDIISTlmN4xMGsic9jhrIacO5E=";
+    };
+  })
+#+end_src
+
+#+begin_src elisp
+  (use-package hurl-mode
+    :mode (rx ".hurl" eos))
+#+end_src
+
 ** Version control :SPC:v:g:
 
 #+begin_src elisp :tangle no :noweb-ref vc
