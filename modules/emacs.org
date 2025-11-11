@@ -919,7 +919,15 @@ Register missing major mode for some programing languages.
 #+begin_src elisp
   (use-package verb
     :hook
-    (org-mode . verb-mode))
+    ((org-mode . smooth/org-enable-verb-mode-if-has-tag)
+     (org-after-tags-change-hook . smooth/org-enable-verb-mode-if-has-tag))
+    :config
+    (defun smooth/org-enable-verb-mode-if-has-tag ()
+  	"Toggle `verb-mode` based on Org buffer has the tag :verb:."
+  	(interactive)
+  	(if (member '("verb") (org-get-buffer-tags))
+          (verb-mode 1)
+        (verb-mode -1))))
 #+end_src
 
 *** hurl
