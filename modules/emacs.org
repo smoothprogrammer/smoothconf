@@ -190,7 +190,8 @@ Better main buffer default.
           (ryo-modal-mode 1))))
     (global-ryo-modal-mode 1)
     (ryo-modal-keys
-     <<normal-mode>>))
+     <<normal-mode>>
+     ))
 #+end_src
 
 #+begin_src elisp :tangle no :noweb-ref ryo-helper
@@ -245,7 +246,8 @@ Better main buffer default.
   (use-package dired
     :ryo
     <<directory>>
-    <<special-file>>)
+    <<special-file>>
+    )
 #+end_src
 
 #+begin_src elisp :tangle no :noweb-ref dired-helper
@@ -289,7 +291,8 @@ Better main buffer default.
     :ryo
     <<movement>>
     <<jump>>
-    <<selection>>)
+    <<selection>>
+    )
 #+end_src
 
 *** avy
@@ -385,7 +388,8 @@ Read the system path from shell.
 #+begin_src elisp :noweb yes
   (use-package helpful
     :ryo
-    <<help>>)
+    <<help>>
+    )
 #+end_src
 
 *** which-key
@@ -646,8 +650,13 @@ path and configure the following variable:
     (prog-mode . eglot-ensure)
     (prog-mode . (lambda () (add-hook 'before-save-hook 'eglot-format-buffer)))
     :config
-    (setq eglot-server-programs '( <<eglot-server-programs>> ))
-    (setq-default eglot-workspace-configuration '( <<eglot-workspace-configuration>> )))
+    (setq eglot-server-programs '(
+  								<<eglot-server-programs>>
+  								))
+    (setq-default eglot-workspace-configuration
+  				'(
+  				  <<eglot-workspace-configuration>>
+  				  )))
 #+end_src
 
 *** eglot-booster
@@ -943,7 +952,8 @@ Register missing major mode for some programing languages.
 #+begin_src elisp :noweb yes
   (use-package magit
     :ryo
-    <<git>>)
+    <<git>>
+    )
 #+end_src
 
 ** Accounting
