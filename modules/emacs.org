@@ -34,21 +34,21 @@ Noweb reference:
 
     emacs = minimalEmacs.pkgs.withPackages (epkgs: [
       <<epkgs>>
-    ]);
+  	]);
 
     cfg = config.mod.emacs;
   in
 
-  {
-    options.mod.emacs = {
-      enable = mkEnableOption "emacs";
-    };
+    {
+  	options.mod.emacs = {
+        enable = mkEnableOption "emacs";
+  	};
 
-    config = mkIf cfg.enable {
-      environment.systemPackages = [
-        emacs
+  	config = mkIf cfg.enable {
+        environment.systemPackages = [
+  		emacs
         <<pkgs>>
-      ];
+        ];
 
       <<config>>
 
@@ -56,8 +56,8 @@ Noweb reference:
         ${emacs}/bin/emacs ${./.}/emacs.org \
           -Q --batch --eval '(org-babel-tangle nil nil "^elisp$")' --kill
       '';
-    };
-  }
+  	};
+    }
 #+end_src
 
 ** Startup performance and default
@@ -150,8 +150,8 @@ Still experiment for a better mapping in =macOS=.
 Better main buffer default.
 
 #+begin_src elisp
-   (setopt sentence-end-double-space nil
-           kill-whole-line t)
+  (setopt sentence-end-double-space nil
+          kill-whole-line t)
 #+end_src
 
 ** Key binding
@@ -487,7 +487,7 @@ Give Emacs some space to breath.
 
 #+begin_src nix :tangle no :noweb-ref epkgs
   epkgs.marginalia
-  epkgs.nerd-icons-completion
+    epkgs.nerd-icons-completion
 #+end_src
 
 #+begin_src elisp
@@ -604,12 +604,12 @@ path and configure the following variable:
     (prog-mode . (lambda () (add-hook 'before-save-hook 'eglot-format-buffer)))
     :config
     (setq eglot-server-programs '(
-  								<<eglot-server-programs>>
-  								))
+                                  <<eglot-server-programs>>
+                                  ))
     (setq-default eglot-workspace-configuration
-  				'(
-  				  <<eglot-workspace-configuration>>
-  				  )))
+                  '(
+                    <<eglot-workspace-configuration>>
+                    )))
 #+end_src
 
 *** eglot-booster
@@ -699,7 +699,7 @@ Boost LSP performance with =eglot-booster=.
     <<consult>>
     :init
     (setq xref-show-xrefs-function #'consult-xref
-  		xref-show-definitions-function #'consult-xref))
+          xref-show-definitions-function #'consult-xref))
 #+end_src
 
 ** TODO Programming language
@@ -715,8 +715,8 @@ available grammars.
 
 #+begin_src nix :tangle no :noweb-ref pkgs
   pkgs.go
-  pkgs.gopls
-  pkgs.delve
+    pkgs.gopls
+    pkgs.delve
 #+end_src
 
 #+begin_src nix :tangle no :noweb-ref epkgs
@@ -796,7 +796,7 @@ Fontify Org mode noweb reference for Nix.
 #+begin_src elisp
   (use-package js
     :mode ((rx ".js" eos)
-  		 (rx ".json" eos))
+           (rx ".json" eos))
     :custom (js-indent-level 2))
 #+end_src
 
@@ -871,7 +871,7 @@ The default look is old with no icon, make the look modern.
 #+begin_src elisp
   (use-package org-modern
     :hook (org-mode . org-modern-mode))
-  #+end_src
+#+end_src
 
 *** org-modern-indent
 
@@ -938,7 +938,7 @@ Register missing major mode for some programing languages.
 
 #+begin_src nix :tangle no :noweb-ref epkgs
   epkgs.org-roam
-  epkgs.org-roam-ui
+    epkgs.org-roam-ui
 #+end_src
 
 *** verb
@@ -954,9 +954,9 @@ Register missing major mode for some programing languages.
      (org-after-tags-change-hook . smooth/org-enable-verb-mode-if-has-tag))
     :config
     (defun smooth/org-enable-verb-mode-if-has-tag ()
-  	"Toggle `verb-mode` based on Org buffer has the tag :verb:."
-  	(interactive)
-  	(if (member '("verb") (org-get-buffer-tags))
+      "Toggle `verb-mode` based on Org buffer has the tag :verb:."
+      (interactive)
+      (if (member '("verb") (org-get-buffer-tags))
           (verb-mode 1)
         (verb-mode -1))))
 #+end_src
@@ -972,10 +972,10 @@ Register missing major mode for some programing languages.
     pname = "hurl-mode";
     version = "0.0.0";
     src = pkgs.fetchFromGitHub {
-  	owner = "JasZhe";
-  	repo = "hurl-mode";
-  	rev = "0753271bb4693924d3dcfa9d66a316086d7b7b72";
-  	sha256 = "sha256-56/XDXYG4pq3+liB9TDIISTlmN4xMGsic9jhrIacO5E=";
+      owner = "JasZhe";
+      repo = "hurl-mode";
+      rev = "0753271bb4693924d3dcfa9d66a316086d7b7b72";
+      sha256 = "sha256-56/XDXYG4pq3+liB9TDIISTlmN4xMGsic9jhrIacO5E=";
     };
   })
 #+end_src

@@ -30,7 +30,7 @@ let
     epkgs.doom-modeline
     epkgs.spacious-padding
     epkgs.marginalia
-    epkgs.nerd-icons-completion
+      epkgs.nerd-icons-completion
     epkgs.eglot-booster
     epkgs.eldoc-box
     epkgs.corfu
@@ -56,40 +56,40 @@ let
     epkgs.ox-hugo
     epkgs.org-present
     epkgs.org-roam
-    epkgs.org-roam-ui
+      epkgs.org-roam-ui
     epkgs.verb
     (pkgs.emacsPackages.trivialBuild {
       pname = "hurl-mode";
       version = "0.0.0";
       src = pkgs.fetchFromGitHub {
-    	owner = "JasZhe";
-    	repo = "hurl-mode";
-    	rev = "0753271bb4693924d3dcfa9d66a316086d7b7b72";
-    	sha256 = "sha256-56/XDXYG4pq3+liB9TDIISTlmN4xMGsic9jhrIacO5E=";
+        owner = "JasZhe";
+        repo = "hurl-mode";
+        rev = "0753271bb4693924d3dcfa9d66a316086d7b7b72";
+        sha256 = "sha256-56/XDXYG4pq3+liB9TDIISTlmN4xMGsic9jhrIacO5E=";
       };
     })
     epkgs.magit
     epkgs.ledger-mode
-  ]);
+	]);
 
   cfg = config.mod.emacs;
 in
 
-{
-  options.mod.emacs = {
-    enable = mkEnableOption "emacs";
-  };
+  {
+	options.mod.emacs = {
+      enable = mkEnableOption "emacs";
+	};
 
-  config = mkIf cfg.enable {
-    environment.systemPackages = [
-      emacs
+	config = mkIf cfg.enable {
+      environment.systemPackages = [
+		emacs
       pkgs.go
-      pkgs.gopls
-      pkgs.delve
+        pkgs.gopls
+        pkgs.delve
       pkgs.gleam
       pkgs.hurl
       pkgs.ledger
-    ];
+      ];
 
     programs.direnv = {
       enable = true;
@@ -101,5 +101,5 @@ in
       ${emacs}/bin/emacs ${./.}/emacs.org \
         -Q --batch --eval '(org-babel-tangle nil nil "^elisp$")' --kill
     '';
-  };
-}
+	};
+  }
