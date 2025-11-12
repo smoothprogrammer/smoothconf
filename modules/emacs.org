@@ -71,7 +71,7 @@ Noweb reference:
     }
 #+end_src
 
-** Startup performance and default
+** Startup performance
 :properties:
 :header-args:elisp: :mkdirp yes :result silent :tangle ~/.emacs.d/early-init.el
 :end:
@@ -79,25 +79,16 @@ Noweb reference:
 Startup performance matters, I've seen a friend of mine opening Emacs and fully
 load after 40 seconds. So keep the startup time low.
 
-Emacs is featureful but has some bad default. Without 3rd party packages, we
-will try to make QoL better.
-
-*** Measure startup time and gc counts
-
-This will give us base information wether our configuration is optimized or not.
-If possible keep the startup time low.
+This will give us base information when startup wether our configuration is
+optimized or not.
 
 #+begin_src elisp
   (add-hook 'emacs-startup-hook
             (lambda ()
               (message "Emacs loaded in %s with %d garbage collections."
-                       (format "%.2f seconds"
-                               (float-time
-                                (time-subtract after-init-time before-init-time)))
+                       (format "%.2f seconds" (float-time (time-subtract after-init-time before-init-time)))
                        gcs-done)))
 #+end_src
-
-*** GC
 
 Temporary increase gc threshold during startup.
 
@@ -110,8 +101,6 @@ Temporary increase gc threshold during startup.
               (setq gc-cons-threshold (* 8 100 100)
                     gc-cons-percentage 0.1)))
 #+end_src
-
-*** UI
 
 Maximize the frame.
 
@@ -131,46 +120,10 @@ Removing some UI elements. Most of them are ugly. Prefer minimal look.
   (tooltip-mode -1)
 #+end_src
 
-*** QoL
-
-Less noise, more peace.
-
-#+begin_src elisp
-  (setopt inhibit-startup-screen t
-          inhibit-startup-buffer-menu t
-          initial-scratch-message nil
-          ring-bell-function 'ignore
-          use-short-answers t)
-#+end_src
-
-Disable backup and lockfiles.
-
-#+begin_src elisp
-  (setopt make-backup-files nil
-          create-lockfiles nil)
-#+end_src
-
-Still experiment for a better mapping in =macOS=.
-
-#+begin_src elisp :tangle no
-  (setopt mac-command-modifier 'control
-          mac-right-command-modifier 'meta
-          mac-option-modifier 'super)
-#+end_src
-
-Better main buffer default.
-
-#+begin_src elisp
-  (setopt sentence-end-double-space nil
-          kill-whole-line t)
-#+end_src
-
 ** Smooth default
 
 Emacs are featureful out of the box, but has a bad default configuration. This
 is an attempt to make a smooth default without 3rd party packages.
-
-*** Zooming
 
 Smooth zooming with =0 - += and its shift counter part key.
 
@@ -182,8 +135,6 @@ Smooth zooming with =0 - += and its shift counter part key.
   (define-key global-map (kbd "C-=") 'text-scale-increase)
   (define-key global-map (kbd "C-+") 'text-scale-increase)
 #+end_src
-
-*** Files, buffers, and minibuffer
 
 EditorConfig cover some file formatting in an editor-agnostic way.
 
@@ -235,6 +186,30 @@ Make script with shebang in it executable.
 
 #+begin_src elisp
   (add-hook 'after-save-hook 'executable-make-buffer-file-executable-if-script-p)
+#+end_src
+
+Less noise, more peace.
+
+#+begin_src elisp
+  (setopt inhibit-startup-screen t
+          inhibit-startup-buffer-menu t
+          initial-scratch-message nil
+          ring-bell-function 'ignore
+          use-short-answers t)
+#+end_src
+
+Disable backup and lockfiles.
+
+#+begin_src elisp
+  (setopt make-backup-files nil
+          create-lockfiles nil)
+#+end_src
+
+Better main buffer default.
+
+#+begin_src elisp
+  (setopt sentence-end-double-space nil
+          kill-whole-line t)
 #+end_src
 
 ** Key binding
