@@ -1020,6 +1020,10 @@ Register missing major mode for some programing languages.
    :name "git")
 #+end_src
 
+#+begin_src elisp :tangle no :noweb-ref blamer
+  ("SPC v b" blamer-show-posframe-commit-info :name "blame")
+#+end_src
+
 *** vc
 
 #+begin_src elisp :noweb yes
@@ -1062,11 +1066,11 @@ Register missing major mode for some programing languages.
   epkgs.blamer
 #+end_src
 
-#+begin_src elisp
+#+begin_src elisp :noweb yes
   (use-package blamer
-    :config
-    (setq blamer-idle-time 0.3)
-    (global-blamer-mode 1))
+    :ryo
+    <<blamer>>
+    )
 #+end_src
 
 ** Accounting
