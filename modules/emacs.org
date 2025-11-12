@@ -899,7 +899,8 @@ Fontify Org mode noweb reference for Nix.
     (org-pretty-entities t)
     (org-agenda-tags-column 0)
     (org-ellipsis "…")
-    (org-cycle-separator-lines 0))
+    (org-cycle-separator-lines 0)
+    (org-imenu-depth 3))
 #+end_src
 
 *** org-auto-tangle
