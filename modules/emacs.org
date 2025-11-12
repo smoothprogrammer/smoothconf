@@ -689,7 +689,7 @@ Completion are essential feature for modern text editor / IDE.
     (add-hook 'completion-at-point-functions #'cape-file))
 #+end_src
 
-** LSP :g:e:
+** LSP :g:e:d:
 
 #+begin_src elisp :tangle no :noweb-ref xref
   ("g d" xref-find-definitions :name "go to definitions")
@@ -706,6 +706,10 @@ Completion are essential feature for modern text editor / IDE.
 #+begin_src elisp :tangle no :noweb-ref flymake
   ("e j" flymake-goto-next-error :name "go to next error")
   ("e k" flymake-goto-prev-error :name "go to prev error")
+#+end_src
+
+#+begin_src elisp :tangle no :noweb-ref eldoc-box
+  ("d" eldoc-box-help-at-point :name "document")
 #+end_src
 
 *** eglot
@@ -749,9 +753,11 @@ Boost LSP performance with =eglot-booster=.
   epkgs.eldoc-box
 #+end_src
 
-#+begin_src elisp
+#+begin_src elisp :noweb yes
   (use-package eldoc-box
-    :hook (eglot-managed-mode . eldoc-box-hover-mode))
+    :ryo
+    <<eldoc-box>>
+    )
 #+end_src
 
 *** xref
