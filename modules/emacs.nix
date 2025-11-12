@@ -17,10 +17,10 @@ let
   });
 
   emacs = minimalEmacs.pkgs.withPackages (epkgs: [
-    epkgs.ryo-modal
-    epkgs.avy
     epkgs.exec-path-from-shell
     epkgs.envrc
+    epkgs.ryo-modal
+    epkgs.avy
     epkgs.helpful
     epkgs.which-key
     epkgs.keycast

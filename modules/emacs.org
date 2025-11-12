@@ -109,6 +109,8 @@ Removing some UI elements. Most of them are ugly. Prefer minimal look.
   (tooltip-mode -1)
 #+end_src
 
+Lastly, try to use lazy load =use-package=.
+
 * Smooth default
 
 Emacs are featureful out of the box, but has a bad default configuration. This
@@ -201,165 +203,6 @@ Better main buffer default.
           kill-whole-line t)
 #+end_src
 
-* Key binding
-
-#+begin_src elisp :tangle no :noweb-ref normal-mode
-  ("<escape>" keyboard-quit)
-  ("i" ignore :exit t)
-  ("I" beginning-of-line :exit t)
-  ("a" forward-char :exit t)
-  ("A" end-of-line :exit t)
-  ("o" smooth/open-line-below :exit t)
-  ("O" smooth/open-line-above :exit t)
-#+end_src
-
-#+begin_src elisp :tangle no :noweb-ref insert-mode
-  ("<escape>" . ryo-modal-mode)
-#+end_src
-
-** ryo
-
-#+begin_src nix :tangle no :noweb-ref epkgs
-  epkgs.ryo-modal
-#+end_src
-
-#+begin_src elisp :noweb yes
-  <<ryo-helper>>
-
-  (use-package ryo-modal
-    :bind
-    <<insert-mode>>
-    :config
-    (define-globalized-minor-mode global-ryo-modal-mode
-      ryo-modal-mode
-      (lambda ()
-        (unless (smooth/modal-blacklisted-p)
-          (ryo-modal-mode 1))))
-    (global-ryo-modal-mode 1)
-    (ryo-modal-keys
-     <<normal-mode>>
-     ))
-#+end_src
-
-#+begin_src elisp :tangle no :noweb-ref ryo-helper
-  (defvar smooth/modal-blacklist
-    '((predicate . minibufferp)
-      (mode . eshell-mode)
-      (mode . term-mode)
-      (mode . vterm-mode)
-      (mode . vc-git-log-edit-mode))
-    "Alist of conditions where `ryo-modal-mode` should not be enabled.")
-
-  (defun smooth/modal-blacklisted-p ()
-    "Return non-nil if current buffer should not enable `ryo-modal-mode`."
-    (cl-some
-     (lambda (entry)
-       (pcase entry
-         (`(predicate . ,fn) (funcall fn))
-         (`(mode . ,mode) (eq major-mode mode))))
-     smooth/modal-blacklist))
-
-  (defun smooth/open-line-below ()
-    (interactive)
-    (end-of-line)
-    (open-line 1)
-    (forward-line 1))
-
-  (defun smooth/open-line-above ()
-    (interactive)
-    (beginning-of-line)
-    (open-line 1))
-#+end_src
-
-* Directory and file :SPC:d:f:j:
-
-#+begin_src elisp :tangle no :noweb-ref directory
-  ("SPC d" project-dired :name "dired")
-  ("SPC f" project-find-file :name "find file")
-#+end_src
-
-#+begin_src elisp :tangle no :noweb-ref special-file
-  ("SPC j"
-   (("e" smooth/open-emacs-config :name "open emacs config")
-    ("w" smooth/open-work-readme :name "open work README"))
-   :name "jump to special file")
-#+end_src
-
-** dired
-
-#+begin_src elisp :noweb yes
-  <<dired-helper>>
-
-  (use-package dired
-    :ryo
-    <<directory>>
-    <<special-file>>
-    )
-#+end_src
-
-#+begin_src elisp :tangle no :noweb-ref dired-helper
-  (defun smooth/open-emacs-config ()
-    (interactive)
-    (find-file "~/.config/smoothconf/modules/emacs.org"))
-
-  (defun smooth/open-work-readme ()
-    (interactive)
-    (find-file "~/work/README.org"))
-#+end_src
-
-* Movement and selection :v:
-
-#+begin_src elisp :tangle no :noweb-ref movement
-  ("h" backward-char)
-  ("j" next-line)
-  ("k" previous-line)
-  ("l" forward-char)
-  ("H" beginning-of-line)
-  ("J" end-of-buffer)
-  ("K" beginning-of-buffer)
-  ("L" end-of-line)
-#+end_src
-
-#+begin_src elisp :tangle no :noweb-ref smooth-jump
-  (";" avy-goto-char-timer)
-#+end_src
-
-#+begin_src elisp :tangle no :noweb-ref selection
-  ("v" set-mark-command)
-#+end_src
-
-** simple
-
-#+begin_src elisp :noweb yes
-  (use-package simple
-    :ryo
-    <<movement>>
-    <<selection>>
-    )
-#+end_src
-
-** avy
-
-#+begin_src nix :tangle no :noweb-ref epkgs
-  epkgs.avy
-#+end_src
-
-#+begin_src elisp :noweb yes
-  (use-package avy
-    :ryo
-    <<smooth-jump>>
-    :custom
-    (defun avy-action-helpful (pt)
-      (save-excursion
-        (goto-char pt)
-        (helpful-at-point))
-      (select-window
-       (cdr ( avy-ring 0)))
-      t)
-    (setf (alist-get ?H avy-dispatch-alist) 'avy-action-helpful)
-    (avy-timeout-seconds 0.3))
-#+end_src
-
 * Environment and Nix
 
 Makes Emacs aware of the environment, especially within [[https://nixos.org/][Nix]] ecosystems. This is
@@ -404,16 +247,140 @@ Read the system path from shell.
 
 #+begin_src elisp
   (use-package envrc
-    :init (setopt envrc-debug t)
-    :hook (after-init . envrc-global-mode))
+    :hook
+    (after-init . envrc-global-mode)
+    :custom
+    (envrc-debug t))
+#+end_src
+
+* Key binding
+
+#+begin_src elisp :tangle no :noweb-ref normal-mode
+  ("<escape>" keyboard-quit)
+  ("i" ignore :exit t)
+  ("I" beginning-of-line :exit t)
+  ("a" forward-char :exit t)
+  ("A" end-of-line :exit t)
+  ("o" smooth/open-line-below :exit t)
+  ("O" smooth/open-line-above :exit t)
+#+end_src
+
+#+begin_src elisp :tangle no :noweb-ref insert-mode
+  ("<escape>" . ryo-modal-mode)
+#+end_src
+
+** ryo
+
+#+begin_src nix :tangle no :noweb-ref epkgs
+  epkgs.ryo-modal
+#+end_src
+
+#+begin_src elisp :noweb yes
+  (use-package ryo-modal
+    :hook
+    (after-init . global-ryo-modal-mode)
+    :bind
+    <<insert-mode>>
+    :config
+    (defvar smooth/modal-blacklist
+  	'((predicate . minibufferp)
+  	  (mode . eshell-mode)
+  	  (mode . term-mode)
+  	  (mode . vterm-mode)
+  	  (mode . vc-git-log-edit-mode))
+  	"Alist of conditions where `ryo-modal-mode` should not be enabled.")
+
+    (defun smooth/modal-blacklisted-p ()
+  	"Return non-nil if current buffer should not enable `ryo-modal-mode`."
+  	(cl-some
+  	 (lambda (entry)
+  	   (pcase entry
+  		 (`(predicate . ,fn) (funcall fn))
+  		 (`(mode . ,mode) (eq major-mode mode))))
+  	 smooth/modal-blacklist))
+
+    (defun smooth/open-line-below ()
+  	(interactive)
+  	(end-of-line)
+  	(open-line 1)
+  	(forward-line 1))
+
+    (defun smooth/open-line-above ()
+  	(interactive)
+  	(beginning-of-line)
+  	(open-line 1))
+
+    (define-globalized-minor-mode global-ryo-modal-mode
+  	ryo-modal-mode
+  	(lambda ()
+  	  (unless (smooth/modal-blacklisted-p)
+  		(ryo-modal-mode 1))))
+
+    (ryo-modal-keys
+     <<normal-mode>>
+     ))
+#+end_src
+
+* Movement and selection :h:j:k:l:v:semicolon:
+
+#+begin_src elisp :tangle no :noweb-ref movement
+  ("h" backward-char)
+  ("j" next-line)
+  ("k" previous-line)
+  ("l" forward-char)
+  ("H" beginning-of-line)
+  ("J" end-of-buffer)
+  ("K" beginning-of-buffer)
+  ("L" end-of-line)
+#+end_src
+
+#+begin_src elisp :tangle no :noweb-ref selection
+  ("v" set-mark-command)
+#+end_src
+
+#+begin_src elisp :tangle no :noweb-ref avy
+  (";" avy-goto-char-timer)
+#+end_src
+
+** simple
+
+#+begin_src elisp :noweb yes
+  (use-package simple
+    :ryo
+    <<movement>>
+    <<selection>>
+    )
+#+end_src
+
+** avy
+
+#+begin_src nix :tangle no :noweb-ref epkgs
+  epkgs.avy
+#+end_src
+
+#+begin_src elisp :noweb yes
+  (use-package avy
+    :ryo
+    <<avy>>
+    :custom
+    (avy-timeout-seconds 0.3)
+    :config
+    (defun avy-action-helpful (pt)
+      (save-excursion
+        (goto-char pt)
+        (helpful-at-point))
+      (select-window
+       (cdr ( avy-ring 0)))
+      t)
+    (setf (alist-get ?H avy-dispatch-alist) 'avy-action-helpful))
 #+end_src
 
 * Help system :SPC:h:
 
-#+begin_src elisp :tangle no :noweb-ref help
+#+begin_src elisp :tangle no :noweb-ref helpful
   ("SPC h"
-   (("m" describe-mode :name "describe mode")
-    ("h" helpful-at-point :name "describe at point")
+   (("h" helpful-at-point :name "describe at point")
+    ("m" describe-mode :name "describe mode")
     ("v" helpful-variable :name "describe variable")
     ("f" helpful-callable :name "describe function")
     ("k" helpful-key :name "describe key")
@@ -431,7 +398,7 @@ Read the system path from shell.
 #+begin_src elisp :noweb yes
   (use-package helpful
     :ryo
-    <<help>>
+    <<helpful>>
     )
 #+end_src
 
@@ -443,7 +410,8 @@ Read the system path from shell.
 
 #+begin_src elisp
   (use-package which-key
-    :hook (after-init . which-key-mode))
+    :hook
+    (after-init . which-key-mode))
 #+end_src
 
 ** keycast
@@ -460,7 +428,40 @@ Read the system path from shell.
 
 #+begin_src elisp
   (use-package markdown-mode
-    :mode (rx ".md" eos))
+    :mode
+    (rx ".md" eos))
+#+end_src
+
+* Project :SPC:d:f:j:
+
+#+begin_src elisp :tangle no :noweb-ref project
+  ("SPC p" project-switch-project :name "project")
+  ("SPC d" project-dired :name "directory")
+  ("SPC f" project-find-file :name "file")
+#+end_src
+
+#+begin_src elisp :tangle no :noweb-ref special-file
+  ("SPC j"
+   (("e" smooth/open-emacs-config :name "open emacs config")
+    ("w" smooth/open-work-readme :name "open work README"))
+   :name "jump to special file")
+#+end_src
+
+** project
+
+#+begin_src elisp :noweb yes
+  (use-package project
+    :ryo
+    <<project>>
+    <<special-file>>
+    :config
+    (defun smooth/open-emacs-config ()
+  	(interactive)
+  	(find-file "~/.config/smoothconf/modules/emacs.org"))
+
+    (defun smooth/open-work-readme ()
+  	(interactive)
+  	(find-file "~/work/README.org")))
 #+end_src
 
 * UI
@@ -481,7 +482,8 @@ Nerd Fonts all the way.
 
 #+begin_src elisp
   (use-package nerd-icons
-    :config (setopt nerd-icons-font-family "Iosevka Nerd Font"))
+    :custom
+    (nerd-icons-font-family "Iosevka Nerd Font"))
 #+end_src
 
 ** doom-themes
@@ -510,9 +512,10 @@ Doom modeline to complement the themes.
 
 #+begin_src elisp
   (use-package doom-modeline
-   :init (doom-modeline-mode)
-   :custom
-   (doom-modeline-project-name t))
+    :hook
+    (after-init . doom-modeline-mode)
+    :custom
+    (doom-modeline-project-name t))
 #+end_src
 
 ** spacious-padding
@@ -525,16 +528,17 @@ Give Emacs some space to breath.
 
 #+begin_src elisp
   (use-package spacious-padding
-    :config
-    (setq spacious-padding-widths
-  		'( :internal-border-width 15
-  		   :header-line-width 4
-  		   :mode-line-width 6
-  		   :tab-width 4
-  		   :right-divider-width 30
-  		   :scroll-bar-width 8
-  		   :fringe-width 4))
-    (spacious-padding-mode 1))
+    :hook
+    (after-init . spacious-padding-mode)
+    :custom
+    (spacious-padding-widths
+     '( :internal-border-width 15
+  	  :header-line-width 4
+  	  :mode-line-width 6
+  	  :tab-width 4
+  	  :right-divider-width 30
+  	  :scroll-bar-width 8
+  	  :fringe-width 4)))
 #+end_src
 
 ** marginalia
@@ -546,12 +550,13 @@ Give Emacs some space to breath.
 
 #+begin_src elisp
   (use-package marginalia
-    :init (marginalia-mode))
+    :hook
+    (after-init . marginalia-mode))
   (use-package nerd-icons-completion
     :after marginalia
-    :config
-    (nerd-icons-completion-mode)
-    (add-hook 'marginalia-mode-hook #'nerd-icons-completion-marginalia-setup))
+    :hook
+    (after-init . nerd-icons-completion-mode)
+    (marginalia-mode . nerd-icons-completion-marginalia-setup))
 #+end_src
 
 * Completion
@@ -590,6 +595,10 @@ Completion are essential feature for modern text editor / IDE.
     :hook
     (after-init . global-corfu-mode)
     (after-init . corfu-popupinfo-mode)
+    :bind
+    (:map corfu-map
+  		("C-j" . corfu-next)
+  		("C-k" . corfu-previous))
     :custom
     (corfu-cycle t)
     (corfu-auto t)
@@ -598,11 +607,7 @@ Completion are essential feature for modern text editor / IDE.
     (corfu-popupinfo-delay 0.3)
     (corfu-popupinfo-hide nil)
     :config
-    (keymap-unset corfu-map "RET")
-    :bind
-    (:map corfu-map
-  		("C-j" . corfu-next)
-  		("C-k" . corfu-previous)))
+    (keymap-unset corfu-map "RET"))
 #+end_src
 
 ** vertico :ui:
@@ -615,15 +620,15 @@ Completion are essential feature for modern text editor / IDE.
   (use-package vertico
     :hook
     (after-init . vertico-mode)
-    :custom
-    (vertico-cycle t)
     :bind
     (:map vertico-map
   		("C-j" . vertico-next)
   		("C-k" . vertico-previous)
           ("RET" . vertico-directory-enter)
           ("DEL" . vertico-directory-delete-char)
-          ("M-DEL" . vertico-directory-delete-word)))
+          ("M-DEL" . vertico-directory-delete-word))
+    :custom
+    (vertico-cycle t))
 #+end_src
 
 ** corderless
@@ -634,11 +639,11 @@ Completion are essential feature for modern text editor / IDE.
 
 #+begin_src elisp
   (use-package orderless
-    :config
-    (setq completion-styles '(orderless basic)
-          completion-category-default nil
-          completion-category-overrides '((file (styles partial-completion)))
-          orderless-matching-styles '(orderless-flex)))
+    :custom
+    (completion-styles '(orderless basic))
+    (completion-category-default nil)
+    (completion-category-overrides '((file (styles partial-completion))))
+    (orderless-matching-styles '(orderless-flex)))
 #+end_src
 
 ** cape
@@ -678,8 +683,8 @@ Completion are essential feature for modern text editor / IDE.
 
 ** eglot
 
-We will use built-in =eglot= for LSP. Make sure the LSP server is installed in the system
-path and configure the following variable:
+We will use built-in =eglot= for LSP. Make sure the LSP server is installed in the
+system path and configure the following variable:
 
 + eglot-server-programs :: mapping between major mode and the LSP server
 + eglot-workspace-configuration :: configuration for the LSP server
@@ -765,8 +770,10 @@ available grammars.
 
 #+begin_src elisp
   (use-package go-ts-mode
-    :mode (rx ".go" eos)
-    :custom (go-ts-mode-indent-offset global-tab-width))
+    :mode
+    (rx ".go" eos)
+    :custom
+    (go-ts-mode-indent-offset global-tab-width))
 #+end_src
 
 #+begin_src elisp :tangle no :noweb-ref eglot-server-programs
@@ -789,7 +796,8 @@ available grammars.
 
 #+begin_src elisp
   (use-package gleam-ts-mode
-    :mode (rx ".gleam" eos))
+    :mode
+    (rx ".gleam" eos))
 #+end_src
 
 #+begin_src elisp :tangle no :noweb-ref eglot-server-programs
@@ -809,7 +817,15 @@ the box.
 
 #+begin_src elisp
   (use-package nix-ts-mode
-    :mode (rx ".nix" eos))
+    :mode
+    (rx ".nix" eos)
+    :hook
+    (nix-ts-mode . smooth/nix-ts-mode-noweb-comment)
+    :config
+    (defun smooth/nix-ts-mode-noweb-comment ()
+  	"Treat `<<...>>` as comment in nix-mode to avoid indentation errors."
+  	(font-lock-add-keywords
+  	 nil '(("<<.*?>>" . font-lock-comment-face)))))
 #+end_src
 
 #+begin_src elisp :tangle no :noweb-ref eglot-server-programs
@@ -820,24 +836,15 @@ the box.
   (:nil . (:formatting (:command ["nixfmt"])))
 #+end_src
 
-Fontify Org mode noweb reference for Nix.
-
-#+begin_src elisp
-  (defun smooth/nix-ts-mode-noweb-comment ()
-    "Treat `<<...>>` as comment in nix-mode to avoid indentation errors."
-    (font-lock-add-keywords
-     nil '(("<<.*?>>" . font-lock-comment-face))))
-
-  (add-hook 'nix-ts-mode-hook #'smooth/nix-ts-mode-noweb-comment)
-#+end_src
-
 ** js/json
 
 #+begin_src elisp
   (use-package js
-    :mode ((rx ".js" eos)
-           (rx ".json" eos))
-    :custom (js-indent-level 2))
+    :mode
+    ((rx ".js" eos)
+     (rx ".json" eos))
+    :custom
+    (js-indent-level 2))
 #+end_src
 
 * Org
@@ -897,8 +904,10 @@ Keep the tangled file in sync.
 
 #+begin_src elisp
   (use-package org-auto-tangle
-    :hook (org-mode . org-auto-tangle-mode)
-    :custom (org-auto-tangle-default t))
+    :hook
+    (org-mode . org-auto-tangle-mode)
+    :custom
+    (org-auto-tangle-default t))
 #+end_src
 
 ** org-modern
@@ -911,12 +920,14 @@ The default look is old with no icon, make the look modern.
 
 #+begin_src elisp
   (use-package org-modern
-    :hook (org-mode . org-modern-mode))
+    :hook
+    (org-mode . org-modern-mode))
 #+end_src
 
 ** org-modern-indent
 
-Package =org-modern-mode= is [[https://github.com/minad/org-modern?tab=readme-ov-file#incompatibilities][incompatible]] with built-in =org-indent-mode=, fix them with =org-modern-indent-mode=.
+Package =org-modern-mode= is [[https://github.com/minad/org-modern?tab=readme-ov-file#incompatibilities][incompatible]] with built-in =org-indent-mode=, fix them
+with =org-modern-indent-mode=.
 
 #+begin_src nix :tangle no :noweb-ref epkgs
   (pkgs.emacsPackages.trivialBuild {
@@ -936,9 +947,10 @@ Package =org-modern-mode= is [[https://github.com/minad/org-modern?tab=readme-ov
     :hook (org-mode . org-modern-indent-mode))
 #+end_src
 
-** ob-babel
+** TODO ob-babel
 
-Register the programming languages to support in evaluation. See [[https://orgmode.org/worg/org-contrib/babel/languages/index.html][Babel language support]].
+Register the programming languages to support in evaluation. See [[https://orgmode.org/worg/org-contrib/babel/languages/index.html][Babel language
+support]].
 
 #+begin_src elisp
   (org-babel-do-load-languages
@@ -958,7 +970,7 @@ Register missing major mode for some programing languages.
   (add-to-list 'org-src-lang-modes '("json" . js))
 #+end_src
 
-** ox-hugo
+** TODO ox-hugo
 
 #+begin_src nix :tangle no :noweb-ref epkgs
   epkgs.ox-hugo
@@ -1023,7 +1035,8 @@ Register missing major mode for some programing languages.
 
 #+begin_src elisp
   (use-package hurl-mode
-    :mode (rx ".hurl" eos))
+    :mode
+    (rx ".hurl" eos))
 #+end_src
 
 * Version control :SPC:v:g:
@@ -1039,7 +1052,7 @@ Register missing major mode for some programing languages.
    :name "version control")
 #+end_src
 
-#+begin_src elisp :tangle no :noweb-ref git
+#+begin_src elisp :tangle no :noweb-ref magit
   ("SPC g"
    (("s" magit-status :name "status"))
    :name "git")
@@ -1069,7 +1082,7 @@ Register missing major mode for some programing languages.
 #+begin_src elisp :noweb yes
   (use-package magit
     :ryo
-    <<git>>
+    <<magit>>
     )
 #+end_src
 
@@ -1081,8 +1094,10 @@ Register missing major mode for some programing languages.
 
 #+begin_src elisp
   (use-package diff-hl
-    :hook (after-init . global-diff-hl-mode)
-    :config (setq diff-hl-bmp-max-width 8))
+    :hook
+    (after-init . global-diff-hl-mode)
+    :custom
+    (diff-hl-bmp-max-width 8))
 #+end_src
 
 ** blamer
