@@ -2,18 +2,7 @@
 #+property: header-args:elisp :mkdirp yes :results silent :tangle ~/.emacs.d/init.el
 #+property: header-args:nix :results silent :tangle ./emacs.nix
 
-* TODO LSP + Completion
-
-- [X] eglot-booster → performance boost
-- [X] flymake (builtin) → diagnostics (already works with Eglot)
-- [X] consult-flymake → better diagnostics browsing
-- [ ] tempel or yasnippet → snippets
-- [X] marginalia → annotations in minibuffer
-- [ ] embark → context-sensitive actions
-- [X] corfu → completion frontend (already compatible)
-- [X] orderless → fuzzy matching in Corfu/Consult
-
-* The config
+* Emacs Nix module
 
 I'm still new to emacs, try reading this in the future:
 
@@ -71,7 +60,7 @@ Noweb reference:
     }
 #+end_src
 
-** Startup performance
+* Startup performance
 :properties:
 :header-args:elisp: :mkdirp yes :result silent :tangle ~/.emacs.d/early-init.el
 :end:
@@ -120,7 +109,7 @@ Removing some UI elements. Most of them are ugly. Prefer minimal look.
   (tooltip-mode -1)
 #+end_src
 
-** Smooth default
+* Smooth default
 
 Emacs are featureful out of the box, but has a bad default configuration. This
 is an attempt to make a smooth default without 3rd party packages.
@@ -212,7 +201,7 @@ Better main buffer default.
           kill-whole-line t)
 #+end_src
 
-** Key binding
+* Key binding
 
 #+begin_src elisp :tangle no :noweb-ref normal-mode
   ("<escape>" keyboard-quit)
@@ -228,7 +217,7 @@ Better main buffer default.
   ("<escape>" . ryo-modal-mode)
 #+end_src
 
-*** ryo
+** ryo
 
 #+begin_src nix :tangle no :noweb-ref epkgs
   epkgs.ryo-modal
@@ -282,7 +271,7 @@ Better main buffer default.
     (open-line 1))
 #+end_src
 
-** Directory and file :SPC:d:f:j:
+* Directory and file :SPC:d:f:j:
 
 #+begin_src elisp :tangle no :noweb-ref directory
   ("SPC d" project-dired :name "dired")
@@ -296,7 +285,7 @@ Better main buffer default.
    :name "jump to special file")
 #+end_src
 
-*** dired
+** dired
 
 #+begin_src elisp :noweb yes
   <<dired-helper>>
@@ -318,7 +307,7 @@ Better main buffer default.
     (find-file "~/work/README.org"))
 #+end_src
 
-** Movement and selection :v:
+* Movement and selection :v:
 
 #+begin_src elisp :tangle no :noweb-ref movement
   ("h" backward-char)
@@ -339,7 +328,7 @@ Better main buffer default.
   ("v" set-mark-command)
 #+end_src
 
-*** simple
+** simple
 
 #+begin_src elisp :noweb yes
   (use-package simple
@@ -349,7 +338,7 @@ Better main buffer default.
     )
 #+end_src
 
-*** avy
+** avy
 
 #+begin_src nix :tangle no :noweb-ref epkgs
   epkgs.avy
@@ -371,12 +360,12 @@ Better main buffer default.
     (avy-timeout-seconds 0.3))
 #+end_src
 
-** Environment and Nix
+* Environment and Nix
 
 Makes Emacs aware of the environment, especially within [[https://nixos.org/][Nix]] ecosystems. This is
 something you want to be setup early on.
 
-*** exec-path-from-shell
+** exec-path-from-shell
 
 Read the system path from shell.
 
@@ -400,7 +389,7 @@ Read the system path from shell.
       (exec-path-from-shell-initialize)))
 #+end_src
 
-*** envrc
+** envrc
 
 #+begin_src nix :tangle no :noweb-ref config
   programs.direnv = {
@@ -419,7 +408,7 @@ Read the system path from shell.
     :hook (after-init . envrc-global-mode))
 #+end_src
 
-** Help system :SPC:h:
+* Help system :SPC:h:
 
 #+begin_src elisp :tangle no :noweb-ref help
   ("SPC h"
@@ -433,7 +422,7 @@ Read the system path from shell.
    :name "help")
 #+end_src
 
-*** helpful
+** helpful
 
 #+begin_src nix :tangle no :noweb-ref epkgs
   epkgs.helpful
@@ -446,7 +435,7 @@ Read the system path from shell.
     )
 #+end_src
 
-*** which-key
+** which-key
 
 #+begin_src nix :tangle no :noweb-ref epkgs
   epkgs.which-key
@@ -457,13 +446,13 @@ Read the system path from shell.
     :hook (after-init . which-key-mode))
 #+end_src
 
-*** keycast
+** keycast
 
 #+begin_src nix :tangle no :noweb-ref epkgs
   epkgs.keycast
 #+end_src
 
-*** markdown-mode
+** markdown-mode
 
 #+begin_src nix :tangle no :noweb-ref epkgs
   epkgs.markdown-mode
@@ -474,11 +463,11 @@ Read the system path from shell.
     :mode (rx ".md" eos))
 #+end_src
 
-** UI
+* UI
 
 Who doesn't want a better UI?
 
-*** nerd-icons
+** nerd-icons
 
 Nerd Fonts all the way.
 
@@ -495,7 +484,7 @@ Nerd Fonts all the way.
     :config (setopt nerd-icons-font-family "Iosevka Nerd Font"))
 #+end_src
 
-*** doom-themes
+** doom-themes
 
 Not a fan of dark themes, but light themes also too bright. Solarized with warm
 and low contrast is a sweet spot for me.
@@ -511,7 +500,7 @@ and low contrast is a sweet spot for me.
     (doom-themes-org-config))
 #+end_src
 
-*** doom-modeline
+** doom-modeline
 
 Doom modeline to complement the themes.
 
@@ -526,7 +515,7 @@ Doom modeline to complement the themes.
    (doom-modeline-project-name t))
 #+end_src
 
-*** spacious-padding
+** spacious-padding
 
 Give Emacs some space to breath.
 
@@ -548,7 +537,7 @@ Give Emacs some space to breath.
     (spacious-padding-mode 1))
 #+end_src
 
-*** marginalia
+** marginalia
 
 #+begin_src nix :tangle no :noweb-ref epkgs
   epkgs.marginalia
@@ -565,7 +554,7 @@ Give Emacs some space to breath.
     (add-hook 'marginalia-mode-hook #'nerd-icons-completion-marginalia-setup))
 #+end_src
 
-** Completion
+* Completion
 
 Completion are essential feature for modern text editor / IDE.
 
@@ -575,7 +564,7 @@ Completion are essential feature for modern text editor / IDE.
         completion-ignore-case t)
 #+end_src
 
-*** consult
+** consult
 
 #+begin_src nix :tangle no :noweb-ref epkgs
   epkgs.consult
@@ -590,7 +579,7 @@ Completion are essential feature for modern text editor / IDE.
     (xref-show-definitions-function #'consult-xref))
 #+end_src
 
-*** corfu :ui:
+** corfu :ui:
 
 #+begin_src nix :tangle no :noweb-ref epkgs
   epkgs.corfu
@@ -616,7 +605,7 @@ Completion are essential feature for modern text editor / IDE.
   		("C-k" . corfu-previous)))
 #+end_src
 
-*** vertico :ui:
+** vertico :ui:
 
 #+begin_src nix :tangle no :noweb-ref epkgs
   epkgs.vertico
@@ -637,7 +626,7 @@ Completion are essential feature for modern text editor / IDE.
           ("M-DEL" . vertico-directory-delete-word)))
 #+end_src
 
-*** corderless
+** corderless
 
 #+begin_src nix :tangle no :noweb-ref epkgs
   epkgs.orderless
@@ -652,7 +641,7 @@ Completion are essential feature for modern text editor / IDE.
           orderless-matching-styles '(orderless-flex)))
 #+end_src
 
-*** cape
+** cape
 
 #+begin_src nix :tangle no :noweb-ref epkgs
   epkgs.cape
@@ -664,7 +653,7 @@ Completion are essential feature for modern text editor / IDE.
     (add-hook 'completion-at-point-functions #'cape-file))
 #+end_src
 
-** LSP :g:e:d:
+* LSP :g:e:d:
 
 #+begin_src elisp :tangle no :noweb-ref xref
   ("g d" xref-find-definitions :name "go to definitions")
@@ -687,7 +676,7 @@ Completion are essential feature for modern text editor / IDE.
   ("d" eldoc-box-help-at-point :name "document")
 #+end_src
 
-*** eglot
+** eglot
 
 We will use built-in =eglot= for LSP. Make sure the LSP server is installed in the system
 path and configure the following variable:
@@ -710,7 +699,7 @@ path and configure the following variable:
                     )))
 #+end_src
 
-*** eglot-booster
+** eglot-booster
 
 Boost LSP performance with =eglot-booster=.
 
@@ -722,7 +711,7 @@ Boost LSP performance with =eglot-booster=.
   (use-package eglot-booster :after eglot :config (eglot-booster-mode))
 #+end_src
 
-*** eldoc-box
+** eldoc-box
 
 #+begin_src nix :tangle no :noweb-ref epkgs
   epkgs.eldoc-box
@@ -735,7 +724,7 @@ Boost LSP performance with =eglot-booster=.
     )
 #+end_src
 
-*** xref
+** xref
 
 #+begin_src elisp :noweb yes
   (use-package xref
@@ -744,7 +733,7 @@ Boost LSP performance with =eglot-booster=.
     )
 #+end_src
 
-*** flymake
+** flymake
 
 #+begin_src elisp :noweb yes
   (use-package flymake
@@ -753,7 +742,7 @@ Boost LSP performance with =eglot-booster=.
     )
 #+end_src
 
-** Programming language
+* Programming language
 
 Syntax highlighting require [[https://tree-sitter.github.io/tree-sitter/][Tree-sitter]] grammars, this will install all
 available grammars.
@@ -762,7 +751,7 @@ available grammars.
   epkgs.treesit-grammars.with-all-grammars
 #+end_src
 
-*** go :main:
+** go :main:
 
 #+begin_src nix :tangle no :noweb-ref pkgs
   pkgs.go
@@ -788,7 +777,7 @@ available grammars.
   (:gopls . (:gofumpt t))
 #+end_src
 
-*** gleam :main:
+** gleam :main:
 
 #+begin_src nix :tangle no :noweb-ref pkgs
   pkgs.gleam
@@ -807,12 +796,12 @@ available grammars.
   (gleam-ts-mode . ("gleam" "lsp"))
 #+end_src
 
-*** elisp :conf:
+** elisp :conf:
 
 Emacs at the heart is a Lisp interpreter, so everything already available out of
 the box.
 
-*** nix :conf:
+** nix :conf:
 
 #+begin_src nix :tangle no :noweb-ref epkgs
   epkgs.nix-ts-mode
@@ -842,7 +831,7 @@ Fontify Org mode noweb reference for Nix.
   (add-hook 'nix-ts-mode-hook #'smooth/nix-ts-mode-noweb-comment)
 #+end_src
 
-*** js/json
+** js/json
 
 #+begin_src elisp
   (use-package js
@@ -851,7 +840,7 @@ Fontify Org mode noweb reference for Nix.
     :custom (js-indent-level 2))
 #+end_src
 
-** Org
+* Org
 
 #+begin_src elisp :tangle no :noweb-ref org
   ("SPC SPC c" org-ctrl-c-ctrl-c)
@@ -871,7 +860,7 @@ Fontify Org mode noweb reference for Nix.
   ("SPC SPC t" org-babel-tangle)
 #+end_src
 
-*** org
+** org
 
 #+begin_src elisp :noweb yes
   (use-package org
@@ -898,7 +887,7 @@ Fontify Org mode noweb reference for Nix.
     (org-imenu-depth 3))
 #+end_src
 
-*** org-auto-tangle
+** org-auto-tangle
 
 Keep the tangled file in sync.
 
@@ -912,7 +901,7 @@ Keep the tangled file in sync.
     :custom (org-auto-tangle-default t))
 #+end_src
 
-*** org-modern
+** org-modern
 
 The default look is old with no icon, make the look modern.
 
@@ -925,7 +914,7 @@ The default look is old with no icon, make the look modern.
     :hook (org-mode . org-modern-mode))
 #+end_src
 
-*** org-modern-indent
+** org-modern-indent
 
 Package =org-modern-mode= is [[https://github.com/minad/org-modern?tab=readme-ov-file#incompatibilities][incompatible]] with built-in =org-indent-mode=, fix them with =org-modern-indent-mode=.
 
@@ -947,7 +936,7 @@ Package =org-modern-mode= is [[https://github.com/minad/org-modern?tab=readme-ov
     :hook (org-mode . org-modern-indent-mode))
 #+end_src
 
-*** ob-babel
+** ob-babel
 
 Register the programming languages to support in evaluation. See [[https://orgmode.org/worg/org-contrib/babel/languages/index.html][Babel language support]].
 
@@ -969,7 +958,7 @@ Register missing major mode for some programing languages.
   (add-to-list 'org-src-lang-modes '("json" . js))
 #+end_src
 
-*** ox-hugo
+** ox-hugo
 
 #+begin_src nix :tangle no :noweb-ref epkgs
   epkgs.ox-hugo
@@ -980,20 +969,20 @@ Register missing major mode for some programing languages.
     :after ox)
 #+end_src
 
-*** TODO org-present
+** TODO org-present
 
 #+begin_src nix :tangle no :noweb-ref epkgs
   epkgs.org-present
 #+end_src
 
-*** TODO org-roam
+** TODO org-roam
 
 #+begin_src nix :tangle no :noweb-ref epkgs
   epkgs.org-roam
     epkgs.org-roam-ui
 #+end_src
 
-*** verb
+** verb
 
 #+begin_src nix :tangle no :noweb-ref epkgs
   epkgs.verb
@@ -1013,7 +1002,7 @@ Register missing major mode for some programing languages.
         (verb-mode -1))))
 #+end_src
 
-*** hurl
+** hurl
 
 #+begin_src nix :tangle no :noweb-ref pkgs
   pkgs.hurl
@@ -1037,7 +1026,7 @@ Register missing major mode for some programing languages.
     :mode (rx ".hurl" eos))
 #+end_src
 
-** Version control :SPC:v:g:
+* Version control :SPC:v:g:
 
 #+begin_src elisp :tangle no :noweb-ref vc
   ("SPC v"
@@ -1060,7 +1049,7 @@ Register missing major mode for some programing languages.
   ("SPC v b" blamer-show-posframe-commit-info :name "blame")
 #+end_src
 
-*** vc
+** vc
 
 #+begin_src elisp :noweb yes
   (use-package vc
@@ -1071,7 +1060,7 @@ Register missing major mode for some programing languages.
     (vc-handled-backends '(Git)))
 #+end_src
 
-*** magit
+** magit
 
 #+begin_src nix :tangle no :noweb-ref epkgs
   epkgs.magit
@@ -1084,7 +1073,7 @@ Register missing major mode for some programing languages.
     )
 #+end_src
 
-*** diff-hl
+** diff-hl
 
 #+begin_src nix :tangle no :noweb-ref epkgs
   epkgs.diff-hl
@@ -1096,7 +1085,7 @@ Register missing major mode for some programing languages.
     :config (setq diff-hl-bmp-max-width 8))
 #+end_src
 
-*** blamer
+** blamer
 
 #+begin_src nix :tangle no :noweb-ref epkgs
   epkgs.blamer
@@ -1109,9 +1098,9 @@ Register missing major mode for some programing languages.
     )
 #+end_src
 
-** Accounting
+* Accounting
 
-*** ledger-mode
+** ledger-mode
 
 #+begin_src nix :tangle no :noweb-ref pkgs
   pkgs.ledger
