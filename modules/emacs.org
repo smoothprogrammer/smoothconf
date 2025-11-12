@@ -165,6 +165,78 @@ Better main buffer default.
           kill-whole-line t)
 #+end_src
 
+** Smooth default
+
+Emacs are featureful out of the box, but has a bad default configuration. This
+is an attempt to make a smooth default without 3rd party packages.
+
+*** Zooming
+
+Smooth zooming with =0 - += and its shift counter part key.
+
+#+begin_src elisp
+  (define-key global-map (kbd "C-0") (lambda () (interactive) (text-scale-set 0)))
+  (define-key global-map (kbd "C-)") (lambda () (interactive) (text-scale-set 0)))
+  (define-key global-map (kbd "C--") 'text-scale-decrease)
+  (define-key global-map (kbd "C-_") 'text-scale-decrease)
+  (define-key global-map (kbd "C-=") 'text-scale-increase)
+  (define-key global-map (kbd "C-+") 'text-scale-increase)
+#+end_src
+
+*** Files, buffers, and minibuffer
+
+EditorConfig cover some file formatting in an editor-agnostic way.
+
+#+begin_src elisp
+  (editorconfig-mode t)
+#+end_src
+
+Make the buffer and its corresponding file in sync.
+
+#+begin_src elisp
+  (global-auto-revert-mode t)
+#+end_src
+
+Replace active region when insert text.
+
+#+begin_src elisp
+  (delete-selection-mode t)
+#+end_src
+
+Make TAB do indent + complete.
+
+#+begin_src elisp
+  (setq-default tab-always-indent 'complete)
+#+end_src
+
+Set tab to 4. We will define a global variable ~global-tab-width~ since other
+major mode might have their own setting for this, we can override them with this
+variable.
+
+#+begin_src elisp
+  (defvar global-tab-width 4)
+  (setq-default tab-width global-tab-width)
+#+end_src
+
+Limit the column to 80 character.
+
+#+begin_src elisp
+  (setq-default fill-column 80)
+  (add-hook 'text-mode-hook 'auto-fill-mode)
+#+end_src
+
+Treat subword movement for camel case in programming mode.
+
+#+begin_src elisp
+  (add-hook 'prog-mode-hook 'subword-mode)
+#+end_src
+
+Make script with shebang in it executable.
+
+#+begin_src elisp
+  (add-hook 'after-save-hook 'executable-make-buffer-file-executable-if-script-p)
+#+end_src
+
 ** Key binding
 
 #+begin_src elisp :tangle no :noweb-ref normal-mode
@@ -526,78 +598,6 @@ Completion are essential feature for modern text editor / IDE.
   (setq read-file-name-completion-ignore-case t
         read-buffer-completion-ignore-case t
         completion-ignore-case t)
-#+end_src
-
-** Smooth default =built-in=
-
-Emacs are featureful out of the box, but has a bad default configuration. This
-is an attempt to make a smooth default without 3rd party packages.
-
-*** Zooming
-
-Smooth zooming with =0 - += and its shift counter part key.
-
-#+begin_src elisp
-  (define-key global-map (kbd "C-0") (lambda () (interactive) (text-scale-set 0)))
-  (define-key global-map (kbd "C-)") (lambda () (interactive) (text-scale-set 0)))
-  (define-key global-map (kbd "C--") 'text-scale-decrease)
-  (define-key global-map (kbd "C-_") 'text-scale-decrease)
-  (define-key global-map (kbd "C-=") 'text-scale-increase)
-  (define-key global-map (kbd "C-+") 'text-scale-increase)
-#+end_src
-
-*** Files, buffers, and minibuffer
-
-EditorConfig cover some file formatting in an editor-agnostic way.
-
-#+begin_src elisp
-  (editorconfig-mode t)
-#+end_src
-
-Make the buffer and its corresponding file in sync.
-
-#+begin_src elisp
-  (global-auto-revert-mode t)
-#+end_src
-
-Replace active region when insert text.
-
-#+begin_src elisp
-  (delete-selection-mode t)
-#+end_src
-
-Make TAB do indent + complete.
-
-#+begin_src elisp
-  (setq-default tab-always-indent 'complete)
-#+end_src
-
-Set tab to 4. We will define a global variable ~global-tab-width~ since other
-major mode might have their own setting for this, we can override them with this
-variable.
-
-#+begin_src elisp
-  (defvar global-tab-width 4)
-  (setq-default tab-width global-tab-width)
-#+end_src
-
-Limit the column to 80 character.
-
-#+begin_src elisp
-  (setq-default fill-column 80)
-  (add-hook 'text-mode-hook 'auto-fill-mode)
-#+end_src
-
-Treat subword movement for camel case in programming mode.
-
-#+begin_src elisp
-  (add-hook 'prog-mode-hook 'subword-mode)
-#+end_src
-
-Make script with shebang in it executable.
-
-#+begin_src elisp
-  (add-hook 'after-save-hook 'executable-make-buffer-file-executable-if-script-p)
 #+end_src
 
 ** LSP :g:
