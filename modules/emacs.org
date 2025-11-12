@@ -566,6 +566,12 @@ Replace active region when insert text.
   (delete-selection-mode t)
 #+end_src
 
+Make TAB do indent + complete.
+
+#+begin_src elisp
+  (setq-default tab-always-indent 'complete)
+#+end_src
+
 Set tab to 4. We will define a global variable ~global-tab-width~ since other
 major mode might have their own setting for this, we can override them with this
 variable.
