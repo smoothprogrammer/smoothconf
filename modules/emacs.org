@@ -600,18 +600,112 @@ Completion are essential feature for modern text editor / IDE.
         completion-ignore-case t)
 #+end_src
 
+*** consult
+
+#+begin_src nix :tangle no :noweb-ref epkgs
+  epkgs.consult
+#+end_src
+
+#+begin_src elisp :noweb yes
+  (use-package consult
+    :ryo
+    <<consult>>
+    :custom
+    (xref-show-xrefs-function #'consult-xref)
+    (xref-show-definitions-function #'consult-xref))
+#+end_src
+
+*** corfu :ui:
+
+#+begin_src nix :tangle no :noweb-ref epkgs
+  epkgs.corfu
+#+end_src
+
+#+begin_src elisp
+  (use-package corfu
+    :hook
+    (after-init . global-corfu-mode)
+    (after-init . corfu-popupinfo-mode)
+    :custom
+    (corfu-cycle t)
+    (corfu-auto t)
+    (corfu-auto-delay 0.0)
+    (corfu-auto-prefix 2)
+    (corfu-popupinfo-delay 0.3)
+    (corfu-popupinfo-hide nil)
+    :config
+    (keymap-unset corfu-map "RET")
+    :bind
+    (:map corfu-map
+  		("C-j" . corfu-next)
+  		("C-k" . corfu-previous)))
+#+end_src
+
+*** vertico :ui:
+
+#+begin_src nix :tangle no :noweb-ref epkgs
+  epkgs.vertico
+#+end_src
+
+#+begin_src elisp
+  (use-package vertico
+    :hook
+    (after-init . vertico-mode)
+    :custom
+    (vertico-cycle t)
+    :bind
+    (:map vertico-map
+  		("C-j" . vertico-next)
+  		("C-k" . vertico-previous)
+          ("RET" . vertico-directory-enter)
+          ("DEL" . vertico-directory-delete-char)
+          ("M-DEL" . vertico-directory-delete-word)))
+#+end_src
+
+*** corderless
+
+#+begin_src nix :tangle no :noweb-ref epkgs
+  epkgs.orderless
+#+end_src
+
+#+begin_src elisp
+  (use-package orderless
+    :config
+    (setq completion-styles '(orderless basic)
+          completion-category-default nil
+          completion-category-overrides '((file (styles partial-completion)))
+          orderless-matching-styles '(orderless-flex)))
+#+end_src
+
+*** cape
+
+#+begin_src nix :tangle no :noweb-ref epkgs
+  epkgs.cape
+#+end_src
+
+#+begin_src elisp
+  (use-package cape
+    :config
+    (add-hook 'completion-at-point-functions #'cape-file))
+#+end_src
+
 ** LSP :g:
 
 #+begin_src elisp :tangle no :noweb-ref xref
   ("g d" xref-find-definitions :name "go to definitions")
   ("g r" xref-find-references :name "go to references")
-  ("g ," xref-go-back :name "go back")
-  ("g ." xref-go-forward :name "go forward")
+  ("g h" xref-go-back :name "go back")
+  ("g l" xref-go-forward :name "go forward")
 #+end_src
 
 #+begin_src elisp :tangle no :noweb-ref consult
-  ("g i" consult-imenu :name "go to imenu")
-  ("g f" consult-flymake :name "go to flymake")
+  ("g i" consult-imenu :name "go to index menu")
+  ("g e" consult-flymake :name "go to error list")
+#+end_src
+
+#+begin_src elisp :tangle no :noweb-ref flymake
+  ("e j" flymake-goto-next-error :name "go to next error")
+  ("e k" flymake-goto-prev-error :name "go to prev error")
 #+end_src
 
 *** eglot
@@ -669,93 +763,13 @@ Boost LSP performance with =eglot-booster=.
     )
 #+end_src
 
-*** corfu :ui:
-
-#+begin_src nix :tangle no :noweb-ref epkgs
-  epkgs.corfu
-#+end_src
-
-#+begin_src elisp
-  (use-package corfu
-    :hook
-    (after-init . global-corfu-mode)
-    (after-init . corfu-popupinfo-mode)
-    :custom
-    (corfu-cycle t)
-    (corfu-auto t)
-    (corfu-auto-delay 0.0)
-    (corfu-auto-prefix 2)
-    (corfu-popupinfo-delay 0.3)
-    (corfu-popupinfo-hide nil)
-    :config
-    (keymap-unset corfu-map "RET")
-    :bind
-    (:map corfu-map
-  		("C-j" . corfu-next)
-  		("C-k" . corfu-previous)))
-#+end_src
-
-*** cape
-
-#+begin_src nix :tangle no :noweb-ref epkgs
-  epkgs.cape
-#+end_src
-
-#+begin_src elisp
-  (use-package cape
-    :config
-    (add-hook 'completion-at-point-functions #'cape-file))
-#+end_src
-
-*** vertico :ui:
-
-#+begin_src nix :tangle no :noweb-ref epkgs
-  epkgs.vertico
-#+end_src
-
-#+begin_src elisp
-  (use-package vertico
-    :hook
-    (after-init . vertico-mode)
-    :custom
-    (vertico-cycle t)
-    :bind
-    (:map vertico-map
-  		("C-j" . vertico-next)
-  		("C-k" . vertico-previous)
-          ("RET" . vertico-directory-enter)
-          ("DEL" . vertico-directory-delete-char)
-          ("M-DEL" . vertico-directory-delete-word)))
-#+end_src
-
-*** corderless
-
-#+begin_src nix :tangle no :noweb-ref epkgs
-  epkgs.orderless
-#+end_src
-
-#+begin_src elisp
-  (use-package orderless
-    :config
-    (setq completion-styles '(orderless basic)
-          completion-category-default nil
-          completion-category-overrides '((file (styles partial-completion)))
-          orderless-matching-styles '(orderless-flex)))
-#+end_src
-
-*** consult
-
-#+begin_src nix :tangle no :noweb-ref epkgs
-  epkgs.consult
-#+end_src
+*** flymake
 
 #+begin_src elisp :noweb yes
-  (use-package consult
+  (use-package flymake
     :ryo
-    <<consult>>
-    :custom
-    (xref-show-xrefs-function #'consult-xref)
-    (xref-show-definitions-function #'consult-xref))
+    <<flymake>>
+    )
 #+end_src
 
 ** TODO Programming language

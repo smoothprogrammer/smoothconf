@@ -31,13 +31,13 @@ let
     epkgs.spacious-padding
     epkgs.marginalia
       epkgs.nerd-icons-completion
-    epkgs.eglot-booster
-    epkgs.eldoc-box
+    epkgs.consult
     epkgs.corfu
-    epkgs.cape
     epkgs.vertico
     epkgs.orderless
-    epkgs.consult
+    epkgs.cape
+    epkgs.eglot-booster
+    epkgs.eldoc-box
     epkgs.treesit-grammars.with-all-grammars
     # go-ts-mode is already emacs built-in major mode
     epkgs.gleam-ts-mode
