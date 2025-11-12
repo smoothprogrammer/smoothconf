@@ -2,16 +2,16 @@
 #+property: header-args:elisp :mkdirp yes :results silent :tangle ~/.emacs.d/init.el
 #+property: header-args:nix :results silent :tangle ./emacs.nix
 
-* TODO LSP
+* TODO LSP + Completion
 
 - [X] eglot-booster → performance boost
-- [ ] flymake (builtin) → diagnostics (already works with Eglot)
-- [ ] consult-flymake → better diagnostics browsing
+- [X] flymake (builtin) → diagnostics (already works with Eglot)
+- [X] consult-flymake → better diagnostics browsing
 - [ ] tempel or yasnippet → snippets
-- [ ] marginalia → annotations in minibuffer
+- [X] marginalia → annotations in minibuffer
 - [ ] embark → context-sensitive actions
-- [ ] corfu → completion frontend (already compatible)
-- [ ] orderless → fuzzy matching in Corfu/Consult
+- [X] corfu → completion frontend (already compatible)
+- [X] orderless → fuzzy matching in Corfu/Consult
 
 * The config
 
@@ -401,7 +401,7 @@ Make script with shebang in it executable.
 Makes Emacs aware of the environment, especially within [[https://nixos.org/][Nix]] ecosystems. This is
 something you want to be setup early on.
 
-*** System path =exec-path-from-shell=
+*** exec-path-from-shell
 
 Read the system path from shell.
 
@@ -425,7 +425,7 @@ Read the system path from shell.
       (exec-path-from-shell-initialize)))
 #+end_src
 
-*** Direnv =envrc=
+*** envrc
 
 #+begin_src nix :tangle no :noweb-ref config
   programs.direnv = {
@@ -488,7 +488,7 @@ Read the system path from shell.
   epkgs.keycast
 #+end_src
 
-*** Markdown =markdown-mode=
+*** markdown-mode
 
 #+begin_src nix :tangle no :noweb-ref epkgs
   epkgs.markdown-mode
@@ -503,7 +503,7 @@ Read the system path from shell.
 
 Who doesn't want a better UI?
 
-*** Fonts and icons =nerd-icons=
+*** nerd-icons
 
 Nerd Fonts all the way.
 
@@ -520,7 +520,7 @@ Nerd Fonts all the way.
     :config (setopt nerd-icons-font-family "Iosevka Nerd Font"))
 #+end_src
 
-*** Themes =doom-themes=
+*** doom-themes
 
 Not a fan of dark themes, but light themes also too bright. Solarized with warm
 and low contrast is a sweet spot for me.
@@ -536,7 +536,7 @@ and low contrast is a sweet spot for me.
     (doom-themes-org-config))
 #+end_src
 
-*** Mode line =doom-modeline=
+*** doom-modeline
 
 Doom modeline to complement the themes.
 
@@ -551,7 +551,7 @@ Doom modeline to complement the themes.
    (doom-modeline-project-name t))
 #+end_src
 
-*** QoL
+*** spacious-padding
 
 Give Emacs some space to breath.
 
@@ -573,7 +573,7 @@ Give Emacs some space to breath.
     (spacious-padding-mode 1))
 #+end_src
 
-*** Annotation =marginalia=
+*** marginalia
 
 #+begin_src nix :tangle no :noweb-ref epkgs
   epkgs.marginalia
@@ -689,7 +689,7 @@ Completion are essential feature for modern text editor / IDE.
     (add-hook 'completion-at-point-functions #'cape-file))
 #+end_src
 
-** LSP :g:
+** LSP :g:e:
 
 #+begin_src elisp :tangle no :noweb-ref xref
   ("g d" xref-find-definitions :name "go to definitions")
@@ -772,7 +772,7 @@ Boost LSP performance with =eglot-booster=.
     )
 #+end_src
 
-** TODO Programming language
+** Programming language
 
 Syntax highlighting require [[https://tree-sitter.github.io/tree-sitter/][Tree-sitter]] grammars, this will install all
 available grammars.
