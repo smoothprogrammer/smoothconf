@@ -714,12 +714,17 @@ Boost LSP performance with =eglot-booster=.
 
 #+begin_src elisp
   (use-package vertico
-    :hook (after-init . vertico-mode)
-    :custom (vertico-cycle t)
-    :bind (:map vertico-map
-                ("RET" . vertico-directory-enter)
-                ("DEL" . vertico-directory-delete-char)
-                ("M-DEL" . vertico-directory-delete-word)))
+    :hook
+    (after-init . vertico-mode)
+    :custom
+    (vertico-cycle t)
+    :bind
+    (:map vertico-map
+  		("C-j" . vertico-next)
+  		("C-k" . vertico-previous)
+          ("RET" . vertico-directory-enter)
+          ("DEL" . vertico-directory-delete-char)
+          ("M-DEL" . vertico-directory-delete-word)))
 #+end_src
 
 *** corderless
