@@ -708,6 +708,10 @@ system path and configure the following variable:
 
 Boost LSP performance with =eglot-booster=.
 
+#+begin_src nix :tangle no :noweb-ref pkgs
+  pkgs.emacs-lsp-booster
+#+end_src
+
 #+begin_src nix :tangle no :noweb-ref epkgs
   epkgs.eglot-booster
 #+end_src
@@ -810,6 +814,11 @@ Emacs at the heart is a Lisp interpreter, so everything already available out of
 the box.
 
 ** nix :conf:
+
+#+begin_src nix :tangle no :noweb-ref epkgs
+  pkgs.nil
+  pkgs.nixfmt-rfc-style
+#+end_src
 
 #+begin_src nix :tangle no :noweb-ref epkgs
   epkgs.nix-ts-mode

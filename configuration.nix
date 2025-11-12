@@ -47,12 +47,6 @@ with lib;
 	inputs.ctools.packages."${platform}".shadowify
     git
     gnumake
-    emacs-lsp-booster
-    nixd
-    nil
-    nixfmt-rfc-style
-    go
-    gopls
     pkgs.potrace
     pkgs.imagemagick
     pkgs.backgroundremover

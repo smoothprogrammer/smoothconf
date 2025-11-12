@@ -41,6 +41,8 @@ let
     epkgs.treesit-grammars.with-all-grammars
     # go-ts-mode is already emacs built-in major mode
     epkgs.gleam-ts-mode
+    pkgs.nil
+    pkgs.nixfmt-rfc-style
     epkgs.nix-ts-mode
     epkgs.org-auto-tangle
     epkgs.org-modern
@@ -86,6 +88,7 @@ in
 	config = mkIf cfg.enable {
       environment.systemPackages = [
 		emacs
+      pkgs.emacs-lsp-booster
       pkgs.go
         pkgs.gopls
         pkgs.delve
