@@ -2,6 +2,13 @@
 #+property: header-args:elisp :mkdirp yes :results silent :tangle ~/.emacs.d/init.el
 #+property: header-args:nix :results silent :tangle ./emacs.nix
 
+* TODO Future
+
++ unify pop mark, xref, and avy?
++ fix completion for function args
++ add compile
++ more avy action (also move to its own section)
+
 * Emacs Nix module
 
 I'm still new to emacs, try reading this in the future:
