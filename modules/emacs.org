@@ -670,15 +670,22 @@ Boost LSP performance with =eglot-booster=.
 
 #+begin_src elisp
   (use-package corfu
-    :hook ((after-init . global-corfu-mode)
-  		 (after-init . corfu-popupinfo-mode))
+    :hook
+    (after-init . global-corfu-mode)
+    (after-init . corfu-popupinfo-mode)
     :custom
     (corfu-cycle t)
     (corfu-auto t)
     (corfu-auto-delay 0.0)
     (corfu-auto-prefix 2)
     (corfu-popupinfo-delay 0.3)
-    (corfu-popupinfo-hide nil))
+    (corfu-popupinfo-hide nil)
+    :config
+    (keymap-unset corfu-map "RET")
+    :bind
+    (:map corfu-map
+  		("C-j" . corfu-next)
+  		("C-k" . corfu-previous)))
 #+end_src
 
 *** cape
