@@ -670,8 +670,24 @@ Boost LSP performance with =eglot-booster=.
 
 #+begin_src elisp
   (use-package corfu
-    :init (global-corfu-mode)
-    :custom (corfu-cycle t))
+    :hook (after-init . global-corfu-mode)
+    :custom
+    (corfu-cycle t)
+    (corfu-auto t)
+    (corfu-auto-delay 0.0)
+    (corfu-auto-prefix 2))
+#+end_src
+
+*** cape
+
+#+begin_src nix :tangle no :noweb-ref epkgs
+  epkgs.cape
+#+end_src
+
+#+begin_src elisp
+  (use-package cape
+    :config
+    (add-hook 'completion-at-point-functions #'cape-file))
 #+end_src
 
 *** vertico

@@ -34,6 +34,7 @@ let
     epkgs.eglot-booster
     epkgs.eldoc-box
     epkgs.corfu
+    epkgs.cape
     epkgs.vertico
     epkgs.orderless
     epkgs.consult
