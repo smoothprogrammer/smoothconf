@@ -662,7 +662,7 @@ Boost LSP performance with =eglot-booster=.
     )
 #+end_src
 
-*** corfu
+*** corfu :ui:
 
 #+begin_src nix :tangle no :noweb-ref epkgs
   epkgs.corfu
@@ -690,7 +690,7 @@ Boost LSP performance with =eglot-booster=.
     (add-hook 'completion-at-point-functions #'cape-file))
 #+end_src
 
-*** vertico
+*** vertico :ui:
 
 #+begin_src nix :tangle no :noweb-ref epkgs
   epkgs.vertico
