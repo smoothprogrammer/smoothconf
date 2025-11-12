@@ -611,6 +611,7 @@ Make script with shebang in it executable.
 
 #+begin_src elisp :tangle no :noweb-ref consult
   ("g i" consult-imenu :name "go to imenu")
+  ("g f" consult-flymake :name "go to flymake")
 #+end_src
 
 *** eglot
@@ -752,9 +753,9 @@ Boost LSP performance with =eglot-booster=.
   (use-package consult
     :ryo
     <<consult>>
-    :init
-    (setq xref-show-xrefs-function #'consult-xref
-          xref-show-definitions-function #'consult-xref))
+    :custom
+    (xref-show-xrefs-function #'consult-xref)
+    (xref-show-definitions-function #'consult-xref))
 #+end_src
 
 ** TODO Programming language
