@@ -474,7 +474,9 @@ Doom modeline to complement the themes.
 
 #+begin_src elisp
   (use-package doom-modeline
-    :config (doom-modeline-mode 1))
+   :init (doom-modeline-mode)
+   :custom
+   (doom-modeline-project-name t))
 #+end_src
 
 *** QoL
