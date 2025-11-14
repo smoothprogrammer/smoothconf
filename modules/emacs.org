@@ -666,7 +666,7 @@ Completion are essential feature for modern text editor / IDE.
     (vertico-cycle t))
 #+end_src
 
-** corderless
+** orderless
 
 #+begin_src nix :tangle no :noweb-ref epkgs
   epkgs.orderless
