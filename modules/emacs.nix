@@ -31,6 +31,8 @@ let
     epkgs.spacious-padding
     epkgs.marginalia
       epkgs.nerd-icons-completion
+    epkgs.pulsar
+    epkgs.golden-ratio
     epkgs.consult
     epkgs.corfu
     epkgs.vertico

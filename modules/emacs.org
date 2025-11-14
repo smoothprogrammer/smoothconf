@@ -608,6 +608,17 @@ Give Emacs some space to breath.
     (advice-add 'smooth/jump-backward :after (lambda (&rest _) (pulsar-pulse-line-red))))
 #+end_src
 
+** golden-ratio
+
+#+begin_src nix :tangle no :noweb-ref epkgs
+  epkgs.golden-ratio
+#+end_src
+
+#+begin_src elisp
+  (use-package golden-ratio
+    :hook (after-init . golden-ratio-mode))
+#+end_src
+
 * Completion
 
 Completion are essential feature for modern text editor / IDE.
