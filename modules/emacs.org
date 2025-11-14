@@ -115,6 +115,16 @@ Removing some UI elements. Most of them are ugly. Prefer minimal look.
   (tooltip-mode -1)
 #+end_src
 
+Less noise, more peace.
+
+#+begin_src elisp
+  (setopt inhibit-startup-screen t
+          inhibit-startup-buffer-menu t
+          initial-scratch-message nil
+          ring-bell-function 'ignore
+          use-short-answers t)
+#+end_src
+
 Lastly, try to use lazy load =use-package=.
 
 * Smooth default
@@ -183,16 +193,6 @@ Make script with shebang in it executable.
 
 #+begin_src elisp
   (add-hook 'after-save-hook 'executable-make-buffer-file-executable-if-script-p)
-#+end_src
-
-Less noise, more peace.
-
-#+begin_src elisp
-  (setopt inhibit-startup-screen t
-          inhibit-startup-buffer-menu t
-          initial-scratch-message nil
-          ring-bell-function 'ignore
-          use-short-answers t)
 #+end_src
 
 Disable backup and lockfiles.
