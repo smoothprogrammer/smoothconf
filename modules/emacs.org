@@ -760,7 +760,9 @@ Boost LSP performance with =eglot-booster=.
 #+begin_src elisp
   (use-package eldoc
     :custom
-    (eldoc-idle-delay 0.0))
+    (eldoc-idle-delay 0.0)
+    (eldoc-echo-area-use-multiline-p 1)
+    (eldoc-echo-area-display-truncation-message nil))
 #+end_src
 
 ** eldoc-box
