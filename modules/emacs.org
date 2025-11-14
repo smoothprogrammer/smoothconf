@@ -353,7 +353,7 @@ Read the system path from shell.
      ))
 #+end_src
 
-* Movement and selection :h:j:k:l:v:semicolon:
+* Movement and selection :h:j:k:l:v:w:semicolon:
 
 #+begin_src elisp :tangle no :noweb-ref movement
   ("h" backward-char)
@@ -372,6 +372,14 @@ Read the system path from shell.
 
 #+begin_src elisp :tangle no :noweb-ref avy
   (";" avy-goto-char-timer)
+#+end_src
+
+#+begin_src elisp :tangle no :noweb-ref windmove
+  ("w"
+   (("h" windmove-left)
+    ("j" windmove-down)
+    ("k" windmove-up)
+    ("l" windmove-right)))
 #+end_src
 
 ** simple
@@ -405,6 +413,15 @@ Read the system path from shell.
        (cdr ( avy-ring 0)))
       t)
     (setf (alist-get ?H avy-dispatch-alist) 'avy-action-helpful))
+#+end_src
+
+** windmove
+
+#+begin_src elisp :noweb yes
+  (use-package windmove
+    :ryo
+    <<windmove>>
+    )
 #+end_src
 
 * Help system :SPC:h:
@@ -616,7 +633,13 @@ Give Emacs some space to breath.
 
 #+begin_src elisp
   (use-package golden-ratio
-    :hook (after-init . golden-ratio-mode))
+    :hook
+    (after-init . golden-ratio-mode)
+    :config
+    (advice-add 'windmove-left :after (lambda (&rest _) (golden-ratio)))
+    (advice-add 'windmove-down :after (lambda (&rest _) (golden-ratio)))
+    (advice-add 'windmove-up :after (lambda (&rest _) (golden-ratio)))
+    (advice-add 'windmove-right :after (lambda (&rest _) (golden-ratio))))
 #+end_src
 
 * Completion
