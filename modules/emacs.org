@@ -639,7 +639,7 @@ Completion are essential feature for modern text editor / IDE.
     (corfu-auto t)
     (corfu-auto-delay 0.0)
     (corfu-auto-prefix 2)
-    (corfu-popupinfo-delay 0.3)
+    (corfu-popupinfo-delay 0.0)
     (corfu-popupinfo-hide nil)
     :config
     (keymap-unset corfu-map "RET"))
@@ -753,6 +753,14 @@ Boost LSP performance with =eglot-booster=.
 
 #+begin_src elisp
   (use-package eglot-booster :after eglot :config (eglot-booster-mode))
+#+end_src
+
+** eldoc
+
+#+begin_src elisp
+  (use-package eldoc
+    :custom
+    (eldoc-idle-delay 0.0))
 #+end_src
 
 ** eldoc-box
