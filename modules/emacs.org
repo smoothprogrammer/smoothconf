@@ -486,6 +486,8 @@ Read the system path from shell.
     :ryo
     <<project>>
     <<special-file>>
+    :custom
+    (project-switch-commands #'project-find-file)
     :config
     (defun smooth/open-emacs-config ()
   	(interactive)
