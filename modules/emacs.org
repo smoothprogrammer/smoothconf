@@ -4,7 +4,6 @@
 
 * TODO Future
 
-+ unify pop mark, xref, and avy?
 + fix completion for function args
 + add compile
 + more avy action (also move to its own section)
@@ -270,6 +269,7 @@ Read the system path from shell.
   ("A" end-of-line :exit t)
   ("o" smooth/open-line-below :exit t)
   ("O" smooth/open-line-above :exit t)
+  ("<" smooth/jump-backward)
 #+end_src
 
 #+begin_src elisp :tangle no :noweb-ref insert-mode
@@ -322,6 +322,31 @@ Read the system path from shell.
   	(lambda ()
   	  (unless (smooth/modal-blacklisted-p)
   		(ryo-modal-mode 1))))
+
+    (defvar smooth/pop-ring (make-ring 100)
+  	"A ring of pop commands recorded from various jump systems.")
+
+    (defun smooth/record-pop (pop-fn)
+  	"Store POP-FN into `smooth/pop-ring` for later use."
+  	(ring-insert smooth/pop-ring pop-fn))
+
+    (defun smooth/jump-backward ()
+  	"Execute the most recent pop command from `smooth/pop-ring`."
+  	(interactive)
+  	(unless (ring-empty-p smooth/pop-ring)
+  	  (let ((fn (ring-remove smooth/pop-ring 0)))
+  		(call-interactively fn))))
+
+    (advice-add 'xref-push-marker-stack
+  			  :after (lambda (&rest _) (smooth/record-pop #'xref-pop-marker-stack)))
+
+    (advice-add 'avy-push-mark
+  			  :after (lambda (&rest _) (smooth/record-pop #'avy-pop-mark)))
+
+    ;; TODO: any push-mark from xref and avy also trigger general push-mark
+    ;; This is problematic as pushing the command in the ring will be doubled.
+    ;; (advice-add 'push-mark
+    ;; 			  :after (lambda (&rest _) (smooth/record-pop #'pop-to-mark-command)))
 
     (ryo-modal-keys
      <<normal-mode>>
