@@ -621,6 +621,10 @@ Give Emacs some space to breath.
   (use-package pulsar
     :config
     ;; TODO: add keyword :pulse to ryo-modal for activating the pulse in that command.
+    (advice-add 'windmove-left :after (lambda (&rest _) (pulsar-pulse-line-red)))
+    (advice-add 'windmove-down :after (lambda (&rest _) (pulsar-pulse-line-red)))
+    (advice-add 'windmove-up :after (lambda (&rest _) (pulsar-pulse-line-red)))
+    (advice-add 'windmove-right :after (lambda (&rest _) (pulsar-pulse-line-red)))
     (advice-add 'avy-goto-char-timer :after (lambda (&rest _) (pulsar-pulse-line-green)))
     (advice-add 'smooth/jump-backward :after (lambda (&rest _) (pulsar-pulse-line-red))))
 #+end_src
@@ -639,7 +643,9 @@ Give Emacs some space to breath.
     (advice-add 'windmove-left :after (lambda (&rest _) (golden-ratio)))
     (advice-add 'windmove-down :after (lambda (&rest _) (golden-ratio)))
     (advice-add 'windmove-up :after (lambda (&rest _) (golden-ratio)))
-    (advice-add 'windmove-right :after (lambda (&rest _) (golden-ratio))))
+    (advice-add 'windmove-right :after (lambda (&rest _) (golden-ratio)))
+    (advice-add 'avy-goto-char-timer :after (lambda (&rest _) (golden-ratio)))
+    (advice-add 'smooth/jump-backward :after (lambda (&rest _) (golden-ratio))))
 #+end_src
 
 ** focus
