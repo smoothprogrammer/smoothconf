@@ -7,6 +7,7 @@
 + fix completion for function args
 + more avy action (also move to its own section)
 + snipet with tempel
++ sql, nosql, redis client
 
 * Emacs Nix module
 
@@ -113,6 +114,7 @@ Removing some UI elements. Most of them are ugly. Prefer minimal look.
   (scroll-bar-mode -1)
   (horizontal-scroll-bar-mode -1)
   (tooltip-mode -1)
+  (setq tab-bar-show nil)
 #+end_src
 
 Less noise, more peace.
@@ -503,13 +505,41 @@ Read the system path from shell.
   (use-package project
     :ryo
     <<project>>
-    <<special-file>>
     :custom
-    (project-switch-commands #'project-find-file)
+    (project-switch-commands #'smooth/project-auto-buffer)
     :config
+    (defun smooth/project-auto-buffer ()
+  	"After switching to a project, jump to its first buffer or *scratch*."
+  	(interactive)
+  	(let* ((pr (project-current))
+  		   (buffers (project-buffers pr)))
+  	  (if buffers
+  		  (switch-to-buffer (car buffers))
+  		(scratch-buffer)))))
+#+end_src
+
+** otpp
+
+#+begin_src nix :tangle no :noweb-ref epkgs
+  epkgs.otpp
+#+end_src
+
+#+begin_src elisp :noweb yes
+  (use-package otpp
+    :hook
+    (after-init . otpp-mode)
+    (after-init . otpp-override-mode)
+    :ryo
+    <<special-file>>
+    :config
+    (setq frame-title-format
+  		'(:eval
+  		  (alist-get 'name (tab-bar--current-tab))))
+
     (defun smooth/open-emacs-config ()
   	(interactive)
-  	(find-file "~/.config/smoothconf/modules/emacs.org"))
+  	(let ((buf (find-file "~/.config/smoothconf/modules/emacs.org")))
+  	  (otpp-detach-buffer-to-tab buf)))
 
     (defun smooth/open-work-readme ()
   	(interactive)
@@ -567,7 +597,7 @@ Doom modeline to complement the themes.
     :hook
     (after-init . doom-modeline-mode)
     :custom
-    (doom-modeline-project-name t))
+    (doom-modeline-workspace-name nil))
 #+end_src
 
 ** spacious-padding

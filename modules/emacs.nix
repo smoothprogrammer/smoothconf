@@ -25,6 +25,7 @@ let
     epkgs.which-key
     epkgs.keycast
     epkgs.markdown-mode
+    epkgs.otpp
     epkgs.nerd-icons
     epkgs.doom-themes
     epkgs.doom-modeline
