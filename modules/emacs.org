@@ -642,6 +642,16 @@ Give Emacs some space to breath.
     (advice-add 'windmove-right :after (lambda (&rest _) (golden-ratio))))
 #+end_src
 
+** focus
+
+#+begin_src nix :tangle no :noweb-ref epkgs
+  epkgs.focus
+#+end_src
+
+#+begin_src elisp
+  (use-package focus)
+#+end_src
+
 * Completion
 
 Completion are essential feature for modern text editor / IDE.

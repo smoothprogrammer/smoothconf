@@ -33,6 +33,7 @@ let
       epkgs.nerd-icons-completion
     epkgs.pulsar
     epkgs.golden-ratio
+    epkgs.focus
     epkgs.consult
     epkgs.corfu
     epkgs.vertico
