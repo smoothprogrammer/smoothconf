@@ -6,6 +6,7 @@
 
 + fix completion for function args
 + more avy action (also move to its own section)
++ snipet with tempel
 
 * Emacs Nix module
 
