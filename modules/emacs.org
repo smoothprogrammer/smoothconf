@@ -594,6 +594,20 @@ Give Emacs some space to breath.
     (marginalia-mode . nerd-icons-completion-marginalia-setup))
 #+end_src
 
+** pulsar
+
+#+begin_src nix :tangle no :noweb-ref epkgs
+  epkgs.pulsar
+#+end_src
+
+#+begin_src elisp
+  (use-package pulsar
+    :config
+    ;; TODO: add keyword :pulse to ryo-modal for activating the pulse in that command.
+    (advice-add 'avy-goto-char-timer :after (lambda (&rest _) (pulsar-pulse-line-green)))
+    (advice-add 'smooth/jump-backward :after (lambda (&rest _) (pulsar-pulse-line-red))))
+#+end_src
+
 * Completion
 
 Completion are essential feature for modern text editor / IDE.
