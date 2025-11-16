@@ -80,19 +80,19 @@ let
     epkgs.diff-hl
     epkgs.blamer
     epkgs.ledger-mode
-	]);
+    ]);
 
   cfg = config.mod.emacs;
 in
 
   {
-	options.mod.emacs = {
+    options.mod.emacs = {
       enable = mkEnableOption "emacs";
-	};
+    };
 
-	config = mkIf cfg.enable {
+    config = mkIf cfg.enable {
       environment.systemPackages = [
-		emacs
+        emacs
       pkgs.emacs-lsp-booster
       pkgs.go
         pkgs.gopls
@@ -112,5 +112,5 @@ in
       ${emacs}/bin/emacs ${./.}/emacs.org \
         -Q --batch --eval '(org-babel-tangle nil nil "^elisp$")' --kill
     '';
-	};
+    };
   }

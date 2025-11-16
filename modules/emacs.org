@@ -41,19 +41,19 @@ Noweb reference:
 
     emacs = minimalEmacs.pkgs.withPackages (epkgs: [
       <<epkgs>>
-  	]);
+      ]);
 
     cfg = config.mod.emacs;
   in
 
     {
-  	options.mod.emacs = {
+      options.mod.emacs = {
         enable = mkEnableOption "emacs";
-  	};
+      };
 
-  	config = mkIf cfg.enable {
+      config = mkIf cfg.enable {
         environment.systemPackages = [
-  		emacs
+          emacs
         <<pkgs>>
         ];
 
@@ -63,7 +63,7 @@ Noweb reference:
         ${emacs}/bin/emacs ${./.}/emacs.org \
           -Q --batch --eval '(org-babel-tangle nil nil "^elisp$")' --kill
       '';
-  	};
+      };
     }
 #+end_src
 
@@ -275,7 +275,7 @@ Read the system path from shell.
 #+end_src
 
 #+begin_src elisp :tangle no :noweb-ref insert-mode
-  ("<escape>" . ryo-modal-mode)
+  ("<escape>" . smooth/universal-escape)
 #+end_src
 
 ** ryo
@@ -292,63 +292,83 @@ Read the system path from shell.
     <<insert-mode>>
     :config
     (defvar smooth/modal-blacklist
-  	'((predicate . minibufferp)
-  	  (mode . eshell-mode)
-  	  (mode . term-mode)
-  	  (mode . vterm-mode)
-  	  (mode . vc-git-log-edit-mode))
-  	"Alist of conditions where `ryo-modal-mode` should not be enabled.")
+      '((predicate . minibufferp)
+        (mode . eshell-mode)
+        (mode . term-mode)
+        (mode . vterm-mode)
+        (mode . vc-git-log-edit-mode))
+      "Alist of conditions where `ryo-modal-mode` should not be enabled.")
 
     (defun smooth/modal-blacklisted-p ()
-  	"Return non-nil if current buffer should not enable `ryo-modal-mode`."
-  	(cl-some
-  	 (lambda (entry)
-  	   (pcase entry
-  		 (`(predicate . ,fn) (funcall fn))
-  		 (`(mode . ,mode) (eq major-mode mode))))
-  	 smooth/modal-blacklist))
+      "Return non-nil if current buffer should not enable `ryo-modal-mode`."
+      (cl-some
+       (lambda (entry)
+         (pcase entry
+           (`(predicate . ,fn) (funcall fn))
+           (`(mode . ,mode) (eq major-mode mode))))
+       smooth/modal-blacklist))
 
     (defun smooth/open-line-below ()
-  	(interactive)
-  	(end-of-line)
-  	(open-line 1)
-  	(forward-line 1))
+      (interactive)
+      (end-of-line)
+      (open-line 1)
+      (forward-line 1))
 
     (defun smooth/open-line-above ()
-  	(interactive)
-  	(beginning-of-line)
-  	(open-line 1))
+      (interactive)
+      (beginning-of-line)
+      (open-line 1))
 
     (define-globalized-minor-mode global-ryo-modal-mode
-  	ryo-modal-mode
-  	(lambda ()
-  	  (unless (smooth/modal-blacklisted-p)
-  		(ryo-modal-mode 1))))
+      ryo-modal-mode
+      (lambda ()
+        (unless (smooth/modal-blacklisted-p)
+          (ryo-modal-mode 1))))
 
     (defvar smooth/pop-ring (make-ring 100)
-  	"A ring of pop commands recorded from various jump systems.")
+      "A ring of pop commands recorded from various jump systems.")
 
     (defun smooth/record-pop (pop-fn)
-  	"Store POP-FN into `smooth/pop-ring` for later use."
-  	(ring-insert smooth/pop-ring pop-fn))
+      "Store POP-FN into `smooth/pop-ring` for later use."
+      (ring-insert smooth/pop-ring pop-fn))
 
     (defun smooth/jump-backward ()
-  	"Execute the most recent pop command from `smooth/pop-ring`."
-  	(interactive)
-  	(unless (ring-empty-p smooth/pop-ring)
-  	  (let ((fn (ring-remove smooth/pop-ring 0)))
-  		(call-interactively fn))))
+      "Execute the most recent pop command from `smooth/pop-ring`."
+      (interactive)
+      (unless (ring-empty-p smooth/pop-ring)
+        (let ((fn (ring-remove smooth/pop-ring 0)))
+          (call-interactively fn))))
 
     (advice-add 'xref-push-marker-stack
-  			  :after (lambda (&rest _) (smooth/record-pop #'xref-pop-marker-stack)))
+                :after (lambda (&rest _) (smooth/record-pop #'xref-pop-marker-stack)))
 
     (advice-add 'avy-push-mark
-  			  :after (lambda (&rest _) (smooth/record-pop #'avy-pop-mark)))
+                :after (lambda (&rest _) (smooth/record-pop #'avy-pop-mark)))
 
     ;; TODO: any push-mark from xref and avy also trigger general push-mark
     ;; This is problematic as pushing the command in the ring will be doubled.
     ;; (advice-add 'push-mark
-    ;; 			  :after (lambda (&rest _) (smooth/record-pop #'pop-to-mark-command)))
+    ;;                    :after (lambda (&rest _) (smooth/record-pop #'pop-to-mark-command)))
+
+    (defun smooth/universal-escape ()
+      "Quit minibuffer or cancel current UI element intelligently."
+      (interactive)
+      (cond
+       ;; 1. Corfu popup is visible
+  	 ((and (bound-and-true-p corfu-mode)
+  		   corfu--candidates)
+  	  (corfu-quit))
+
+  	 ;; 2. Vertico minibuffer
+  	 ((when (minibufferp)
+  	  (minibuffer-keyboard-quit)))
+
+  	 ;; 3. Minibuffer fallback
+  	 ((minibufferp)
+  	  (minibuffer-keyboard-quit))
+
+  	 ;; 4. Enter ryo-modal-mode
+       (t (ryo-modal-mode))))
 
     (ryo-modal-keys
      <<normal-mode>>
@@ -509,13 +529,13 @@ Read the system path from shell.
     (project-switch-commands #'smooth/project-auto-buffer)
     :config
     (defun smooth/project-auto-buffer ()
-  	"After switching to a project, jump to its first buffer or *scratch*."
-  	(interactive)
-  	(let* ((pr (project-current))
-  		   (buffers (project-buffers pr)))
-  	  (if buffers
-  		  (switch-to-buffer (car buffers))
-  		(scratch-buffer)))))
+      "After switching to a project, jump to its first buffer or *scratch*."
+      (interactive)
+      (let* ((pr (project-current))
+             (buffers (project-buffers pr)))
+        (if buffers
+            (switch-to-buffer (car buffers))
+          (scratch-buffer)))))
 #+end_src
 
 ** otpp
@@ -533,17 +553,17 @@ Read the system path from shell.
     <<special-file>>
     :config
     (setq frame-title-format
-  		'(:eval
-  		  (alist-get 'name (tab-bar--current-tab))))
+          '(:eval
+            (alist-get 'name (tab-bar--current-tab))))
 
     (defun smooth/open-emacs-config ()
-  	(interactive)
-  	(let ((buf (find-file "~/.config/smoothconf/modules/emacs.org")))
-  	  (otpp-detach-buffer-to-tab buf)))
+      (interactive)
+      (let ((buf (find-file "~/.config/smoothconf/modules/emacs.org")))
+        (otpp-detach-buffer-to-tab buf)))
 
     (defun smooth/open-work-readme ()
-  	(interactive)
-  	(find-file "~/work/README.org")))
+      (interactive)
+      (find-file "~/work/README.org")))
 #+end_src
 
 * UI
@@ -615,12 +635,12 @@ Give Emacs some space to breath.
     :custom
     (spacious-padding-widths
      '( :internal-border-width 15
-  	  :header-line-width 4
-  	  :mode-line-width 6
-  	  :tab-width 4
-  	  :right-divider-width 30
-  	  :scroll-bar-width 8
-  	  :fringe-width 4)))
+        :header-line-width 4
+        :mode-line-width 6
+        :tab-width 4
+        :right-divider-width 30
+        :scroll-bar-width 8
+        :fringe-width 4)))
 #+end_src
 
 ** marginalia
@@ -742,8 +762,8 @@ Completion are essential feature for modern text editor / IDE.
     (after-init . corfu-popupinfo-mode)
     :bind
     (:map corfu-map
-  		("C-j" . corfu-next)
-  		("C-k" . corfu-previous))
+          ("C-j" . corfu-next)
+          ("C-k" . corfu-previous))
     :custom
     (corfu-cycle t)
     (corfu-auto t)
@@ -767,8 +787,8 @@ Completion are essential feature for modern text editor / IDE.
     (after-init . vertico-mode)
     :bind
     (:map vertico-map
-  		("C-j" . vertico-next)
-  		("C-k" . vertico-previous)
+          ("C-j" . vertico-next)
+          ("C-k" . vertico-previous)
           ("RET" . vertico-directory-enter)
           ("DEL" . vertico-directory-delete-char)
           ("M-DEL" . vertico-directory-delete-word))
@@ -990,9 +1010,9 @@ the box.
     (nix-ts-mode . smooth/nix-ts-mode-noweb-comment)
     :config
     (defun smooth/nix-ts-mode-noweb-comment ()
-  	"Treat `<<...>>` as comment in nix-mode to avoid indentation errors."
-  	(font-lock-add-keywords
-  	 nil '(("<<.*?>>" . font-lock-comment-face)))))
+      "Treat `<<...>>` as comment in nix-mode to avoid indentation errors."
+      (font-lock-add-keywords
+       nil '(("<<.*?>>" . font-lock-comment-face)))))
 #+end_src
 
 #+begin_src elisp :tangle no :noweb-ref eglot-server-programs
