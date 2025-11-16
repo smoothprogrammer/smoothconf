@@ -35,6 +35,7 @@ let
     epkgs.pulsar
     epkgs.golden-ratio
     epkgs.focus
+    epkgs.vertico-posframe
     epkgs.consult
     epkgs.corfu
     epkgs.vertico

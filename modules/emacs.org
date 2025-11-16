@@ -688,6 +688,22 @@ Give Emacs some space to breath.
   (use-package focus)
 #+end_src
 
+** vertico-posframe
+
+#+begin_src nix :tangle no :noweb-ref epkgs
+  epkgs.vertico-posframe
+#+end_src
+
+#+begin_src elisp
+  (use-package vertico-posframe
+    :hook
+    (after-init . vertico-posframe-mode)
+    :custom
+    (vertico-posframe-parameters
+     '((left-fringe . 8)
+       (right-fringe . 8))))
+#+end_src
+
 * Completion
 
 Completion are essential feature for modern text editor / IDE.
