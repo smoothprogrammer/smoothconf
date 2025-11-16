@@ -8,6 +8,10 @@
 + more avy action (also move to its own section)
 + snipet with tempel
 + sql, nosql, redis client
++ consider using mwim for movement
++ consider using literate-calc-mode
++ consider using smart-hungry-delete
++ consider using expand-region
 
 * Emacs Nix module
 
@@ -357,17 +361,14 @@ Read the system path from shell.
        ;; 1. Corfu popup is visible
   	 ((and (bound-and-true-p corfu-mode)
   		   corfu--candidates)
-  	  (corfu-quit))
+  	  (corfu-quit)
+  	  (ryo-modal-mode))
 
-  	 ;; 2. Vertico minibuffer
+  	 ;; 2. Minibuffer
   	 ((when (minibufferp)
-  	  (minibuffer-keyboard-quit)))
+  		(minibuffer-keyboard-quit)))
 
-  	 ;; 3. Minibuffer fallback
-  	 ((minibufferp)
-  	  (minibuffer-keyboard-quit))
-
-  	 ;; 4. Enter ryo-modal-mode
+  	 ;; 3. Enter ryo-modal-mode
        (t (ryo-modal-mode))))
 
     (ryo-modal-keys
