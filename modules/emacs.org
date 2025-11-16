@@ -375,17 +375,17 @@ Read the system path from shell.
      ))
 #+end_src
 
-* Movement and selection :h:j:k:l:v:w:semicolon:
+* Movement and selection :h:j:k:l:g:v:w:semicolon:
 
 #+begin_src elisp :tangle no :noweb-ref movement
   ("h" backward-char)
   ("j" next-line)
   ("k" previous-line)
   ("l" forward-char)
-  ("H" beginning-of-line)
-  ("J" end-of-buffer)
-  ("K" beginning-of-buffer)
-  ("L" end-of-line)
+  ("g h" beginning-of-line)
+  ("g j" end-of-buffer)
+  ("g k" beginning-of-buffer)
+  ("g l" end-of-line)
 #+end_src
 
 #+begin_src elisp :tangle no :noweb-ref selection
@@ -829,8 +829,6 @@ Completion are essential feature for modern text editor / IDE.
 #+begin_src elisp :tangle no :noweb-ref xref
   ("g d" xref-find-definitions :name "go to definitions")
   ("g r" xref-find-references :name "go to references")
-  ("g h" xref-go-back :name "go back")
-  ("g l" xref-go-forward :name "go forward")
 #+end_src
 
 #+begin_src elisp :tangle no :noweb-ref consult
