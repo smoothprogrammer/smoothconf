@@ -8,10 +8,18 @@
 + more avy action (also move to its own section)
 + snipet with tempel
 + sql, nosql, redis client
-+ consider using mwim for movement
++ consider using mwim
 + consider using literate-calc-mode
 + consider using smart-hungry-delete
 + consider using expand-region
++ consider using multi-compile
++ consider using prodigy and cask
++ consider using go-playground
++ consider using kubernetes-el
++ add folding
++ add debugger, dap-mode?
++ ai?
++ migrate to magit
 
 * Emacs Nix module
 
