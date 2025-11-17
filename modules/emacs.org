@@ -18,7 +18,6 @@
 + add folding
 + add debugger, dap-mode?
 + ai?
-+ migrate to magit
 
 * Emacs Nix module
 
@@ -1247,18 +1246,7 @@ Register missing major mode for some programing languages.
     (rx ".hurl" eos))
 #+end_src
 
-* Version control :SPC:v:g:
-
-#+begin_src elisp :tangle no :noweb-ref vc
-  ("SPC v"
-   (("v" vc-next-action :name "next action")
-    ("s" project-vc-dir :name "status")
-    ("h" vc-annotate :name "annotate")
-    ("d" vc-diff :name "diff")
-    ("l" vc-print-log :name "log")
-    ("p" vc-push :name "push"))
-   :name "version control")
-#+end_src
+* Version control :SPC:g:
 
 #+begin_src elisp :tangle no :noweb-ref magit
   ("SPC g"
@@ -1281,17 +1269,6 @@ Register missing major mode for some programing languages.
 
 #+begin_src elisp :tangle no :noweb-ref blamer
   ("SPC v b" blamer-show-posframe-commit-info :name "blame")
-#+end_src
-
-** vc
-
-#+begin_src elisp :noweb yes
-  (use-package vc
-    :ryo
-    <<vc>>
-    :custom
-    (vc-follow-symlink t)
-    (vc-handled-backends '(Git)))
 #+end_src
 
 ** magit
