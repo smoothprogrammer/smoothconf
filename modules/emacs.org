@@ -1250,6 +1250,19 @@ Register missing major mode for some programing languages.
   ("SPC g"
    (("s" magit-status :name "status"))
    :name "git")
+  (:mode 'magit-mode)
+  ("j" magit-section-forward)
+  ("k" magit-section-backward)
+  ("TAB" magit-section-toggle)
+  ("q" magit-mode-bury-buffer)
+  ("d" magit-diff-dwim)
+  ("a" magit-apply)
+  ("x" magit-discard)
+  ("s" magit-stage)
+  ("u" magit-unstage)
+  ("c c" magit-commit-create)
+  ("c a" magit-commit-amend)
+  ("p u" magit-push-current-to-upstream)
 #+end_src
 
 #+begin_src elisp :tangle no :noweb-ref blamer
