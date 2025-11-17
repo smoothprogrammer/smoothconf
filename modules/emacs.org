@@ -4,9 +4,8 @@
 
 * TODO Future
 
-+ fix completion for function args
 + more avy action (also move to its own section)
-+ snipet with tempel
++ more tempel template (also move to its own section)
 + sql, nosql, redis client
 + consider using mwim
 + consider using literate-calc-mode
@@ -831,6 +830,21 @@ Completion are essential feature for modern text editor / IDE.
     :config
     (add-hook 'completion-at-point-functions #'cape-file)
     (add-hook 'completion-at-point-functions #'cape-elisp-block))
+#+end_src
+
+** tempel
+
+#+begin_src nix :tangle no :noweb-ref epkgs
+  epkgs.tempel
+  epkgs.eglot-tempel
+#+end_src
+
+#+begin_src elisp
+  (use-package tempel)
+
+  (use-package eglot-tempel
+    :hook
+    (after-init . eglot-tempel-mode))
 #+end_src
 
 * LSP :g:e:d:

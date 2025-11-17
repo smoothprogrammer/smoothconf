@@ -41,6 +41,8 @@ let
     epkgs.vertico
     epkgs.orderless
     epkgs.cape
+    epkgs.tempel
+    epkgs.eglot-tempel
     epkgs.eglot-booster
     epkgs.eldoc-box
     epkgs.treesit-grammars.with-all-grammars
