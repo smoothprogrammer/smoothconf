@@ -53,6 +53,7 @@ let
     epkgs.nix-ts-mode
     epkgs.geiser
       epkgs.geiser-guile
+    # lua-ts-mode is already emacs built-in major mode
     epkgs.org-auto-tangle
     epkgs.org-modern
     (pkgs.emacsPackages.trivialBuild {
@@ -103,6 +104,8 @@ in
         pkgs.delve
       pkgs.gleam
       pkgs.guile
+      pkgs.luajit
+      pkgs.lua-language-server
       pkgs.hurl
       pkgs.ledger
       ];

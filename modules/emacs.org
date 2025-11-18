@@ -1073,6 +1073,27 @@ the box.
     :defer t)
 #+end_src
 
+** lua :noob:
+
+#+begin_src nix :tangle no :noweb-ref pkgs
+  pkgs.luajit
+  pkgs.lua-language-server
+#+end_src
+
+#+begin_src nix :tangle no :noweb-ref epkgs
+  # lua-ts-mode is already emacs built-in major mode
+#+end_src
+
+#+begin_src elisp
+  (use-package lua-ts-mode
+    :mode
+    (rx ".lua" eos))
+#+end_src
+
+#+begin_src elisp :tangle no :noweb-ref eglot-server-programs
+  ((lua-ts-mode) . ("lua-language-server"))
+#+end_src
+
 * Org
 
 #+begin_src elisp :tangle no :noweb-ref org
