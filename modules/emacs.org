@@ -1054,6 +1054,25 @@ the box.
     (js-indent-level 2))
 #+end_src
 
+** guile :noob:
+
+#+begin_src nix :tangle no :noweb-ref pkgs
+  pkgs.guile
+#+end_src
+
+#+begin_src nix :tangle no :noweb-ref epkgs
+  epkgs.geiser
+    epkgs.geiser-guile
+#+end_src
+
+#+begin_src elisp
+  (use-package geiser
+    :defer t)
+
+  (use-package geiser-guile
+    :defer t)
+#+end_src
+
 * Org
 
 #+begin_src elisp :tangle no :noweb-ref org

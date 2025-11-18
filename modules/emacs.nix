@@ -51,6 +51,8 @@ let
     pkgs.nil
     pkgs.nixfmt-rfc-style
     epkgs.nix-ts-mode
+    epkgs.geiser
+      epkgs.geiser-guile
     epkgs.org-auto-tangle
     epkgs.org-modern
     (pkgs.emacsPackages.trivialBuild {
@@ -100,6 +102,7 @@ in
         pkgs.gopls
         pkgs.delve
       pkgs.gleam
+      pkgs.guile
       pkgs.hurl
       pkgs.ledger
       ];
