@@ -851,10 +851,11 @@ Completion are essential feature for modern text editor / IDE.
 #+begin_src elisp :tangle no :noweb-ref xref
   ("g d" xref-find-definitions :name "go to definitions")
   ("g r" xref-find-references :name "go to references")
+  ("g i" eglot-find-implementation :name "go to implementation")
 #+end_src
 
 #+begin_src elisp :tangle no :noweb-ref consult
-  ("g i" consult-imenu :name "go to index menu")
+  ("g m" consult-imenu :name "go to menu")
   ("g e" consult-flymake :name "go to error list")
 #+end_src
 
