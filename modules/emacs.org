@@ -1014,7 +1014,7 @@ the box.
 
 ** nix :conf:
 
-#+begin_src nix :tangle no :noweb-ref epkgs
+#+begin_src nix :tangle no :noweb-ref pkgs
   pkgs.nil
   pkgs.nixfmt-rfc-style
 #+end_src
