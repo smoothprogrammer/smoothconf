@@ -1007,6 +1007,27 @@ available grammars.
   (gleam-ts-mode . ("gleam" "lsp"))
 #+end_src
 
+** erlang
+
+#+begin_src nix :tangle no :noweb-ref pkgs
+  pkgs.beam28Packages.erlang
+  pkgs.erlang-language-platform
+#+end_src
+
+#+begin_src elisp :tangle no :noweb-ref epkgs
+  epkgs.erlang-ts
+#+end_src
+
+#+begin_src elisp
+  (use-package erlang-ts-mode
+    :mode
+    (rx ".erl" eos))
+#+end_src
+
+#+begin_src elisp :tangle no :noweb-ref eglot-server-programs
+  (erlang-ts-mode . ("elp" "server"))
+#+end_src
+
 ** elisp :conf:
 
 Emacs at the heart is a Lisp interpreter, so everything already available out of
@@ -1016,7 +1037,7 @@ the box.
 
 #+begin_src nix :tangle no :noweb-ref pkgs
   pkgs.nil
-  pkgs.nixfmt-rfc-style
+  pkgs.nixfmt
 #+end_src
 
 #+begin_src nix :tangle no :noweb-ref epkgs

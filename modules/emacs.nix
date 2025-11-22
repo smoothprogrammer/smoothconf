@@ -48,6 +48,7 @@ let
     epkgs.treesit-grammars.with-all-grammars
     # go-ts-mode is already emacs built-in major mode
     epkgs.gleam-ts-mode
+    epkgs.erlang-ts
     epkgs.nix-ts-mode
     epkgs.geiser
       epkgs.geiser-guile
@@ -101,8 +102,10 @@ in
         pkgs.gopls
         pkgs.delve
       pkgs.gleam
+      pkgs.beam28Packages.erlang
+      pkgs.erlang-language-platform
       pkgs.nil
-      pkgs.nixfmt-rfc-style
+      pkgs.nixfmt
       pkgs.guile
       pkgs.luajit
       pkgs.lua-language-server
