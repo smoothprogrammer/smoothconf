@@ -732,6 +732,14 @@ Give Emacs some space to breath.
        (right-fringe . 8))))
 #+end_src
 
+** ansi-color
+
+#+begin_src elisp
+  (use-package ansi-color
+    :hook
+    (compilation-filter . ansi-color-compilation-filter))
+#+end_src
+
 * Completion
 
 Completion are essential feature for modern text editor / IDE.
