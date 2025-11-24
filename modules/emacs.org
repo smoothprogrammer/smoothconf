@@ -510,13 +510,14 @@ Read the system path from shell.
     (rx ".md" eos))
 #+end_src
 
-* Project :SPC:d:f:j:
+* Project :SPC:d:e:f:j:
 
 #+begin_src elisp :tangle no :noweb-ref project
   ("SPC p" project-switch-project :name "project")
   ("SPC d" project-dired :name "directory")
   ("SPC f" project-find-file :name "file")
   ("SPC c" project-compile  :name "compile")
+  ("SPC e" project-eshell :name "eshell")
 #+end_src
 
 #+begin_src elisp :tangle no :noweb-ref special-file
