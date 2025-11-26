@@ -382,7 +382,11 @@ Read the system path from shell.
      ))
 #+end_src
 
-* Movement and selection :h:j:k:l:g:v:w:semicolon:
+* Movement and selection :h:j:k:l:f:g:v:w:semicolon:
+
+#+begin_src elisp :tangle no :noweb-ref command
+  (";" execute-extended-command)
+#+end_src
 
 #+begin_src elisp :tangle no :noweb-ref movement
   ("h" backward-char)
@@ -400,7 +404,7 @@ Read the system path from shell.
 #+end_src
 
 #+begin_src elisp :tangle no :noweb-ref avy
-  (";" avy-goto-char-timer)
+  ("f" avy-goto-char-timer)
 #+end_src
 
 #+begin_src elisp :tangle no :noweb-ref windmove
@@ -416,6 +420,7 @@ Read the system path from shell.
 #+begin_src elisp :noweb yes
   (use-package simple
     :ryo
+    <<command>>
     <<movement>>
     <<selection>>
     )
