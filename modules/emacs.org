@@ -1357,7 +1357,8 @@ Register missing major mode for some programing languages.
   (use-package magit
     :ryo
     <<magit>>
-    )
+    :custom
+    (auto-revert-check-vc-info t))
 #+end_src
 
 ** diff-hl
