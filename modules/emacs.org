@@ -1289,8 +1289,6 @@ Register missing major mode for some programing languages.
     :hook
     ((org-mode . smooth/org-enable-verb-mode-if-has-tag)
      (org-after-tags-change-hook . smooth/org-enable-verb-mode-if-has-tag))
-    :custom
-    (verb-auto-show-headers-buffer t)
     :config
     (defun smooth/org-enable-verb-mode-if-has-tag ()
       "Toggle `verb-mode` based on Org buffer has the tag :verb:."
