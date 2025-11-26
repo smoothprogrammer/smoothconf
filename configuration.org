@@ -205,6 +205,8 @@ See: https://github.com/nix-darwin/nix-darwin/issues/1041
   "audacity"
   "inkscape"
   "affinity"
+  "container"
+  "docker-desktop"
 #+end_src
 
 VMWare download information https://knowledge.broadcom.com/external/article/368667/download-and-license-information-for-vmw.html

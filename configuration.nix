@@ -69,6 +69,8 @@ with lib;
 	"audacity"
 	"inkscape"
 	"affinity"
+	"container"
+	"docker-desktop"
   ];
 
   system.stateVersion = 6;
