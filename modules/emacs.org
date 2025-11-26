@@ -523,6 +523,7 @@ Read the system path from shell.
   ("SPC f" project-find-file :name "file")
   ("SPC c" project-compile  :name "compile")
   ("SPC e" project-eshell :name "eshell")
+  ("SPC b" project-switch-to-buffer :name "buffer")
 #+end_src
 
 #+begin_src elisp :tangle no :noweb-ref special-file
