@@ -1405,3 +1405,16 @@ Register missing major mode for some programing languages.
 #+begin_src elisp
   (use-package ledger-mode)
 #+end_src
+
+* Misc
+
+** jwt
+
+#+begin_src nix :tangle no :noweb-ref epkgs
+  epkgs.jwt
+#+end_src
+
+#+begin_src elisp
+  (use-package jwt
+    :defer t)
+#+end_src

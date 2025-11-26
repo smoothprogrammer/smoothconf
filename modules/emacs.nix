@@ -84,6 +84,7 @@ let
     epkgs.diff-hl
     epkgs.blamer
     epkgs.ledger-mode
+    epkgs.jwt
     ]);
 
   cfg = config.mod.emacs;
