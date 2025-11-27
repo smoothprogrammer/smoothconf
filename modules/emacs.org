@@ -415,6 +415,20 @@ Read the system path from shell.
     ("l" windmove-right)))
 #+end_src
 
+#+begin_src elisp :tangle no :noweb-ref harpoon
+  ("SPC a" harpoon-add-file)
+  ("SPC o" harpoon-toggle-file)
+
+  ("SPC 1" harpoon-go-to-1)
+  ("SPC 2" harpoon-go-to-2)
+  ("SPC 3" harpoon-go-to-3)
+  ("SPC 4" harpoon-go-to-4)
+  ("SPC 4" harpoon-go-to-5)
+
+  (:mode 'harpoon-mode)
+  ("q" quit-window)
+#+end_src
+
 ** simple
 
 #+begin_src elisp :noweb yes
@@ -447,6 +461,20 @@ Read the system path from shell.
        (cdr ( avy-ring 0)))
       t)
     (setf (alist-get ?H avy-dispatch-alist) 'avy-action-helpful))
+#+end_src
+
+** harpoon
+
+#+begin_src nix :tangle no :noweb-ref epkgs
+  epkgs.harpoon
+#+end_src
+
+#+begin_src elisp :noweb yes
+  (use-package harpoon
+    :defer t
+    :ryo
+    <<harpoon>>
+    )
 #+end_src
 
 ** windmove

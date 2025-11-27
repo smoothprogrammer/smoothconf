@@ -21,6 +21,7 @@ let
     epkgs.envrc
     epkgs.ryo-modal
     epkgs.avy
+    epkgs.harpoon
     epkgs.helpful
     epkgs.which-key
     epkgs.keycast
