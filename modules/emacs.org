@@ -551,7 +551,7 @@ Read the system path from shell.
              (buffers (project-buffers pr)))
         (if buffers
             (switch-to-buffer (car buffers))
-          (scratch-buffer)))))
+          (project-find-file)))))
 #+end_src
 
 ** otpp
