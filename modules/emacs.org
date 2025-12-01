@@ -271,16 +271,16 @@ Read the system path from shell.
     (envrc-debug t))
 #+end_src
 
-* Key binding
+* Smooth motion
 
 #+begin_src elisp :tangle no :noweb-ref normal-mode
   ("<escape>" keyboard-quit)
-  ("i" ignore :exit t)
-  ("I" beginning-of-line :exit t)
-  ("a" forward-char :exit t)
-  ("A" end-of-line :exit t)
-  ("o" smooth/open-line-below :exit t)
-  ("O" smooth/open-line-above :exit t)
+  ;; ("i" ignore :exit t)
+  ;; ("I" beginning-of-line :exit t)
+  ;; ("a" forward-char :exit t)
+  ;; ("A" end-of-line :exit t)
+  ;; ("o" smooth/open-line-below :exit t)
+  ;; ("O" smooth/open-line-above :exit t)
   ("<" smooth/jump-backward)
 #+end_src
 
@@ -296,11 +296,118 @@ Read the system path from shell.
 
 #+begin_src elisp :noweb yes
   (use-package ryo-modal
-    :hook
-    (after-init . global-ryo-modal-mode)
-    :bind
-    <<insert-mode>>
+    :hook (after-init . global-ryo-modal-mode)
+    :bind <<insert-mode>>
+
+    :custom
+    (cursor-type 'bar)
+    (ryo-modal-cursor-type 'box)
+
     :config
+    <<smooth-config>>
+
+    (ryo-modal-keys
+     ("1" "M-1" :norepeat t)
+     ("2" "M-2" :norepeat t)
+     ("3" "M-3" :norepeat t)
+     ("4" "M-4" :norepeat t)
+     ("5" "M-5" :norepeat t)
+     ("6" "M-6" :norepeat t)
+     ("7" "M-7" :norepeat t)
+     ("8" "M-8" :norepeat t)
+     ("9" "M-9" :norepeat t)
+     ("0" "M-0" :norepeat t)
+     ("-" "M--" :norepeat t))
+
+    (ryo-modal-keys
+     ("a" forward-char :first '(smooth-deactivate-mark) :exit t)
+     ("A" move-end-of-line :first '(smooth-deactivate-mark) :exit t)
+     ("b" backward-word :first '(smooth-activate-mark))
+     ("B" backward-word :first '(smooth-activate-mark-if-inactive))
+     ("c" smooth-delete :exit t)
+     ("C" kill-line :exit t)
+     ("d" smooth-delete)
+     ("D" kill-line)
+     ;; ("e" :name "flymake")
+     ("E" undefined)
+     ("f" forward-word :first '(smooth-activate-mark))
+     ("F" forward-word :first '(smooth-activate-mark-if-inactive))
+     ;; ("g" :name "goto")
+     ("G" undefined)
+     ("h" backward-char :first '(smooth-deactivate-mark))
+     ("H" backward-char :first '(smooth-activate-mark-if-inactive))
+     ("i" ignore :first '(smooth-deactivate-mark) :exit t)
+     ("I" move-beginning-of-line :first '(smooth-deactivate-mark) :exit t)
+     ("j" next-line :first '(smooth-deactivate-mark))
+     ("J" next-line :first '(smooth-activate-mark-if-inactive))
+     ("k" previous-line :first '(smooth-deactivate-mark))
+     ("K" previous-line :first '(smooth-activate-mark-if-inactive))
+     ("l" forward-char :first '(smooth-deactivate-mark))
+     ("L" forward-char :first '(smooth-activate-mark-if-inactive))
+     ("m" undefined)
+     ("M" undefined)
+     ("n" undefined)
+     ("N" undefined)
+     ("o" smooth-open-line-below :first '(smooth-deactivate-mark) :exit t)
+     ("O" smooth-open-line-above :first '(smooth-deactivate-mark) :exit t)
+     ("p" yank)
+     ("P" undefined)
+     ("q" quit-window)
+     ("Q" undefined)
+     ;; ("r" :name "eglot-rename")
+     ("R" undefined)
+     ("s" undefined)
+     ("S" undefined)
+     ("t" undefined)
+     ("T" undefined)
+     ("u" undo-only)
+     ("U" undo-redo)
+     ("v" undefined)
+     ("V" undefined)
+     ;; ("w" :name "windmove")
+     ("W" undefined)
+     ("x" execute-extended-command)
+     ("X" undefined)
+     ("y" smooth-yank)
+     ("Y" undefined)
+     ("z" undefined)
+     ("Z" undefined))
+
+    (ryo-modal-keys
+     ("(" undefined)
+     (")" undefined)
+     ("{" undefined)
+     ("}" undefined)
+     ("[" undefined)
+     ("]" undefined)
+     ("<" undefined)
+     (">" undefined)
+     ("'" undefined)
+     ("\"" undefined))
+
+    (ryo-modal-keys
+     ("`" undefined)
+     ("~" undefined)
+     ("!" undefined)
+     ("@" undefined)
+     ("#" undefined)
+     ("$" undefined)
+     ("%" undefined)
+     ("^" undefined)
+     ("&" undefined)
+     ("*" undefined)
+     ("_" undefined)
+     ("=" undefined)
+     ("+" undefined)
+     ("\\" undefined)
+     ("|" undefined)
+     ;; (";" :name "avy")
+     (":" undefined)
+     ("," undefined)
+     ("." undefined)
+     ("/" undefined)
+     ("?" undefined))
+
     (defvar smooth/modal-blacklist
       '((predicate . minibufferp)
         (mode . eshell-mode)
@@ -313,21 +420,10 @@ Read the system path from shell.
       "Return non-nil if current buffer should not enable `ryo-modal-mode`."
       (cl-some
        (lambda (entry)
-         (pcase entry
+  	   (pcase entry
            (`(predicate . ,fn) (funcall fn))
            (`(mode . ,mode) (eq major-mode mode))))
        smooth/modal-blacklist))
-
-    (defun smooth/open-line-below ()
-      (interactive)
-      (end-of-line)
-      (open-line 1)
-      (forward-line 1))
-
-    (defun smooth/open-line-above ()
-      (interactive)
-      (beginning-of-line)
-      (open-line 1))
 
     (define-globalized-minor-mode global-ryo-modal-mode
       ryo-modal-mode
@@ -365,16 +461,16 @@ Read the system path from shell.
       (interactive)
       (cond
        ;; 1. Corfu popup is visible
-  	 ((and (bound-and-true-p corfu-mode)
-  		   corfu--candidates)
-  	  (corfu-quit)
-  	  (ryo-modal-mode))
+       ((and (bound-and-true-p corfu-mode)
+        	   corfu--candidates)
+        (corfu-quit)
+        (ryo-modal-mode))
 
-  	 ;; 2. Minibuffer
-  	 ((when (minibufferp)
-  		(minibuffer-keyboard-quit)))
+       ;; 2. Minibuffer
+       ((when (minibufferp)
+        	(minibuffer-keyboard-quit)))
 
-  	 ;; 3. Enter ryo-modal-mode
+       ;; 3. Enter ryo-modal-mode
        (t (ryo-modal-mode))))
 
     (ryo-modal-keys
@@ -382,17 +478,49 @@ Read the system path from shell.
      ))
 #+end_src
 
-* Movement and selection :h:j:k:l:f:g:v:w:semicolon:
+#+begin_src elisp :tangle no :noweb-ref smooth-config
+  (defun smooth-activate-mark ()
+    (set-mark (point)))
 
-#+begin_src elisp :tangle no :noweb-ref command
-  (";" execute-extended-command)
+  (defun smooth-activate-mark-if-inactive ()
+    (unless (use-region-p) (set-mark (point))))
+
+  (defun smooth-deactivate-mark ()
+    (deactivate-mark))
+
+  (defun smooth-delete (count)
+    (interactive "p")
+    (if (use-region-p)
+  	  (kill-region (region-beginning) (region-end))
+    (delete-char count t)))
+
+  (defun smooth-open-line-below (count)
+    (interactive "p")
+    (end-of-line)
+    (open-line count)
+    (forward-line count))
+
+  (defun smooth-open-line-above (count)
+    (interactive "p")
+    (beginning-of-line)
+    (open-line count))
+
+  (defun smooth-yank (count)
+    (interactive "p")
+    (if (use-region-p)
+  	  (kill-ring-save (region-beginning) (region-end))
+  	(kill-new (char-to-string (char-after)))))
+
+  (defun smooth-line (count)
+    (interactive "p")
+    (beginning-of-line)
+    (smooth-activate-mark-if-inactive)
+    (forward-line count))
 #+end_src
 
+* Movement and selection :h:j:k:l:f:g:v:w:semicolon:
+
 #+begin_src elisp :tangle no :noweb-ref movement
-  ("h" backward-char)
-  ("j" next-line)
-  ("k" previous-line)
-  ("l" forward-char)
   ("g h" beginning-of-line)
   ("g j" end-of-buffer)
   ("g k" beginning-of-buffer)
@@ -401,18 +529,6 @@ Read the system path from shell.
 
 #+begin_src elisp :tangle no :noweb-ref selection
   ("v" set-mark-command)
-#+end_src
-
-#+begin_src elisp :tangle no :noweb-ref avy
-  ("f" avy-goto-char-timer)
-#+end_src
-
-#+begin_src elisp :tangle no :noweb-ref windmove
-  ("w"
-   (("h" windmove-left)
-    ("j" windmove-down)
-    ("k" windmove-up)
-    ("l" windmove-right)))
 #+end_src
 
 #+begin_src elisp :tangle no :noweb-ref harpoon
@@ -424,9 +540,6 @@ Read the system path from shell.
   ("SPC 3" harpoon-go-to-3)
   ("SPC 4" harpoon-go-to-4)
   ("SPC 4" harpoon-go-to-5)
-
-  (:mode 'harpoon-mode)
-  ("q" quit-window)
 #+end_src
 
 ** simple
@@ -434,7 +547,6 @@ Read the system path from shell.
 #+begin_src elisp :noweb yes
   (use-package simple
     :ryo
-    <<command>>
     <<movement>>
     <<selection>>
     )
@@ -446,10 +558,10 @@ Read the system path from shell.
   epkgs.avy
 #+end_src
 
-#+begin_src elisp :noweb yes
+#+begin_src elisp
   (use-package avy
     :ryo
-    <<avy>>
+    (";" avy-goto-char-2)
     :custom
     (avy-timeout-seconds 0.3)
     :config
@@ -482,8 +594,10 @@ Read the system path from shell.
 #+begin_src elisp :noweb yes
   (use-package windmove
     :ryo
-    <<windmove>>
-    )
+    ("w h" windmove-left)
+    ("w j" windmove-down)
+    ("w k" windmove-up)
+    ("w l" windmove-right))
 #+end_src
 
 * Help system :SPC:h:
@@ -795,7 +909,8 @@ Completion are essential feature for modern text editor / IDE.
 #+begin_src elisp :noweb yes
   (use-package consult
     :ryo
-    <<consult>>
+    ("g m" consult-imenu :name "goto menu")
+    ("g e" consult-flymake :name "goto error list")
     :custom
     (xref-show-xrefs-function #'consult-xref)
     (xref-show-definitions-function #'consult-xref))
@@ -893,22 +1008,6 @@ Completion are essential feature for modern text editor / IDE.
 
 * LSP :g:e:d:
 
-#+begin_src elisp :tangle no :noweb-ref xref
-  ("g d" xref-find-definitions :name "go to definitions")
-  ("g r" xref-find-references :name "go to references")
-  ("g i" eglot-find-implementation :name "go to implementation")
-#+end_src
-
-#+begin_src elisp :tangle no :noweb-ref consult
-  ("g m" consult-imenu :name "go to menu")
-  ("g e" consult-flymake :name "go to error list")
-#+end_src
-
-#+begin_src elisp :tangle no :noweb-ref flymake
-  ("e j" flymake-goto-next-error :name "go to next error")
-  ("e k" flymake-goto-prev-error :name "go to prev error")
-#+end_src
-
 #+begin_src elisp :tangle no :noweb-ref eldoc-box
   ("d" eldoc-box-help-at-point :name "document")
 #+end_src
@@ -923,6 +1022,9 @@ system path and configure the following variable:
 
 #+begin_src elisp :noweb yes
   (use-package eglot
+    :ryo
+    ("r" eglot-rename)
+    ("g i" eglot-find-implementation :name "goto implementation")
     :hook
     (prog-mode . eglot-ensure)
     (prog-mode . (lambda () (add-hook 'before-save-hook 'eglot-format-buffer)))
@@ -973,26 +1075,26 @@ Boost LSP performance with =eglot-booster=.
 #+begin_src elisp :noweb yes
   (use-package eldoc-box
     :ryo
-    <<eldoc-box>>
+    ;; <<eldoc-box>>
     )
 #+end_src
 
 ** xref
 
-#+begin_src elisp :noweb yes
+#+begin_src elisp
   (use-package xref
     :ryo
-    <<xref>>
-    )
+    ("g d" xref-find-definitions :name "goto definitions")
+    ("g r" xref-find-references :name "goto references"))
 #+end_src
 
 ** flymake
 
-#+begin_src elisp :noweb yes
+#+begin_src elisp
   (use-package flymake
     :ryo
-    <<flymake>>
-    )
+    ("e j" flymake-goto-next-error :name "goto next error")
+    ("e k" flymake-goto-prev-error :name "goto prev error"))
 #+end_src
 
 * Programming language
