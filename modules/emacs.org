@@ -606,30 +606,25 @@ Read the system path from shell.
 #+begin_src elisp :tangle no :noweb-ref defun-smooth-editing
   (defun smooth-insert()
     (interactive)
-    (smooth-deactivate-mark)
     (smooth-insert-mode))
 
   (defun smooth-insert-beginning()
     (interactive)
-    (smooth-deactivate-mark)
     (beginning-of-line)
     (smooth-insert-mode))
 
   (defun smooth-append()
     (interactive)
-    (smooth-deactivate-mark)
     (forward-char)
     (smooth-insert-mode))
 
   (defun smooth-append-end()
     (interactive)
-    (smooth-deactivate-mark)
     (end-of-line)
     (smooth-insert-mode))
 
   (defun smooth-open-line-below()
     (interactive)
-    (smooth-deactivate-mark)
     (end-of-line)
     (open-line 1)
     (forward-line)
@@ -638,7 +633,6 @@ Read the system path from shell.
 
   (defun smooth-open-line-above()
     (interactive)
-    (smooth-deactivate-mark)
     (beginning-of-line)
     (open-line 1)
     (indent-according-to-mode)
