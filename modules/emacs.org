@@ -305,12 +305,11 @@ Read the system path from shell.
 
     <<smooth-motion>>
     <<smooth-insert>>
+    <<smooth-editing>>
 
     (ryo-modal-keys
      ("b" undefined)
      ("B" undefined)
-     ("d" smooth-kill)
-     ("D" kill-line)
      ;; ("e" :name "flymake")
      ("E" undefined)
      ("f" undefined)
@@ -321,7 +320,6 @@ Read the system path from shell.
      ("M" undefined)
      ("n" undefined)
      ("N" undefined)
-     ("p" yank)
      ("P" undefined)
      ("q" quit-window)
      ("Q" undefined)
@@ -331,14 +329,11 @@ Read the system path from shell.
      ("S" undefined)
      ("t" undefined)
      ("T" undefined)
-     ("u" undo-only)
-     ("U" undo-redo)
      ("V" undefined)
      ;; ("w" :name "windmove")
      ("W" undefined)
      ("x" execute-extended-command)
      ("X" undefined)
-     ("y" smooth-yank)
      ("Y" undefined)
      ("z" undefined)
      ("Z" undefined))
@@ -422,12 +417,6 @@ Read the system path from shell.
     (if (use-region-p)
   	  (kill-region (region-beginning) (region-end))
   	(delete-char count t)))
-
-  (defun smooth-yank (count)
-    (interactive "p")
-    (if (use-region-p)
-  	  (kill-ring-save (region-beginning) (region-end))
-  	(kill-new (char-to-string (char-after)))))
 
   (defun smooth-line (count)
     (interactive "p")
@@ -647,6 +636,56 @@ Read the system path from shell.
     (interactive)
     (kill-line)
     (smooth-insert-mode))
+#+end_src
+
+** smooth-editing
+
+#+begin_src elisp :tangle no :noweb yes :noweb-ref smooth-editing
+  <<defun-smooth-editing>>
+
+  (ryo-modal-keys
+   ("u" smooth-undo)
+   ("U" smooth-redo)
+   ("y" smooth-yank)
+   ("p" smooth-put)
+   ("d" smooth-delete)
+   ("D" smooth-delete-end))
+#+end_src
+
+#+begin_src elisp :tangle no :noweb-ref defun-smooth-editing
+  (defun smooth-undo()
+    (interactive)
+    (undo-only)
+    (smooth-deactivate-extend))
+
+  (defun smooth-redo()
+    (interactive)
+    (undo-redo)
+    (smooth-deactivate-extend))
+
+  (defun smooth-yank(count)
+    (interactive "p")
+    (if (use-region-p)
+  	  (kill-ring-save (region-beginning) (region-end))
+  	(kill-new (char-to-string (char-after))))
+    (smooth-deactivate-extend))
+
+  (defun smooth-put(count)
+    (interactive "p")
+    (when (use-region-p)
+  	(delete-region (region-beginning) (region-end)))
+    (yank)
+    (smooth-deactivate-extend))
+
+  (defun smooth-delete(count)
+    (interactive "p")
+    (smooth-kill count)
+    (smooth-deactivate-extend))
+
+  (defun smooth-delete-end()
+    (interactive)
+    (kill-line)
+    (smooth-deactivate-extend))
 #+end_src
 
 * Movement and selection :h:j:k:l:f:g:v:w:semicolon:
