@@ -271,24 +271,9 @@ Read the system path from shell.
     (envrc-debug t))
 #+end_src
 
-* Smooth motion
+* Smooth modal
 
-#+begin_src elisp :tangle no :noweb-ref normal-mode
-  ("<escape>" keyboard-quit)
-  ;; ("i" ignore :exit t)
-  ;; ("I" beginning-of-line :exit t)
-  ;; ("a" forward-char :exit t)
-  ;; ("A" end-of-line :exit t)
-  ;; ("o" smooth/open-line-below :exit t)
-  ;; ("O" smooth/open-line-above :exit t)
-  ("<" smooth/jump-backward)
-#+end_src
-
-#+begin_src elisp :tangle no :noweb-ref insert-mode
-  ("<escape>" . smooth/universal-escape)
-#+end_src
-
-** ryo
+** ryo-modal
 
 #+begin_src nix :tangle no :noweb-ref epkgs
   epkgs.ryo-modal
@@ -296,14 +281,13 @@ Read the system path from shell.
 
 #+begin_src elisp :noweb yes
   (use-package ryo-modal
+    :bind ("<escape>" . smooth-escape)
     :hook (after-init . global-ryo-modal-mode)
-    :bind <<insert-mode>>
-
-    :custom
-    (cursor-type 'bar)
-    (ryo-modal-cursor-type 'box)
-
+    :after pulsar
+    :custom ((cursor-type 'bar)
+  		   (ryo-modal-cursor-type 'box))
     :config
+    <<smooth-old-config>>
     <<smooth-config>>
 
     (ryo-modal-keys
@@ -319,37 +303,24 @@ Read the system path from shell.
      ("0" "M-0" :norepeat t)
      ("-" "M--" :norepeat t))
 
+    <<smooth-motion>>
+    <<smooth-editing>>
+
     (ryo-modal-keys
-     ("a" forward-char :first '(smooth-deactivate-mark) :exit t)
-     ("A" move-end-of-line :first '(smooth-deactivate-mark) :exit t)
-     ("b" backward-word :first '(smooth-activate-mark))
-     ("B" backward-word :first '(smooth-activate-mark-if-inactive))
-     ("c" smooth-delete :exit t)
-     ("C" kill-line :exit t)
+     ("b" undefined)
+     ("B" undefined)
      ("d" smooth-delete)
      ("D" kill-line)
      ;; ("e" :name "flymake")
      ("E" undefined)
-     ("f" forward-word :first '(smooth-activate-mark))
-     ("F" forward-word :first '(smooth-activate-mark-if-inactive))
+     ("f" undefined)
+     ("F" undefined)
      ;; ("g" :name "goto")
      ("G" undefined)
-     ("h" backward-char :first '(smooth-deactivate-mark))
-     ("H" backward-char :first '(smooth-activate-mark-if-inactive))
-     ("i" ignore :first '(smooth-deactivate-mark) :exit t)
-     ("I" move-beginning-of-line :first '(smooth-deactivate-mark) :exit t)
-     ("j" next-line :first '(smooth-deactivate-mark))
-     ("J" next-line :first '(smooth-activate-mark-if-inactive))
-     ("k" previous-line :first '(smooth-deactivate-mark))
-     ("K" previous-line :first '(smooth-activate-mark-if-inactive))
-     ("l" forward-char :first '(smooth-deactivate-mark))
-     ("L" forward-char :first '(smooth-activate-mark-if-inactive))
      ("m" undefined)
      ("M" undefined)
      ("n" undefined)
      ("N" undefined)
-     ("o" smooth-open-line-below :first '(smooth-deactivate-mark) :exit t)
-     ("O" smooth-open-line-above :first '(smooth-deactivate-mark) :exit t)
      ("p" yank)
      ("P" undefined)
      ("q" quit-window)
@@ -362,7 +333,6 @@ Read the system path from shell.
      ("T" undefined)
      ("u" undo-only)
      ("U" undo-redo)
-     ("v" undefined)
      ("V" undefined)
      ;; ("w" :name "windmove")
      ("W" undefined)
@@ -386,6 +356,7 @@ Read the system path from shell.
      ("\"" undefined))
 
     (ryo-modal-keys
+     ("<escape>" smooth-keyboard-quit)
      ("`" undefined)
      ("~" undefined)
      ("!" undefined)
@@ -406,77 +377,10 @@ Read the system path from shell.
      ("," undefined)
      ("." undefined)
      ("/" undefined)
-     ("?" undefined))
-
-    (defvar smooth/modal-blacklist
-      '((predicate . minibufferp)
-        (mode . eshell-mode)
-        (mode . term-mode)
-        (mode . vterm-mode)
-        (mode . vc-git-log-edit-mode))
-      "Alist of conditions where `ryo-modal-mode` should not be enabled.")
-
-    (defun smooth/modal-blacklisted-p ()
-      "Return non-nil if current buffer should not enable `ryo-modal-mode`."
-      (cl-some
-       (lambda (entry)
-  	   (pcase entry
-           (`(predicate . ,fn) (funcall fn))
-           (`(mode . ,mode) (eq major-mode mode))))
-       smooth/modal-blacklist))
-
-    (define-globalized-minor-mode global-ryo-modal-mode
-      ryo-modal-mode
-      (lambda ()
-        (unless (smooth/modal-blacklisted-p)
-          (ryo-modal-mode 1))))
-
-    (defvar smooth/pop-ring (make-ring 100)
-      "A ring of pop commands recorded from various jump systems.")
-
-    (defun smooth/record-pop (pop-fn)
-      "Store POP-FN into `smooth/pop-ring` for later use."
-      (ring-insert smooth/pop-ring pop-fn))
-
-    (defun smooth/jump-backward ()
-      "Execute the most recent pop command from `smooth/pop-ring`."
-      (interactive)
-      (unless (ring-empty-p smooth/pop-ring)
-        (let ((fn (ring-remove smooth/pop-ring 0)))
-          (call-interactively fn))))
-
-    (advice-add 'xref-push-marker-stack
-                :after (lambda (&rest _) (smooth/record-pop #'xref-pop-marker-stack)))
-
-    (advice-add 'avy-push-mark
-                :after (lambda (&rest _) (smooth/record-pop #'avy-pop-mark)))
-
-    ;; TODO: any push-mark from xref and avy also trigger general push-mark
-    ;; This is problematic as pushing the command in the ring will be doubled.
-    ;; (advice-add 'push-mark
-    ;;                    :after (lambda (&rest _) (smooth/record-pop #'pop-to-mark-command)))
-
-    (defun smooth/universal-escape ()
-      "Quit minibuffer or cancel current UI element intelligently."
-      (interactive)
-      (cond
-       ;; 1. Corfu popup is visible
-       ((and (bound-and-true-p corfu-mode)
-        	   corfu--candidates)
-        (corfu-quit)
-        (ryo-modal-mode))
-
-       ;; 2. Minibuffer
-       ((when (minibufferp)
-        	(minibuffer-keyboard-quit)))
-
-       ;; 3. Enter ryo-modal-mode
-       (t (ryo-modal-mode))))
-
-    (ryo-modal-keys
-     <<normal-mode>>
-     ))
+     ("?" undefined)))
 #+end_src
+
+** smooth-config
 
 #+begin_src elisp :tangle no :noweb-ref smooth-config
   (defun smooth-activate-mark ()
@@ -488,22 +392,36 @@ Read the system path from shell.
   (defun smooth-deactivate-mark ()
     (deactivate-mark))
 
-  (defun smooth-delete (count)
+  (defvar smooth--extend-p nil)
+
+  (defun smooth-toggle-extend()
+    (interactive)
+    (setq smooth--extend-p (not smooth--extend-p))
+    (if smooth--extend-p
+  	  (smooth-activate-mark)
+  	(smooth-deactivate-mark)))
+
+  (defun smooth-deactivate-extend()
+    (interactive)
+    (setq smooth--extend-p nil)
+    (smooth-deactivate-mark))
+
+  (defun smooth-normal-mode ()
+    (interactive)
+    (pulsar-pulse-line-green)
+    (ryo-modal-mode 1))
+
+  (defun smooth-insert-mode ()
+    (interactive)
+    (pulsar-pulse-line-yellow)
+    (smooth-deactivate-extend)
+    (ryo-modal-mode 0))
+
+  (defun smooth-kill (count)
     (interactive "p")
     (if (use-region-p)
   	  (kill-region (region-beginning) (region-end))
-    (delete-char count t)))
-
-  (defun smooth-open-line-below (count)
-    (interactive "p")
-    (end-of-line)
-    (open-line count)
-    (forward-line count))
-
-  (defun smooth-open-line-above (count)
-    (interactive "p")
-    (beginning-of-line)
-    (open-line count))
+  	(delete-char count t)))
 
   (defun smooth-yank (count)
     (interactive "p")
@@ -516,6 +434,215 @@ Read the system path from shell.
     (beginning-of-line)
     (smooth-activate-mark-if-inactive)
     (forward-line count))
+
+  (defun smooth-escape ()
+    (interactive)
+    (cond
+     ;; 1. Corfu popup is visible
+     ((and (bound-and-true-p corfu-mode)
+        	 corfu--candidates)
+      (corfu-quit)
+      (ryo-modal-mode))
+
+     ;; 2. Minibuffer
+     ((when (minibufferp)
+        (minibuffer-keyboard-quit)))
+
+     ;; 3. Enter ryo-modal-mode
+     (t (smooth-normal-mode))))
+
+  (defun smooth-keyboard-quit ()
+    (interactive)
+    (pulsar-pulse-line-red)
+    (smooth-deactivate-extend)
+    (keyboard-quit))
+#+end_src
+
+#+begin_src elisp :tangle no :noweb-ref smooth-old-config
+  (defvar smooth/modal-blacklist
+    '((predicate . minibufferp)
+      (mode . eshell-mode)
+      (mode . term-mode)
+      (mode . vterm-mode)
+      (mode . vc-git-log-edit-mode))
+    "Alist of conditions where `ryo-modal-mode` should not be enabled.")
+
+  (defun smooth/modal-blacklisted-p ()
+    "Return non-nil if current buffer should not enable `ryo-modal-mode`."
+    (cl-some
+     (lambda (entry)
+  	 (pcase entry
+         (`(predicate . ,fn) (funcall fn))
+         (`(mode . ,mode) (eq major-mode mode))))
+     smooth/modal-blacklist))
+
+  (define-globalized-minor-mode global-ryo-modal-mode
+    ryo-modal-mode
+    (lambda ()
+      (unless (smooth/modal-blacklisted-p)
+        (ryo-modal-mode 1))))
+
+  (defvar smooth/pop-ring (make-ring 100)
+    "A ring of pop commands recorded from various jump systems.")
+
+  (defun smooth/record-pop (pop-fn)
+    "Store POP-FN into `smooth/pop-ring` for later use."
+    (ring-insert smooth/pop-ring pop-fn))
+
+  (defun smooth/jump-backward ()
+    "Execute the most recent pop command from `smooth/pop-ring`."
+    (interactive)
+    (unless (ring-empty-p smooth/pop-ring)
+      (let ((fn (ring-remove smooth/pop-ring 0)))
+        (call-interactively fn))))
+
+  (advice-add 'xref-push-marker-stack
+              :after (lambda (&rest _) (smooth/record-pop #'xref-pop-marker-stack)))
+
+  (advice-add 'avy-push-mark
+              :after (lambda (&rest _) (smooth/record-pop #'avy-pop-mark)))
+
+  ;; TODO: any push-mark from xref and avy also trigger general push-mark
+  ;; This is problematic as pushing the command in the ring will be doubled.
+  ;; (advice-add 'push-mark
+  ;;                    :after (lambda (&rest _) (smooth/record-pop #'pop-to-mark-command)))
+#+end_src
+
+** smooth-motion
+
+#+begin_src elisp :tangle no :noweb yes :noweb-ref smooth-motion
+  <<defun-smooth-motion>>
+
+  (ryo-modal-keys
+   ("v" smooth-toggle-extend))
+
+  (ryo-modal-keys
+   ("h" smooth-left)
+   ("j" smooth-down)
+   ("k" smooth-up)
+   ("l" smooth-right)
+   ("H" smooth-word-left)
+   ("J" smooth-paragraph-down)
+   ("K" smooth-paragraph-up)
+   ("L" smooth-word-right))
+#+end_src
+
+#+begin_src elisp :tangle no :noweb-ref defun-smooth-motion
+  (defun smooth-left(count)
+    (interactive "p")
+    (if smooth--extend-p
+  	  (smooth-activate-mark-if-inactive)
+  	(smooth-deactivate-mark))
+    (backward-char count))
+
+  (defun smooth-down(count)
+    (interactive "p")
+    (if smooth--extend-p
+  	  (smooth-activate-mark-if-inactive)
+  	(smooth-deactivate-mark))
+    (next-line count))
+
+  (defun smooth-up(count)
+    (interactive "p")
+    (if smooth--extend-p
+  	  (smooth-activate-mark-if-inactive)
+  	(smooth-deactivate-mark))
+    (previous-line count))
+
+  (defun smooth-right(count)
+    (interactive "p")
+    (if smooth--extend-p
+  	  (smooth-activate-mark-if-inactive)
+  	(smooth-deactivate-mark))
+    (forward-char count))
+
+  (defun smooth-word-left(count)
+    (interactive "p")
+    (if smooth--extend-p
+  	  (smooth-activate-mark-if-inactive)
+  	(smooth-activate-mark))
+    (backward-word count))
+
+  (defun smooth-paragraph-down(count)
+    (interactive "p")
+    (if smooth--extend-p
+  	  (smooth-activate-mark-if-inactive)
+  	(smooth-activate-mark))
+    (forward-paragraph count))
+
+  (defun smooth-paragraph-up(count)
+    (interactive "p")
+    (if smooth--extend-p
+  	  (smooth-activate-mark-if-inactive)
+  	(smooth-activate-mark))
+    (backward-paragraph count))
+
+  (defun smooth-word-right(count)
+    (interactive "p")
+    (if smooth--extend-p
+  	  (smooth-activate-mark-if-inactive)
+  	(smooth-activate-mark))
+    (forward-word count))
+#+end_src
+
+** smooth-editing
+
+#+begin_src elisp :tangle no :noweb yes :noweb-ref smooth-editing
+  <<defun-smooth-editing>>
+
+  (ryo-modal-keys
+   ("i" smooth-insert)
+   ("a" smooth-append)
+   ("o" smooth-open-line-below)
+   ("c" smooth-delete :exit t))
+
+  (ryo-modal-keys
+   ("I" smooth-insert-beginning)
+   ("A" smooth-append-end)
+   ("O" smooth-open-line-above)
+   ("C" kill-line :exit t))
+#+end_src
+
+#+begin_src elisp :tangle no :noweb-ref defun-smooth-editing
+  (defun smooth-insert()
+    (interactive)
+    (smooth-deactivate-mark)
+    (smooth-insert-mode))
+
+  (defun smooth-insert-beginning()
+    (interactive)
+    (smooth-deactivate-mark)
+    (beginning-of-line)
+    (smooth-insert-mode))
+
+  (defun smooth-append()
+    (interactive)
+    (smooth-deactivate-mark)
+    (forward-char)
+    (smooth-insert-mode))
+
+  (defun smooth-append-end()
+    (interactive)
+    (smooth-deactivate-mark)
+    (end-of-line)
+    (smooth-insert-mode))
+
+  (defun smooth-open-line-below()
+    (interactive)
+    (smooth-deactivate-mark)
+    (end-of-line)
+    (open-line 1)
+    (forward-line)
+    (indent-according-to-mode)
+    (smooth-insert-mode))
+
+  (defun smooth-open-line-above()
+    (interactive)
+    (smooth-deactivate-mark)
+    (beginning-of-line)
+    (open-line 1)
+    (indent-according-to-mode)
+    (smooth-insert-mode))
 #+end_src
 
 * Movement and selection :h:j:k:l:f:g:v:w:semicolon:
