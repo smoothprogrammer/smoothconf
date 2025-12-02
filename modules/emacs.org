@@ -304,12 +304,12 @@ Read the system path from shell.
      ("-" "M--" :norepeat t))
 
     <<smooth-motion>>
-    <<smooth-editing>>
+    <<smooth-insert>>
 
     (ryo-modal-keys
      ("b" undefined)
      ("B" undefined)
-     ("d" smooth-delete)
+     ("d" smooth-kill)
      ("D" kill-line)
      ;; ("e" :name "flymake")
      ("E" undefined)
@@ -585,25 +585,25 @@ Read the system path from shell.
     (forward-word count))
 #+end_src
 
-** smooth-editing
+** smooth-insert
 
-#+begin_src elisp :tangle no :noweb yes :noweb-ref smooth-editing
-  <<defun-smooth-editing>>
+#+begin_src elisp :tangle no :noweb yes :noweb-ref smooth-insert
+  <<defun-smooth-insert>>
 
   (ryo-modal-keys
    ("i" smooth-insert)
    ("a" smooth-append)
    ("o" smooth-open-line-below)
-   ("c" smooth-delete :exit t))
+   ("c" smooth-change))
 
   (ryo-modal-keys
    ("I" smooth-insert-beginning)
    ("A" smooth-append-end)
    ("O" smooth-open-line-above)
-   ("C" kill-line :exit t))
+   ("C" smooth-change-end))
 #+end_src
 
-#+begin_src elisp :tangle no :noweb-ref defun-smooth-editing
+#+begin_src elisp :tangle no :noweb-ref defun-smooth-insert
   (defun smooth-insert()
     (interactive)
     (smooth-insert-mode))
@@ -636,6 +636,16 @@ Read the system path from shell.
     (beginning-of-line)
     (open-line 1)
     (indent-according-to-mode)
+    (smooth-insert-mode))
+
+  (defun smooth-change(count)
+    (interactive "p")
+    (smooth-kill count)
+    (smooth-insert-mode))
+
+  (defun smooth-change-end()
+    (interactive)
+    (kill-line)
     (smooth-insert-mode))
 #+end_src
 
