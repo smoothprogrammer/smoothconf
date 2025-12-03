@@ -329,7 +329,6 @@ Read the system path from shell.
      ("S" undefined)
      ("t" undefined)
      ("T" undefined)
-     ("V" undefined)
      ;; ("w" :name "windmove")
      ("W" undefined)
      ("x" execute-extended-command)
@@ -418,12 +417,6 @@ Read the system path from shell.
   	  (kill-region (region-beginning) (region-end))
   	(delete-char count t)))
 
-  (defun smooth-line (count)
-    (interactive "p")
-    (beginning-of-line)
-    (smooth-activate-mark-if-inactive)
-    (forward-line count))
-
   (defun smooth-escape ()
     (interactive)
     (cond
@@ -503,7 +496,8 @@ Read the system path from shell.
   <<defun-smooth-motion>>
 
   (ryo-modal-keys
-   ("v" smooth-toggle-extend))
+   ("v" smooth-toggle-extend)
+   ("V" smooth-line))
 
   (ryo-modal-keys
    ("h" smooth-left)
@@ -523,6 +517,13 @@ Read the system path from shell.
 #+end_src
 
 #+begin_src elisp :tangle no :noweb-ref defun-smooth-motion
+  (defun smooth-line (count)
+    (interactive "p")
+    (beginning-of-line)
+    (unless smooth--extend-p
+  	(smooth-activate-mark))
+    (forward-line count))
+
   (defun smooth-left (count)
     (interactive "p")
     (if smooth--extend-p
