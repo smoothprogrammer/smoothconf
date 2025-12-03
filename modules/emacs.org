@@ -389,14 +389,14 @@ Read the system path from shell.
 
   (defvar smooth--extend-p nil)
 
-  (defun smooth-toggle-extend()
+  (defun smooth-toggle-extend ()
     (interactive)
     (setq smooth--extend-p (not smooth--extend-p))
     (if smooth--extend-p
   	  (smooth-activate-mark)
   	(smooth-deactivate-mark)))
 
-  (defun smooth-deactivate-extend()
+  (defun smooth-deactivate-extend ()
     (interactive)
     (setq smooth--extend-p nil)
     (smooth-deactivate-mark))
@@ -517,56 +517,58 @@ Read the system path from shell.
 #+end_src
 
 #+begin_src elisp :tangle no :noweb-ref defun-smooth-motion
-  (defun smooth-left(count)
+  (defun smooth-left (count)
     (interactive "p")
     (if smooth--extend-p
   	  (smooth-activate-mark-if-inactive)
   	(smooth-deactivate-mark))
     (backward-char count))
 
-  (defun smooth-down(count)
+  (defun smooth-down (count)
     (interactive "p")
     (if smooth--extend-p
   	  (smooth-activate-mark-if-inactive)
   	(smooth-deactivate-mark))
     (next-line count))
 
-  (defun smooth-up(count)
+  (defun smooth-up (count)
     (interactive "p")
     (if smooth--extend-p
   	  (smooth-activate-mark-if-inactive)
   	(smooth-deactivate-mark))
     (previous-line count))
 
-  (defun smooth-right(count)
+  (defun smooth-right (count)
     (interactive "p")
     (if smooth--extend-p
   	  (smooth-activate-mark-if-inactive)
   	(smooth-deactivate-mark))
     (forward-char count))
 
-  (defun smooth-word-left(count)
+  (defun smooth-word-left (count)
     (interactive "p")
     (if smooth--extend-p
   	  (smooth-activate-mark-if-inactive)
   	(smooth-activate-mark))
     (backward-word count))
 
-  (defun smooth-paragraph-down(count)
+
+
+  (defun smooth-paragraph-down (count)
     (interactive "p")
     (if smooth--extend-p
   	  (smooth-activate-mark-if-inactive)
   	(smooth-activate-mark))
     (forward-paragraph count))
 
-  (defun smooth-paragraph-up(count)
+  (defun smooth-paragraph-up (count)
     (interactive "p")
     (if smooth--extend-p
   	  (smooth-activate-mark-if-inactive)
   	(smooth-activate-mark))
     (backward-paragraph count))
 
-  (defun smooth-word-right(count)
+  (defun smooth-word-right (count)
     (interactive "p")
     (if smooth--extend-p
   	  (smooth-activate-mark-if-inactive)
@@ -593,26 +595,26 @@ Read the system path from shell.
 #+end_src
 
 #+begin_src elisp :tangle no :noweb-ref defun-smooth-insert
-  (defun smooth-insert()
+  (defun smooth-insert ()
     (interactive)
     (smooth-insert-mode))
 
-  (defun smooth-insert-beginning()
+  (defun smooth-insert-beginning ()
     (interactive)
     (beginning-of-line)
     (smooth-insert-mode))
 
-  (defun smooth-append()
+  (defun smooth-append ()
     (interactive)
     (forward-char)
     (smooth-insert-mode))
 
-  (defun smooth-append-end()
+  (defun smooth-append-end ()
     (interactive)
     (end-of-line)
     (smooth-insert-mode))
 
-  (defun smooth-open-line-below()
+  (defun smooth-open-line-below ()
     (interactive)
     (end-of-line)
     (open-line 1)
@@ -620,19 +622,19 @@ Read the system path from shell.
     (indent-according-to-mode)
     (smooth-insert-mode))
 
-  (defun smooth-open-line-above()
+  (defun smooth-open-line-above ()
     (interactive)
     (beginning-of-line)
     (open-line 1)
     (indent-according-to-mode)
     (smooth-insert-mode))
 
-  (defun smooth-change(count)
+  (defun smooth-change (count)
     (interactive "p")
     (smooth-kill count)
     (smooth-insert-mode))
 
-  (defun smooth-change-end()
+  (defun smooth-change-end ()
     (interactive)
     (kill-line)
     (smooth-insert-mode))
@@ -653,36 +655,36 @@ Read the system path from shell.
 #+end_src
 
 #+begin_src elisp :tangle no :noweb-ref defun-smooth-editing
-  (defun smooth-undo()
+  (defun smooth-undo ()
     (interactive)
     (undo-only)
     (smooth-deactivate-extend))
 
-  (defun smooth-redo()
+  (defun smooth-redo ()
     (interactive)
     (undo-redo)
     (smooth-deactivate-extend))
 
-  (defun smooth-yank(count)
+  (defun smooth-yank (count)
     (interactive "p")
     (if (use-region-p)
   	  (kill-ring-save (region-beginning) (region-end))
   	(kill-new (char-to-string (char-after))))
     (smooth-deactivate-extend))
 
-  (defun smooth-put(count)
+  (defun smooth-put (count)
     (interactive "p")
     (when (use-region-p)
   	(delete-region (region-beginning) (region-end)))
     (yank)
     (smooth-deactivate-extend))
 
-  (defun smooth-delete(count)
+  (defun smooth-delete (count)
     (interactive "p")
     (smooth-kill count)
     (smooth-deactivate-extend))
 
-  (defun smooth-delete-end()
+  (defun smooth-delete-end ()
     (interactive)
     (kill-line)
     (smooth-deactivate-extend))
