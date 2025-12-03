@@ -392,6 +392,15 @@ Use anchor instead of extend.
     (unless (use-region-p)
   	(smooth-activate-mark)))
 
+  (defun smooth-activate-anchor-line ()
+    (interactive)
+    (setq smooth--anchor-p t)
+    (save-excursion
+  	(goto-char (mark))
+  	(beginning-of-line)
+  	(smooth-activate-mark))
+    (forward-line))
+
   (defun smooth-deactivate-anchor ()
     (interactive)
     (setq smooth--anchor-p nil)
@@ -494,7 +503,7 @@ Use anchor instead of extend.
 
     (ryo-modal-keys
      ("v" smooth-activate-anchor)
-     ("V" smooth-line)
+     ("V" smooth-activate-anchor-line)
      ("," smooth-back))
 
     (ryo-modal-keys
@@ -515,13 +524,6 @@ Use anchor instead of extend.
 #+end_src
 
 #+begin_src elisp :tangle no :noweb-ref defun-smooth-motion
-  (defun smooth-line (count)
-    (interactive "p")
-    (beginning-of-line)
-    (unless smooth--anchor-p
-  	(smooth-activate-mark))
-    (forward-line count))
-
   (defun smooth-back ()
     (interactive)
     (pop-to-mark-command)
