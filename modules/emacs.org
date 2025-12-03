@@ -396,7 +396,8 @@ Use anchor instead of extend.
     (interactive)
     (setq smooth--anchor-p t)
     (save-excursion
-  	(goto-char (mark))
+  	(when (use-region-p)
+  	  (goto-char (mark)))
   	(beginning-of-line)
   	(smooth-activate-mark))
     (forward-line))
