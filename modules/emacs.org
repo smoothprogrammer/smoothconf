@@ -308,11 +308,11 @@ Read the system path from shell.
     <<smooth-editing>>
 
     (ryo-modal-keys
-     ("b" undefined)
      ("B" undefined)
+     ("C" undefined)
+     ("D" undefined)
      ;; ("e" :name "flymake")
      ("E" undefined)
-     ("f" undefined)
      ("F" undefined)
      ;; ("g" :name "goto")
      ("G" undefined)
@@ -509,11 +509,17 @@ Read the system path from shell.
    ("h" smooth-left)
    ("j" smooth-down)
    ("k" smooth-up)
-   ("l" smooth-right)
-   ("H" smooth-word-left)
+   ("l" smooth-right))
+
+  (ryo-modal-keys
+   ("b" smooth-word-left)
+   ("f" smooth-word-right))
+
+  (ryo-modal-keys
+   ("H" smooth-line-left)
    ("J" smooth-paragraph-down)
    ("K" smooth-paragraph-up)
-   ("L" smooth-word-right))
+   ("L" smooth-line-right))
 #+end_src
 
 #+begin_src elisp :tangle no :noweb-ref defun-smooth-motion
@@ -552,7 +558,26 @@ Read the system path from shell.
   	(smooth-activate-mark))
     (backward-word count))
 
+  (defun smooth-word-right (count)
+    (interactive "p")
+    (if smooth--extend-p
+  	  (smooth-activate-mark-if-inactive)
+  	(smooth-activate-mark))
+    (forward-word count))
 
+  (defun smooth-line-left (count)
+    (interactive "p")
+    (if smooth--extend-p
+  	  (smooth-activate-mark-if-inactive)
+  	(smooth-activate-mark))
+    (beginning-of-line count))
+
+  (defun smooth-line-right (count)
+    (interactive "p")
+    (if smooth--extend-p
+  	  (smooth-activate-mark-if-inactive)
+  	(smooth-activate-mark))
+    (end-of-line count))
 
   (defun smooth-paragraph-down (count)
     (interactive "p")
@@ -567,13 +592,6 @@ Read the system path from shell.
   	  (smooth-activate-mark-if-inactive)
   	(smooth-activate-mark))
     (backward-paragraph count))
-
-  (defun smooth-word-right (count)
-    (interactive "p")
-    (if smooth--extend-p
-  	  (smooth-activate-mark-if-inactive)
-  	(smooth-activate-mark))
-    (forward-word count))
 #+end_src
 
 ** smooth-insert
@@ -590,8 +608,7 @@ Read the system path from shell.
   (ryo-modal-keys
    ("I" smooth-insert-beginning)
    ("A" smooth-append-end)
-   ("O" smooth-open-line-above)
-   ("C" smooth-change-end))
+   ("O" smooth-open-line-above))
 #+end_src
 
 #+begin_src elisp :tangle no :noweb-ref defun-smooth-insert
@@ -633,11 +650,6 @@ Read the system path from shell.
     (interactive "p")
     (smooth-kill count)
     (smooth-insert-mode))
-
-  (defun smooth-change-end ()
-    (interactive)
-    (kill-line)
-    (smooth-insert-mode))
 #+end_src
 
 ** smooth-editing
@@ -650,8 +662,7 @@ Read the system path from shell.
    ("U" smooth-redo)
    ("y" smooth-yank)
    ("p" smooth-put)
-   ("d" smooth-delete)
-   ("D" smooth-delete-end))
+   ("d" smooth-delete))
 #+end_src
 
 #+begin_src elisp :tangle no :noweb-ref defun-smooth-editing
@@ -682,11 +693,6 @@ Read the system path from shell.
   (defun smooth-delete (count)
     (interactive "p")
     (smooth-kill count)
-    (smooth-deactivate-extend))
-
-  (defun smooth-delete-end ()
-    (interactive)
-    (kill-line)
     (smooth-deactivate-extend))
 #+end_src
 
