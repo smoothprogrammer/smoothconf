@@ -324,7 +324,6 @@ Use anchor instead of extend.
      ("N" undefined)
      ("q" quit-window)
      ("Q" undefined)
-     ;; ("r" :name "eglot-rename")
      ("R" undefined)
      ("s" undefined)
      ("S" undefined)
@@ -660,6 +659,7 @@ Use anchor instead of extend.
    ("y" smooth-yank)
    ("p" smooth-put)
    ("P" smooth-put-menu)
+   ("r" eglot-rename :first '(smooth-deactivate-anchor))
    ("d" smooth-delete))
 #+end_src
 
@@ -1241,8 +1241,6 @@ system path and configure the following variable:
 
 #+begin_src elisp :noweb yes
   (use-package eglot
-    :ryo
-    ("r" eglot-rename)
     :hook
     (prog-mode . eglot-ensure)
     (prog-mode . (lambda () (add-hook 'before-save-hook 'eglot-format-buffer)))
