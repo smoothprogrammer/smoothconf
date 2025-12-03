@@ -714,8 +714,11 @@ Use anchor instead of extend.
    ("g l" smooth-goto-right))
 
   (ryo-modal-keys
-   ("g m" smooth-menu)
-   ("g e" smooth-error-menu))
+   ("g d" xref-find-definitions :first '(smooth-deactivate-anchor))
+   ("g r" xref-find-references :first '(smooth-deactivate-anchor))
+   ("g i" eglot-find-implementation :first '(smooth-deactivate-anchor))
+   ("g m" smooth-goto-menu)
+   ("g e" smooth-goto-error-menu))
 #+end_src
 
 #+begin_src elisp :tangle no :noweb-ref defun-smooth-goto
@@ -743,14 +746,14 @@ Use anchor instead of extend.
   	(smooth-deactivate-mark))
     (end-of-line))
 
-  (defun smooth-menu ()
+  (defun smooth-goto-menu ()
     (interactive)
     (smooth-deactivate-anchor)
     (if (fboundp 'consult-imenu)
   	  (consult-imenu)
   	(imenu)))
 
-  (defun smooth-error-menu ()
+  (defun smooth-goto-error-menu ()
     (interactive)
     (smooth-deactivate-anchor)
     (if (fboundp 'consult-flymake)
@@ -1240,7 +1243,6 @@ system path and configure the following variable:
   (use-package eglot
     :ryo
     ("r" eglot-rename)
-    ("g i" eglot-find-implementation :name "goto implementation")
     :hook
     (prog-mode . eglot-ensure)
     (prog-mode . (lambda () (add-hook 'before-save-hook 'eglot-format-buffer)))
@@ -1293,15 +1295,6 @@ Boost LSP performance with =eglot-booster=.
     :ryo
     ;; <<eldoc-box>>
     )
-#+end_src
-
-** xref
-
-#+begin_src elisp
-  (use-package xref
-    :ryo
-    ("g d" xref-find-definitions :name "goto definitions")
-    ("g r" xref-find-references :name "goto references"))
 #+end_src
 
 ** flymake
