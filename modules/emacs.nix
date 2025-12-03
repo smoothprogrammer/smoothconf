@@ -54,7 +54,6 @@ let
     epkgs.geiser
       epkgs.geiser-guile
     # lua-ts-mode is already emacs built-in major mode
-    epkgs.org-auto-tangle
     epkgs.org-modern
     (pkgs.emacsPackages.trivialBuild {
       pname = "org-modern-indent";

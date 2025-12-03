@@ -1,6 +1,8 @@
 #+title: Emacs Configurations
 #+property: header-args:elisp :mkdirp yes :results silent :tangle ~/.emacs.d/init.el
 #+property: header-args:nix :results silent :tangle ./emacs.nix
+#+auto-tangle: t
+#+auto-reload: ~/.emacs.d/init.el
 
 * TODO Future
 
@@ -1510,6 +1512,7 @@ the box.
     <<org>>
     <<org-insert>>
     <<babel>>
+    :hook (after-save . org-auto--tangle-and-reload)
     :custom
     ;; Edit settings.
     (org-auto-align-tags nil)
@@ -1525,23 +1528,20 @@ the box.
     (org-agenda-tags-column 0)
     (org-ellipsis "…")
     (org-cycle-separator-lines 0)
-    (org-imenu-depth 3))
-#+end_src
+    (org-imenu-depth 3)
+    :config
+    (defun org-auto--find-keywords-value (key)
+  	(car (cdr (assoc (upcase key) (org-collect-keywords (list key))))))
 
-** org-auto-tangle
-
-Keep the tangled file in sync.
-
-#+begin_src nix :tangle no :noweb-ref epkgs
-  epkgs.org-auto-tangle
-#+end_src
-
-#+begin_src elisp
-  (use-package org-auto-tangle
-    :hook
-    (org-mode . org-auto-tangle-mode)
-    :custom
-    (org-auto-tangle-default t))
+    (defun org-auto--tangle-and-reload ()
+      (when (derived-mode-p 'org-mode)
+        (let ((auto-tangle (org-auto--find-keywords-value "auto-tangle"))
+              (auto-reload (org-auto--find-keywords-value "auto-reload")))
+          (when (string= auto-tangle "t")
+            (org-babel-tangle))
+          (when auto-reload
+            (load-file auto-reload)
+  		  (message "auto reload"))))))
 #+end_src
 
 ** org-modern
