@@ -309,6 +309,7 @@ Use anchor instead of extend.
     <<smooth-insert>>
     <<smooth-editing>>
     <<smooth-goto>>
+    <<smooth-lsp>>
 
     (ryo-modal-keys
      ("B" undefined)
@@ -661,7 +662,6 @@ Use anchor instead of extend.
    ("y" smooth-yank)
    ("p" smooth-put)
    ("P" smooth-put-menu)
-   ("r" eglot-rename :first '(smooth-deactivate-anchor))
    ("d" smooth-delete))
 #+end_src
 
@@ -714,13 +714,6 @@ Use anchor instead of extend.
    ("g j" smooth-goto-down)
    ("g k" smooth-goto-up)
    ("g l" smooth-goto-right))
-
-  (ryo-modal-keys
-   ("g d" xref-find-definitions :first '(smooth-deactivate-anchor))
-   ("g r" xref-find-references :first '(smooth-deactivate-anchor))
-   ("g i" eglot-find-implementation :first '(smooth-deactivate-anchor))
-   ("g m" smooth-goto-menu)
-   ("g e" smooth-goto-error-menu))
 #+end_src
 
 #+begin_src elisp :tangle no :noweb-ref defun-smooth-goto
@@ -747,20 +740,38 @@ Use anchor instead of extend.
     (unless smooth--anchor-p
   	(smooth-deactivate-mark))
     (end-of-line))
+#+end_src
 
-  (defun smooth-goto-menu ()
-    (interactive)
-    (smooth-deactivate-anchor)
-    (if (fboundp 'consult-imenu)
-  	  (consult-imenu)
-  	(imenu)))
+** smooth-lsp
 
-  (defun smooth-goto-error-menu ()
-    (interactive)
-    (smooth-deactivate-anchor)
-    (if (fboundp 'consult-flymake)
-  	  (consult-flymake)
-  	(flymake-menu)))
+#+begin_src elisp :tangle no :noweb-ref smooth-lsp
+  (with-eval-after-load 'eglot
+    (ryo-modal-keys
+     ("r" eglot-rename :first '(smooth-deactivate-anchor))
+     ("g i" eglot-find-implementation :first '(smooth-deactivate-anchor))))
+
+  (with-eval-after-load 'xref
+    (ryo-modal-keys
+     ("g d" xref-find-definitions :first '(smooth-deactivate-anchor))
+     ("g r" xref-find-references :first '(smooth-deactivate-anchor))))
+
+  (with-eval-after-load 'imenu
+    (defun smooth-goto-menu ()
+  	(interactive)
+  	(if (fboundp 'consult-imenu)
+  		(consult-imenu)
+  	  (imenu)))
+    (ryo-modal-keys
+     ("g m" smooth-goto-menu :first '(smooth-deactivate-anchor))))
+
+  (with-eval-after-load 'flymake
+    (defun smooth-goto-error-menu ()
+  	(interactive)
+  	(if (fboundp 'consult-flymake)
+  		(consult-flymake)
+  	  (flymake-menu)))
+    (ryo-modal-keys
+     ("g e" smooth-goto-error-menu :first '(smooth-deactivate-anchor))))
 #+end_src
 
 * Movement and selection :h:j:k:l:f:g:v:w:semicolon:
