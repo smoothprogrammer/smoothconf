@@ -713,7 +713,8 @@ Use anchor instead of extend.
    ("g l" smooth-goto-right))
 
   (ryo-modal-keys
-   ("g m" smooth-menu))
+   ("g m" smooth-menu)
+   ("g e" smooth-error-menu))
 #+end_src
 
 #+begin_src elisp :tangle no :noweb-ref defun-smooth-goto
@@ -747,6 +748,13 @@ Use anchor instead of extend.
     (if (fboundp 'consult-imenu)
   	  (consult-imenu)
   	(imenu)))
+
+  (defun smooth-error-menu ()
+    (interactive)
+    (smooth-deactivate-anchor)
+    (if (fboundp 'consult-flymake)
+  	  (consult-flymake)
+  	(flymake-menu)))
 #+end_src
 
 * Movement and selection :h:j:k:l:f:g:v:w:semicolon:
@@ -1118,8 +1126,6 @@ Completion are essential feature for modern text editor / IDE.
 
 #+begin_src elisp :noweb yes
   (use-package consult
-    :ryo
-    ("g e" consult-flymake :name "goto error list")
     :custom
     (xref-show-xrefs-function #'consult-xref)
     (xref-show-definitions-function #'consult-xref))
