@@ -322,7 +322,6 @@ Use anchor instead of extend.
      ("M" undefined)
      ("n" undefined)
      ("N" undefined)
-     ("P" undefined)
      ("q" quit-window)
      ("Q" undefined)
      ;; ("r" :name "eglot-rename")
@@ -657,6 +656,7 @@ Use anchor instead of extend.
    ("U" smooth-redo)
    ("y" smooth-yank)
    ("p" smooth-put)
+   ("P" smooth-put-menu)
    ("d" smooth-delete))
 #+end_src
 
@@ -684,6 +684,14 @@ Use anchor instead of extend.
   	(delete-region (region-beginning) (region-end)))
     (yank)
     (smooth-deactivate-anchor))
+
+  (defun smooth-put-menu (count)
+    (interactive "p")
+    (when (use-region-p)
+  	(delete-region (region-beginning) (region-end)))
+    (if (fboundp 'consult-yank-pop)
+  	  (consult-yank-pop)
+  	(yank-pop)))
 
   (defun smooth-delete (count)
     (interactive "p")
