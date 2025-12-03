@@ -527,7 +527,7 @@ Use anchor instead of extend.
 #+begin_src elisp :tangle no :noweb-ref defun-smooth-motion
   (defun smooth-back ()
     (interactive)
-    (pop-to-mark-command)
+    (pop-global-mark)
     (smooth-deactivate-anchor))
 
   (defun smooth-left (count)
