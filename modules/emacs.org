@@ -308,6 +308,7 @@ Use anchor instead of extend.
     <<smooth-motion>>
     <<smooth-insert>>
     <<smooth-editing>>
+    <<smooth-goto>>
 
     (ryo-modal-keys
      ("B" undefined)
@@ -316,7 +317,6 @@ Use anchor instead of extend.
      ;; ("e" :name "flymake")
      ("E" undefined)
      ("F" undefined)
-     ;; ("g" :name "goto")
      ("G" undefined)
      ("m" undefined)
      ("M" undefined)
@@ -699,18 +699,47 @@ Use anchor instead of extend.
     (smooth-deactivate-anchor))
 #+end_src
 
+** smooth-goto
+
+#+begin_src elisp :tangle no :noweb yes :noweb-ref smooth-goto
+  <<defun-smooth-goto>>
+
+  (ryo-modal-keys
+   ("g"
+    (("h" smooth-goto-left)
+     ("j" smooth-goto-down)
+     ("k" smooth-goto-up)
+     ("l" smooth-goto-right))
+    :name "goto"))
+#+end_src
+
+#+begin_src elisp :tangle no :noweb-ref defun-smooth-goto
+  (defun smooth-goto-left ()
+    (interactive)
+    (unless smooth--anchor-p
+  	(smooth-deactivate-mark))
+    (beginning-of-line))
+
+  (defun smooth-goto-down ()
+    (interactive)
+    (unless smooth--anchor-p
+  	(smooth-deactivate-mark))
+    (end-of-buffer))
+
+  (defun smooth-goto-up ()
+    (interactive)
+    (unless smooth--anchor-p
+  	(smooth-deactivate-mark))
+    (beginning-of-buffer))
+
+  (defun smooth-goto-right ()
+    (interactive)
+    (unless smooth--anchor-p
+  	(smooth-deactivate-mark))
+    (end-of-line))
+#+end_src
+
 * Movement and selection :h:j:k:l:f:g:v:w:semicolon:
-
-#+begin_src elisp :tangle no :noweb-ref movement
-  ("g h" beginning-of-line)
-  ("g j" end-of-buffer)
-  ("g k" beginning-of-buffer)
-  ("g l" end-of-line)
-#+end_src
-
-#+begin_src elisp :tangle no :noweb-ref selection
-  ("v" set-mark-command)
-#+end_src
 
 #+begin_src elisp :tangle no :noweb-ref harpoon
   ("SPC a" harpoon-add-file)
@@ -721,16 +750,6 @@ Use anchor instead of extend.
   ("SPC 3" harpoon-go-to-3)
   ("SPC 4" harpoon-go-to-4)
   ("SPC 4" harpoon-go-to-5)
-#+end_src
-
-** simple
-
-#+begin_src elisp :noweb yes
-  (use-package simple
-    :ryo
-    <<movement>>
-    <<selection>>
-    )
 #+end_src
 
 ** avy
