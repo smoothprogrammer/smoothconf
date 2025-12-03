@@ -271,7 +271,9 @@ Read the system path from shell.
     (envrc-debug t))
 #+end_src
 
-* Smooth modal
+* TODO Smooth modal
+
+Use anchor instead of extend.
 
 ** ryo-modal
 
@@ -368,7 +370,6 @@ Read the system path from shell.
      ("|" undefined)
      ;; (";" :name "avy")
      (":" undefined)
-     ("," undefined)
      ("." undefined)
      ("/" undefined)
      ("?" undefined)))
@@ -378,26 +379,23 @@ Read the system path from shell.
 
 #+begin_src elisp :tangle no :noweb-ref smooth-config
   (defun smooth-activate-mark ()
-    (set-mark (point)))
-
-  (defun smooth-activate-mark-if-inactive ()
-    (unless (use-region-p) (set-mark (point))))
+    (push-mark (point) t t))
 
   (defun smooth-deactivate-mark ()
     (deactivate-mark))
 
-  (defvar smooth--extend-p nil)
+  (defvar smooth--anchor-p nil)
 
-  (defun smooth-toggle-extend ()
+  (defun smooth-activate-anchor ()
     (interactive)
-    (setq smooth--extend-p (not smooth--extend-p))
-    (if smooth--extend-p
-  	  (smooth-activate-mark)
-  	(smooth-deactivate-mark)))
+    (setq smooth--anchor-p t)
+    (message "Anchor set")
+    (unless (use-region-p)
+  	(smooth-activate-mark)))
 
-  (defun smooth-deactivate-extend ()
+  (defun smooth-deactivate-anchor ()
     (interactive)
-    (setq smooth--extend-p nil)
+    (setq smooth--anchor-p nil)
     (smooth-deactivate-mark))
 
   (defun smooth-normal-mode ()
@@ -408,7 +406,7 @@ Read the system path from shell.
   (defun smooth-insert-mode ()
     (interactive)
     (pulsar-pulse-line-yellow)
-    (smooth-deactivate-extend)
+    (smooth-deactivate-anchor)
     (ryo-modal-mode 0))
 
   (defun smooth-kill (count)
@@ -436,7 +434,7 @@ Read the system path from shell.
   (defun smooth-keyboard-quit ()
     (interactive)
     (pulsar-pulse-line-red)
-    (smooth-deactivate-extend)
+    (smooth-deactivate-anchor)
     (keyboard-quit))
 #+end_src
 
@@ -493,104 +491,100 @@ Read the system path from shell.
 ** smooth-motion
 
 #+begin_src elisp :tangle no :noweb yes :noweb-ref smooth-motion
-  <<defun-smooth-motion>>
+    <<defun-smooth-motion>>
 
-  (ryo-modal-keys
-   ("v" smooth-toggle-extend)
-   ("V" smooth-line))
+    (ryo-modal-keys
+     ("v" smooth-activate-anchor)
+     ("V" smooth-line)
+     ("," smooth-back))
 
-  (ryo-modal-keys
-   ("h" smooth-left)
-   ("j" smooth-down)
-   ("k" smooth-up)
-   ("l" smooth-right))
+    (ryo-modal-keys
+     ("h" smooth-left)
+     ("j" smooth-down)
+     ("k" smooth-up)
+     ("l" smooth-right))
 
-  (ryo-modal-keys
-   ("b" smooth-word-left)
-   ("f" smooth-word-right))
+    (ryo-modal-keys
+     ("b" smooth-word-left)
+     ("f" smooth-word-right))
 
-  (ryo-modal-keys
-   ("H" smooth-line-left)
-   ("J" smooth-paragraph-down)
-   ("K" smooth-paragraph-up)
-   ("L" smooth-line-right))
+    (ryo-modal-keys
+     ("H" smooth-line-left)
+     ("J" smooth-paragraph-down)
+     ("K" smooth-paragraph-up)
+     ("L" smooth-line-right))
 #+end_src
 
 #+begin_src elisp :tangle no :noweb-ref defun-smooth-motion
   (defun smooth-line (count)
     (interactive "p")
     (beginning-of-line)
-    (unless smooth--extend-p
+    (unless smooth--anchor-p
   	(smooth-activate-mark))
     (forward-line count))
 
+  (defun smooth-back ()
+    (interactive)
+    (pop-to-mark-command)
+    (smooth-deactivate-anchor))
+
   (defun smooth-left (count)
     (interactive "p")
-    (if smooth--extend-p
-  	  (smooth-activate-mark-if-inactive)
+    (unless smooth--anchor-p
   	(smooth-deactivate-mark))
     (backward-char count))
 
   (defun smooth-down (count)
     (interactive "p")
-    (if smooth--extend-p
-  	  (smooth-activate-mark-if-inactive)
+    (unless smooth--anchor-p
   	(smooth-deactivate-mark))
     (next-line count))
 
   (defun smooth-up (count)
     (interactive "p")
-    (if smooth--extend-p
-  	  (smooth-activate-mark-if-inactive)
+    (unless smooth--anchor-p
   	(smooth-deactivate-mark))
     (previous-line count))
 
   (defun smooth-right (count)
     (interactive "p")
-    (if smooth--extend-p
-  	  (smooth-activate-mark-if-inactive)
+    (unless smooth--anchor-p
   	(smooth-deactivate-mark))
     (forward-char count))
 
   (defun smooth-word-left (count)
     (interactive "p")
-    (if smooth--extend-p
-  	  (smooth-activate-mark-if-inactive)
+    (unless smooth--anchor-p
   	(smooth-activate-mark))
     (backward-word count))
 
   (defun smooth-word-right (count)
     (interactive "p")
-    (if smooth--extend-p
-  	  (smooth-activate-mark-if-inactive)
+    (unless smooth--anchor-p
   	(smooth-activate-mark))
     (forward-word count))
 
   (defun smooth-line-left (count)
     (interactive "p")
-    (if smooth--extend-p
-  	  (smooth-activate-mark-if-inactive)
+    (unless smooth--anchor-p
   	(smooth-activate-mark))
     (beginning-of-line count))
 
   (defun smooth-line-right (count)
     (interactive "p")
-    (if smooth--extend-p
-  	  (smooth-activate-mark-if-inactive)
+    (unless smooth--anchor-p
   	(smooth-activate-mark))
     (end-of-line count))
 
   (defun smooth-paragraph-down (count)
     (interactive "p")
-    (if smooth--extend-p
-  	  (smooth-activate-mark-if-inactive)
+    (unless smooth--anchor-p
   	(smooth-activate-mark))
     (forward-paragraph count))
 
   (defun smooth-paragraph-up (count)
     (interactive "p")
-    (if smooth--extend-p
-  	  (smooth-activate-mark-if-inactive)
+    (unless smooth--anchor-p
   	(smooth-activate-mark))
     (backward-paragraph count))
 #+end_src
@@ -670,31 +664,31 @@ Read the system path from shell.
   (defun smooth-undo ()
     (interactive)
     (undo-only)
-    (smooth-deactivate-extend))
+    (smooth-deactivate-anchor))
 
   (defun smooth-redo ()
     (interactive)
     (undo-redo)
-    (smooth-deactivate-extend))
+    (smooth-deactivate-anchor))
 
   (defun smooth-yank (count)
     (interactive "p")
     (if (use-region-p)
   	  (kill-ring-save (region-beginning) (region-end))
   	(kill-new (char-to-string (char-after))))
-    (smooth-deactivate-extend))
+    (smooth-deactivate-anchor))
 
   (defun smooth-put (count)
     (interactive "p")
     (when (use-region-p)
   	(delete-region (region-beginning) (region-end)))
     (yank)
-    (smooth-deactivate-extend))
+    (smooth-deactivate-anchor))
 
   (defun smooth-delete (count)
     (interactive "p")
     (smooth-kill count)
-    (smooth-deactivate-extend))
+    (smooth-deactivate-anchor))
 #+end_src
 
 * Movement and selection :h:j:k:l:f:g:v:w:semicolon:
