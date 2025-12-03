@@ -273,8 +273,6 @@ Read the system path from shell.
 
 * TODO Smooth modal
 
-Use anchor instead of extend.
-
 ** ryo-modal
 
 #+begin_src nix :tangle no :noweb-ref epkgs
