@@ -19,6 +19,16 @@ let
   emacs = minimalEmacs.pkgs.withPackages (epkgs: [
     epkgs.exec-path-from-shell
     epkgs.envrc
+    epkgs.nerd-icons
+    epkgs.doom-themes
+    epkgs.doom-modeline
+    epkgs.spacious-padding
+    epkgs.marginalia
+    epkgs.nerd-icons-completion
+    epkgs.pulsar
+    epkgs.golden-ratio
+    epkgs.focus
+    epkgs.vertico-posframe
     epkgs.ryo-modal
     epkgs.avy
     epkgs.harpoon
@@ -27,16 +37,6 @@ let
     epkgs.keycast
     epkgs.markdown-mode
     epkgs.otpp
-    epkgs.nerd-icons
-    epkgs.doom-themes
-    epkgs.doom-modeline
-    epkgs.spacious-padding
-    epkgs.marginalia
-      epkgs.nerd-icons-completion
-    epkgs.pulsar
-    epkgs.golden-ratio
-    epkgs.focus
-    epkgs.vertico-posframe
     epkgs.consult
     epkgs.corfu
     epkgs.vertico
