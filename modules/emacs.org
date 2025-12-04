@@ -276,7 +276,7 @@ Read the system path from shell.
 
 Who doesn't want a better UI?
 
-** nerd-icons
+** nerd-icons :font:
 
 Nerd Fonts all the way.
 
@@ -294,7 +294,7 @@ Nerd Fonts all the way.
     (nerd-icons-font-family "Iosevka Nerd Font"))
 #+end_src
 
-** doom-themes
+** doom-themes :theme:
 
 Not a fan of dark themes, but light themes also too bright. Solarized with warm
 and low contrast is a sweet spot for me.
@@ -310,7 +310,7 @@ and low contrast is a sweet spot for me.
     (doom-themes-org-config))
 #+end_src
 
-** doom-modeline
+** doom-modeline :theme:
 
 Doom modeline to complement the themes.
 
@@ -324,6 +324,134 @@ Doom modeline to complement the themes.
     (after-init . doom-modeline-mode)
     :custom
     (doom-modeline-workspace-name nil))
+#+end_src
+
+** corfu :completion:
+
+#+begin_src nix :tangle no :noweb-ref epkgs
+  epkgs.corfu
+#+end_src
+
+#+begin_src elisp
+  (use-package corfu
+    :hook
+    (after-init . global-corfu-mode)
+    (after-init . corfu-popupinfo-mode)
+    :bind
+    (:map corfu-map
+          ("C-j" . corfu-next)
+          ("C-k" . corfu-previous))
+    :custom
+    (corfu-cycle t)
+    (corfu-auto t)
+    (corfu-auto-delay 0.0)
+    (corfu-auto-prefix 2)
+    (corfu-popupinfo-delay 0.0)
+    (corfu-popupinfo-hide nil)
+    :config
+    (keymap-unset corfu-map "RET"))
+#+end_src
+
+** vertico :completion:
+
+#+begin_src nix :tangle no :noweb-ref epkgs
+  epkgs.vertico
+#+end_src
+
+#+begin_src elisp
+  (use-package vertico
+    :hook
+    (after-init . vertico-mode)
+    :bind
+    (:map vertico-map
+          ("C-j" . vertico-next)
+          ("C-k" . vertico-previous)
+          ("RET" . vertico-directory-enter)
+          ("DEL" . vertico-directory-delete-char)
+          ("M-DEL" . vertico-directory-delete-word))
+    :custom
+    (vertico-cycle t))
+#+end_src
+
+** TODO vertico-posframe :completion:
+
+TODO: Evaluate whether I need this or not.
+
+#+begin_src nix :tangle no :noweb-ref epkgs
+  epkgs.vertico-posframe
+#+end_src
+
+#+begin_src elisp
+  (use-package vertico-posframe
+    :hook
+    (after-init . vertico-posframe-mode)
+    :custom
+    (vertico-posframe-parameters
+     '((left-fringe . 8)
+       (right-fringe . 8))))
+#+end_src
+
+** marginalia :completion:
+
+Add annotation to the minibuffer.
+
+#+begin_src nix :tangle no :noweb-ref epkgs
+  epkgs.marginalia
+#+end_src
+
+#+begin_src elisp
+  (use-package marginalia
+    :hook
+    (after-init . marginalia-mode))
+#+end_src
+
+** nerd-icons-completion :completion:font:
+
+Fix =nerd-icons= doesn't affect minibuffer.
+
+#+begin_src nix :tangle no :noweb-ref epkgs
+  epkgs.nerd-icons-completion
+#+end_src
+
+#+begin_src elisp
+  (use-package nerd-icons-completion
+    :after marginalia
+    :hook
+    (after-init . nerd-icons-completion-mode)
+    (marginalia-mode . nerd-icons-completion-marginalia-setup))
+#+end_src
+
+** TODO focus :focus:
+
+Focus around the point.
+
+#+begin_src nix :tangle no :noweb-ref epkgs
+  epkgs.focus
+#+end_src
+
+#+begin_src elisp
+  (use-package focus)
+#+end_src
+
+** TODO golden-ratio :focus:
+
+Focus on the current window.
+
+#+begin_src nix :tangle no :noweb-ref epkgs
+  epkgs.golden-ratio
+#+end_src
+
+#+begin_src elisp
+  (use-package golden-ratio
+    :hook
+    (after-init . golden-ratio-mode)
+    :config
+    (advice-add 'windmove-left :after (lambda (&rest _) (golden-ratio)))
+    (advice-add 'windmove-down :after (lambda (&rest _) (golden-ratio)))
+    (advice-add 'windmove-up :after (lambda (&rest _) (golden-ratio)))
+    (advice-add 'windmove-right :after (lambda (&rest _) (golden-ratio)))
+    (advice-add 'avy-goto-char-timer :after (lambda (&rest _) (golden-ratio)))
+    (advice-add 'smooth/jump-backward :after (lambda (&rest _) (golden-ratio))))
 #+end_src
 
 ** spacious-padding
@@ -349,34 +477,12 @@ Give Emacs some space to breath.
         :fringe-width 4)))
 #+end_src
 
-** marginalia
-
-Add annotation to the minibuffer.
-
-#+begin_src nix :tangle no :noweb-ref epkgs
-  epkgs.marginalia
-#+end_src
+** ansi-color
 
 #+begin_src elisp
-  (use-package marginalia
+  (use-package ansi-color
     :hook
-    (after-init . marginalia-mode))
-#+end_src
-
-** nerd-icons-completion
-
-Fix =nerd-icons= doesn't affect minibuffer.
-
-#+begin_src nix :tangle no :noweb-ref epkgs
-  epkgs.nerd-icons-completion
-#+end_src
-
-#+begin_src elisp
-  (use-package nerd-icons-completion
-    :after marginalia
-    :hook
-    (after-init . nerd-icons-completion-mode)
-    (marginalia-mode . nerd-icons-completion-marginalia-setup))
+    (compilation-filter . ansi-color-compilation-filter))
 #+end_src
 
 ** TODO pulsar
@@ -397,65 +503,6 @@ Visual indicator to help easily spot current line.
     (advice-add 'windmove-right :after (lambda (&rest _) (pulsar-pulse-line-red)))
     (advice-add 'avy-goto-char-timer :after (lambda (&rest _) (pulsar-pulse-line-green)))
     (advice-add 'smooth/jump-backward :after (lambda (&rest _) (pulsar-pulse-line-red))))
-#+end_src
-
-** TODO golden-ratio
-
-Focus on the current window.
-
-#+begin_src nix :tangle no :noweb-ref epkgs
-  epkgs.golden-ratio
-#+end_src
-
-#+begin_src elisp
-  (use-package golden-ratio
-    :hook
-    (after-init . golden-ratio-mode)
-    :config
-    (advice-add 'windmove-left :after (lambda (&rest _) (golden-ratio)))
-    (advice-add 'windmove-down :after (lambda (&rest _) (golden-ratio)))
-    (advice-add 'windmove-up :after (lambda (&rest _) (golden-ratio)))
-    (advice-add 'windmove-right :after (lambda (&rest _) (golden-ratio)))
-    (advice-add 'avy-goto-char-timer :after (lambda (&rest _) (golden-ratio)))
-    (advice-add 'smooth/jump-backward :after (lambda (&rest _) (golden-ratio))))
-#+end_src
-
-** TODO focus
-
-Focus around the point.
-
-#+begin_src nix :tangle no :noweb-ref epkgs
-  epkgs.focus
-#+end_src
-
-#+begin_src elisp
-  (use-package focus)
-#+end_src
-
-** TODO vertico-posframe
-
-TODO: Evaluate whether I need this or not.
-
-#+begin_src nix :tangle no :noweb-ref epkgs
-  epkgs.vertico-posframe
-#+end_src
-
-#+begin_src elisp
-  (use-package vertico-posframe
-    :hook
-    (after-init . vertico-posframe-mode)
-    :custom
-    (vertico-posframe-parameters
-     '((left-fringe . 8)
-       (right-fringe . 8))))
-#+end_src
-
-** ansi-color
-
-#+begin_src elisp
-  (use-package ansi-color
-    :hook
-    (compilation-filter . ansi-color-compilation-filter))
 #+end_src
 
 * TODO Smooth modal
@@ -804,7 +851,18 @@ to my own liking.
   ("e k" flymake-goto-prev-error :name "goto prev error")
 #+end_src
 
-* Movement and selection :h:j:k:l:f:g:v:w:semicolon:
+** smooth-project
+
+#+begin_src elisp :tangle no :noweb-ref project
+  ("SPC p" project-switch-project :name "project")
+  ("SPC SPC d" project-dired :name "root directory")
+  ("SPC d" dired-jump :name "directory")
+  ("SPC SPC f" project-find-file :name "root file")
+  ("SPC f" find-file :name "file")
+  ("SPC c" project-compile  :name "compile")
+  ("SPC e" project-eshell :name "eshell")
+  ("SPC b" project-switch-to-buffer :name "buffer")
+#+end_src
 
 #+begin_src elisp :tangle no :noweb-ref harpoon
   ("SPC a" harpoon-add-file)
@@ -816,6 +874,22 @@ to my own liking.
   ("SPC 4" harpoon-go-to-4)
   ("SPC 4" harpoon-go-to-5)
 #+end_src
+
+** smooth-help
+
+#+begin_src elisp :tangle no :noweb-ref helpful
+  ("SPC h"
+   (("h" helpful-at-point :name "describe at point")
+    ("m" describe-mode :name "describe mode")
+    ("v" helpful-variable :name "describe variable")
+    ("f" helpful-callable :name "describe function")
+    ("k" helpful-key :name "describe key")
+    ("x" helpful-command :name "describe command")
+    ("j" pp-macroexpand-last-sexp))
+   :name "help")
+#+end_src
+
+* TODO Advanced motion
 
 ** avy
 
@@ -840,33 +914,7 @@ to my own liking.
     (setf (alist-get ?H avy-dispatch-alist) 'avy-action-helpful))
 #+end_src
 
-** harpoon
-
-#+begin_src nix :tangle no :noweb-ref epkgs
-  epkgs.harpoon
-#+end_src
-
-#+begin_src elisp :noweb yes
-  (use-package harpoon
-    :defer t
-    :ryo
-    <<harpoon>>
-    )
-#+end_src
-
-* Help system :SPC:h:
-
-#+begin_src elisp :tangle no :noweb-ref helpful
-  ("SPC h"
-   (("h" helpful-at-point :name "describe at point")
-    ("m" describe-mode :name "describe mode")
-    ("v" helpful-variable :name "describe variable")
-    ("f" helpful-callable :name "describe function")
-    ("k" helpful-key :name "describe key")
-    ("x" helpful-command :name "describe command")
-    ("j" pp-macroexpand-last-sexp))
-   :name "help")
-#+end_src
+* Help system
 
 ** helpful
 
@@ -911,25 +959,7 @@ to my own liking.
     (rx ".md" eos))
 #+end_src
 
-* Project :SPC:d:e:f:j:
-
-#+begin_src elisp :tangle no :noweb-ref project
-  ("SPC p" project-switch-project :name "project")
-  ("SPC SPC d" project-dired :name "root directory")
-  ("SPC d" dired-jump :name "directory")
-  ("SPC SPC f" project-find-file :name "root file")
-  ("SPC f" find-file :name "file")
-  ("SPC c" project-compile  :name "compile")
-  ("SPC e" project-eshell :name "eshell")
-  ("SPC b" project-switch-to-buffer :name "buffer")
-#+end_src
-
-#+begin_src elisp :tangle no :noweb-ref special-file
-  ("SPC j"
-   (("e" smooth/open-emacs-config :name "open emacs config")
-    ("w" smooth/open-work-readme :name "open work README"))
-   :name "jump to special file")
-#+end_src
+* Project
 
 ** project
 
@@ -958,11 +988,14 @@ to my own liking.
 
 #+begin_src elisp :noweb yes
   (use-package otpp
+    :ryo
+    ("SPC j"
+     (("e" smooth/open-emacs-config :name "open emacs config")
+  	("w" smooth/open-work-readme :name "open work README"))
+     :name "jump to special file")
     :hook
     (after-init . otpp-mode)
     (after-init . otpp-override-mode)
-    :ryo
-    <<special-file>>
     :config
     (setq frame-title-format
           '(:eval
@@ -976,6 +1009,20 @@ to my own liking.
     (defun smooth/open-work-readme ()
       (interactive)
       (find-file "~/work/README.org")))
+#+end_src
+
+** harpoon
+
+#+begin_src nix :tangle no :noweb-ref epkgs
+  epkgs.harpoon
+#+end_src
+
+#+begin_src elisp :noweb yes
+  (use-package harpoon
+    :defer t
+    :ryo
+    <<harpoon>>
+    )
 #+end_src
 
 * Completion
@@ -1001,53 +1048,6 @@ Completion are essential feature for modern text editor / IDE.
     :custom
     (xref-show-xrefs-function #'consult-xref)
     (xref-show-definitions-function #'consult-xref))
-#+end_src
-
-** corfu :ui:
-
-#+begin_src nix :tangle no :noweb-ref epkgs
-  epkgs.corfu
-#+end_src
-
-#+begin_src elisp
-  (use-package corfu
-    :hook
-    (after-init . global-corfu-mode)
-    (after-init . corfu-popupinfo-mode)
-    :bind
-    (:map corfu-map
-          ("C-j" . corfu-next)
-          ("C-k" . corfu-previous))
-    :custom
-    (corfu-cycle t)
-    (corfu-auto t)
-    (corfu-auto-delay 0.0)
-    (corfu-auto-prefix 2)
-    (corfu-popupinfo-delay 0.0)
-    (corfu-popupinfo-hide nil)
-    :config
-    (keymap-unset corfu-map "RET"))
-#+end_src
-
-** vertico :ui:
-
-#+begin_src nix :tangle no :noweb-ref epkgs
-  epkgs.vertico
-#+end_src
-
-#+begin_src elisp
-  (use-package vertico
-    :hook
-    (after-init . vertico-mode)
-    :bind
-    (:map vertico-map
-          ("C-j" . vertico-next)
-          ("C-k" . vertico-previous)
-          ("RET" . vertico-directory-enter)
-          ("DEL" . vertico-directory-delete-char)
-          ("M-DEL" . vertico-directory-delete-word))
-    :custom
-    (vertico-cycle t))
 #+end_src
 
 ** orderless
@@ -1093,7 +1093,7 @@ Completion are essential feature for modern text editor / IDE.
     (after-init . eglot-tempel-mode))
 #+end_src
 
-* LSP :g:e:d:
+* LSP
 
 #+begin_src elisp :tangle no :noweb-ref eldoc-box
   ("d" eldoc-box-help-at-point :name "document")

@@ -22,24 +22,24 @@ let
     epkgs.nerd-icons
     epkgs.doom-themes
     epkgs.doom-modeline
-    epkgs.spacious-padding
+    epkgs.corfu
+    epkgs.vertico
+    epkgs.vertico-posframe
     epkgs.marginalia
     epkgs.nerd-icons-completion
-    epkgs.pulsar
-    epkgs.golden-ratio
     epkgs.focus
-    epkgs.vertico-posframe
+    epkgs.golden-ratio
+    epkgs.spacious-padding
+    epkgs.pulsar
     epkgs.ryo-modal
     epkgs.avy
-    epkgs.harpoon
     epkgs.helpful
     epkgs.which-key
     epkgs.keycast
     epkgs.markdown-mode
     epkgs.otpp
+    epkgs.harpoon
     epkgs.consult
-    epkgs.corfu
-    epkgs.vertico
     epkgs.orderless
     epkgs.cape
     epkgs.tempel
