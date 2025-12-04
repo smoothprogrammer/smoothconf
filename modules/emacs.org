@@ -286,11 +286,13 @@ to my own liking.
 
 #+begin_src elisp :noweb yes
   (use-package ryo-modal
-    :bind ("<escape>" . smooth-escape)
-    :hook (after-init . global-ryo-modal-mode)
-    :after pulsar
-    :custom ((cursor-type 'bar)
-  		   (ryo-modal-cursor-type 'box))
+    :bind
+    ("<escape>" . smooth-escape)
+    :hook
+    (after-init . global-ryo-modal-mode)
+    :custom
+    (cursor-type 'bar)
+    (ryo-modal-cursor-type 'box)
     :config
     <<smooth-old-config>>
     <<smooth-config>>
@@ -355,7 +357,7 @@ to my own liking.
      ("\"" undefined))
 
     (ryo-modal-keys
-     ("<escape>" smooth-deactivate-anchor :first '(pulsar-pulse-line-red) :then '(keyboard-quit))
+     ("<escape>" smooth-keyboard-quit)
      ("`" undefined)
      ("~" undefined)
      ("!" undefined)
@@ -421,14 +423,23 @@ to my own liking.
 
   (defun smooth-normal-mode ()
     (interactive)
-    (pulsar-pulse-line-green)
+    (when (fboundp 'pulsar-pulse-line-green)
+  	(pulsar-pulse-line-green))
     (ryo-modal-mode 1))
 
   (defun smooth-insert-mode ()
     (interactive)
-    (pulsar-pulse-line-yellow)
+    (when (fboundp 'pulsar-pulse-line-yellow)
+  	(pulsar-pulse-line-yellow))
     (smooth-deactivate-anchor)
     (ryo-modal-mode 0))
+
+  (defun smooth-keyboard-quit ()
+    (interactive)
+    (when (fboundp 'pulsar-pulse-line-red)
+  	(pulsar-pulse-line-red))
+    (smooth-deactivate-anchor)
+    (keyboard-quit))
 
   (defun smooth-kill (count)
     (interactive "p")
