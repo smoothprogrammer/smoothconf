@@ -6,7 +6,6 @@
 
 * TODO Future
 
-+ more avy action (also move to its own section)
 + more tempel template (also move to its own section)
 + sql, nosql, redis client
 + consider using mwim
@@ -836,10 +835,6 @@ to my own liking.
   ("w l" windmove-right :then '(smooth-pulse-green))
 #+end_src
 
-#+begin_src elisp :tangle no :noweb-ref avy
-  (";" avy-goto-char-2 :then '(smooth-pulse-green))
-#+end_src
-
 #+begin_src elisp :tangle no :noweb-ref eglot
   ("g i" eglot-find-implementation :first '(smooth-deactivate-anchor))
 #+end_src
@@ -897,9 +892,9 @@ to my own liking.
    :name "help")
 #+end_src
 
-* TODO Advanced motion
+** smooth-avy
 
-** avy
+[[https://karthinks.com/software/avy-can-do-anything/][Avy can do anything]]. However, most of the time, I only use =avy= for jump only.
 
 #+begin_src nix :tangle no :noweb-ref epkgs
   epkgs.avy
@@ -908,18 +903,11 @@ to my own liking.
 #+begin_src elisp :noweb yes
   (use-package avy
     :ryo
-    <<avy>>
+    (";" avy-goto-char-2 :then '(smooth-pulse-green))
     :custom
-    (avy-timeout-seconds 0.3)
-    :config
-    (defun avy-action-helpful (pt)
-      (save-excursion
-        (goto-char pt)
-        (helpful-at-point))
-      (select-window
-       (cdr ( avy-ring 0)))
-      t)
-    (setf (alist-get ?H avy-dispatch-alist) 'avy-action-helpful))
+    (avy-single-candidate-jump nil)
+    (avy-style 'words)
+    (avy-dispatch-alist nil))
 #+end_src
 
 * Help system
