@@ -653,23 +653,32 @@ to my own liking.
     (setq smooth--anchor-p nil)
     (smooth-deactivate-mark))
 
+  (defun smooth-pulse-red ()
+    (when (fboundp 'pulsar-pulse-line-red)
+  	(pulsar-pulse-line-red)))
+
+  (defun smooth-pulse-green ()
+    (when (fboundp 'pulsar-pulse-line-green)
+  	(pulsar-pulse-line-green)))
+
+  (defun smooth-pulse-yellow ()
+    (when (fboundp 'pulsar-pulse-line-yellow)
+  	(pulsar-pulse-line-yellow)))
+
   (defun smooth-normal-mode ()
     (interactive)
-    (when (fboundp 'pulsar-pulse-line-green)
-  	(pulsar-pulse-line-green))
+    (smooth-pulse-green)
     (ryo-modal-mode 1))
 
   (defun smooth-insert-mode ()
     (interactive)
-    (when (fboundp 'pulsar-pulse-line-yellow)
-  	(pulsar-pulse-line-yellow))
+    (smooth-pulse-yellow)
     (smooth-deactivate-anchor)
     (ryo-modal-mode 0))
 
   (defun smooth-keyboard-quit ()
     (interactive)
-    (when (fboundp 'pulsar-pulse-line-red)
-  	(pulsar-pulse-line-red))
+    (smooth-pulse-red)
     (smooth-deactivate-anchor)
     (keyboard-quit))
 
