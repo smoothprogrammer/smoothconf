@@ -500,12 +500,12 @@ to my own liking.
      <<smooth-motion>>
      <<smooth-insert>>
      <<smooth-editing>>
+     <<smooth-goto>>
      )
 
     (ryo-modal-keys
      ("b" undefined)
      ("B" undefined)
-     ;; ("e" :name "flymake")
      ("E" undefined)
      ("f" undefined)
      ("F" undefined)
@@ -522,7 +522,6 @@ to my own liking.
      ("S" undefined)
      ("t" undefined)
      ("T" undefined)
-     ;; ("w" :name "windmove")
      ("W" undefined)
      ("x" execute-extended-command)
      ("X" undefined)
@@ -779,6 +778,13 @@ to my own liking.
 
 ** smooth-goto
 
+#+begin_src elisp :tangle no :noweb-ref smooth-goto
+  ("w h" windmove-left)
+  ("w j" windmove-down)
+  ("w k" windmove-up)
+  ("w l" windmove-right)
+#+end_src
+
 #+begin_src elisp :tangle no :noweb-ref eglot
   ("g i" eglot-find-implementation :first '(smooth-deactivate-anchor))
 #+end_src
@@ -846,17 +852,6 @@ to my own liking.
     :ryo
     <<harpoon>>
     )
-#+end_src
-
-** windmove
-
-#+begin_src elisp :noweb yes
-  (use-package windmove
-    :ryo
-    ("w h" windmove-left)
-    ("w j" windmove-down)
-    ("w k" windmove-up)
-    ("w l" windmove-right))
 #+end_src
 
 * Help system :SPC:h:
