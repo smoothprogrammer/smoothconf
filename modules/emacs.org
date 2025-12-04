@@ -274,6 +274,10 @@ Read the system path from shell.
 
 * TODO Smooth modal
 
+Coming from Vim, modal editing is a must. In Emacs, we have options like [[https://github.com/emacs-evil/evil][evil]],
+[[https://github.com/jyp/boon][boon]], and [[https://github.com/meow-edit/meow][meow]]. But I really like [[https://github.com/Kungsgeten/ryo-modal][ryo-modal]] where I can customize modal editing
+to my own liking.
+
 ** ryo-modal
 
 #+begin_src nix :tangle no :noweb-ref epkgs
