@@ -450,7 +450,7 @@ Focus on the current window.
     (advice-add 'windmove-down :after (lambda (&rest _) (golden-ratio)))
     (advice-add 'windmove-up :after (lambda (&rest _) (golden-ratio)))
     (advice-add 'windmove-right :after (lambda (&rest _) (golden-ratio)))
-    (advice-add 'avy-goto-char-timer :after (lambda (&rest _) (golden-ratio)))
+    (advice-add 'avy-goto-char-2 :after (lambda (&rest _) (golden-ratio)))
     (advice-add 'smooth/jump-backward :after (lambda (&rest _) (golden-ratio))))
 #+end_src
 
@@ -497,11 +497,6 @@ Visual indicator to help easily spot current line.
   (use-package pulsar
     :config
     ;; TODO: add keyword :pulse to ryo-modal for activating the pulse in that command.
-    (advice-add 'windmove-left :after (lambda (&rest _) (pulsar-pulse-line-red)))
-    (advice-add 'windmove-down :after (lambda (&rest _) (pulsar-pulse-line-red)))
-    (advice-add 'windmove-up :after (lambda (&rest _) (pulsar-pulse-line-red)))
-    (advice-add 'windmove-right :after (lambda (&rest _) (pulsar-pulse-line-red)))
-    (advice-add 'avy-goto-char-timer :after (lambda (&rest _) (pulsar-pulse-line-green)))
     (advice-add 'smooth/jump-backward :after (lambda (&rest _) (pulsar-pulse-line-red))))
 #+end_src
 
@@ -835,10 +830,14 @@ to my own liking.
 ** smooth-goto
 
 #+begin_src elisp :tangle no :noweb-ref smooth-goto
-  ("w h" windmove-left)
-  ("w j" windmove-down)
-  ("w k" windmove-up)
-  ("w l" windmove-right)
+  ("w h" windmove-left :then '(smooth-pulse-green))
+  ("w j" windmove-down :then '(smooth-pulse-green))
+  ("w k" windmove-up :then '(smooth-pulse-green))
+  ("w l" windmove-right :then '(smooth-pulse-green))
+#+end_src
+
+#+begin_src elisp :tangle no :noweb-ref avy
+  (";" avy-goto-char-2 :then '(smooth-pulse-green))
 #+end_src
 
 #+begin_src elisp :tangle no :noweb-ref eglot
@@ -906,10 +905,10 @@ to my own liking.
   epkgs.avy
 #+end_src
 
-#+begin_src elisp
+#+begin_src elisp :noweb yes
   (use-package avy
     :ryo
-    (";" avy-goto-char-2)
+    <<avy>>
     :custom
     (avy-timeout-seconds 0.3)
     :config
