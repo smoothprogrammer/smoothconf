@@ -449,8 +449,7 @@ Focus on the current window.
     (advice-add 'windmove-down :after (lambda (&rest _) (golden-ratio)))
     (advice-add 'windmove-up :after (lambda (&rest _) (golden-ratio)))
     (advice-add 'windmove-right :after (lambda (&rest _) (golden-ratio)))
-    (advice-add 'avy-goto-char-2 :after (lambda (&rest _) (golden-ratio)))
-    (advice-add 'smooth/jump-backward :after (lambda (&rest _) (golden-ratio))))
+    (advice-add 'avy-goto-char-2 :after (lambda (&rest _) (golden-ratio))))
 #+end_src
 
 ** spacious-padding
@@ -493,10 +492,8 @@ Visual indicator to help easily spot current line.
 #+end_src
 
 #+begin_src elisp
-  (use-package pulsar
-    :config
-    ;; TODO: add keyword :pulse to ryo-modal for activating the pulse in that command.
-    (advice-add 'smooth/jump-backward :after (lambda (&rest _) (pulsar-pulse-line-red))))
+  (use-package pulsar)
+  ;; TODO: add keyword :pulse to ryo-modal for activating the pulse in that command.
 #+end_src
 
 * TODO Smooth modal
@@ -747,30 +744,46 @@ to my own liking.
       (unless (smooth/modal-blacklisted-p)
         (ryo-modal-mode 1))))
 
-  (defvar smooth/pop-ring (make-ring 100)
-    "A ring of pop commands recorded from various jump systems.")
+  (defvar smooth-hist-backward-stack nil)
+  (defvar smooth-hist-forward-stack nil)
 
-  (defun smooth/record-pop (pop-fn)
-    "Store POP-FN into `smooth/pop-ring` for later use."
-    (ring-insert smooth/pop-ring pop-fn))
+  (defun smooth-hist-make-entry ()
+    (let* ((win (selected-window))
+  		 (buf (window-buffer win))
+  		 (pos (window-point win)))
+  	(list :window win :buffer buf :point pos)))
 
-  (defun smooth/jump-backward ()
-    "Execute the most recent pop command from `smooth/pop-ring`."
+  (defun smooth-hist-jump-to (entry)
+    (let ((win (plist-get entry :window))
+  		(buf (plist-get entry :buffer))
+  		(pos (plist-get entry :point)))
+  	(cond
+  	 ((window-live-p win)
+  	  (select-window win)
+  	  (switch-to-buffer buf)
+  	  (goto-char pos))
+  	 (t
+  	  (switch-to-buffer buf)
+  	  (goto-char pos)))))
+
+  (defun smooth-hist-record ()
     (interactive)
-    (unless (ring-empty-p smooth/pop-ring)
-      (let ((fn (ring-remove smooth/pop-ring 0)))
-        (call-interactively fn))))
+    (push (smooth-hist-make-entry) smooth-hist-backward-stack)
+    (setq smooth-hist-forward-stack nil))
 
-  (advice-add 'xref-push-marker-stack
-              :after (lambda (&rest _) (smooth/record-pop #'xref-pop-marker-stack)))
+  (defun smooth-hist-backward ()
+    (interactive)
+    (if (null smooth-hist-backward-stack)
+  	  (message "No older position")
+  	(push (smooth-hist-make-entry) smooth-hist-forward-stack)
+  	(smooth-hist-jump-to (pop smooth-hist-backward-stack))))
 
-  (advice-add 'avy-push-mark
-              :after (lambda (&rest _) (smooth/record-pop #'avy-pop-mark)))
-
-  ;; TODO: any push-mark from xref and avy also trigger general push-mark
-  ;; This is problematic as pushing the command in the ring will be doubled.
-  ;; (advice-add 'push-mark
-  ;;                    :after (lambda (&rest _) (smooth/record-pop #'pop-to-mark-command)))
+  (defun smooth-hist-forward ()
+    (interactive)
+    (if (null smooth-hist-forward-stack)
+  	  (message "No newer position")
+  	(push (smooth-hist-make-entry) smooth-hist-backward-stack)
+  	(smooth-hist-jump-to (pop smooth-hist-forward-stack))))
 #+end_src
 
 ** smooth-motion
