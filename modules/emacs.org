@@ -141,7 +141,7 @@ Less noise, more peace.
 
 Lastly, try to use lazy load =use-package=.
 
-* Smooth default
+* Better default
 
 Emacs are featureful out of the box, but has a bad default configuration. This
 is an attempt to make a smooth default without 3rd party packages.
@@ -219,8 +219,7 @@ Disable backup and lockfiles.
 Better main buffer default.
 
 #+begin_src elisp
-  (setopt sentence-end-double-space nil
-          kill-whole-line t)
+  (setopt sentence-end-double-space nil)
 #+end_src
 
 * Environment and Nix
@@ -305,24 +304,25 @@ Read the system path from shell.
      ("0" "M-0" :norepeat t)
      ("-" "M--" :norepeat t))
 
-    <<smooth-motion>>
-    <<smooth-insert>>
-    <<smooth-editing>>
-    <<smooth-goto>>
-    <<smooth-lsp>>
+    (ryo-modal-keys
+     <<smooth-motion>>
+     <<smooth-insert>>
+     <<smooth-editing>>
+     )
 
     (ryo-modal-keys
+     ("b" undefined)
      ("B" undefined)
-     ("C" undefined)
-     ("D" undefined)
      ;; ("e" :name "flymake")
      ("E" undefined)
+     ("f" undefined)
      ("F" undefined)
      ("G" undefined)
      ("m" undefined)
      ("M" undefined)
      ("n" undefined)
      ("N" undefined)
+     ("P" undefined)
      ("q" quit-window)
      ("Q" undefined)
      ("R" undefined)
@@ -351,7 +351,7 @@ Read the system path from shell.
      ("\"" undefined))
 
     (ryo-modal-keys
-     ("<escape>" smooth-keyboard-quit)
+     ("<escape>" smooth-deactivate-anchor :first '(pulsar-pulse-line-red) :then '(keyboard-quit))
      ("`" undefined)
      ("~" undefined)
      ("!" undefined)
@@ -376,13 +376,21 @@ Read the system path from shell.
 ** smooth-config
 
 #+begin_src elisp :tangle no :noweb-ref smooth-config
+  (defvar smooth--anchor-p nil)
+
   (defun smooth-activate-mark ()
     (push-mark (point) t t))
+
+  (defun smooth-activate-mark-if-no-anchor ()
+    (unless smooth--anchor-p
+  	(smooth-activate-mark)))
 
   (defun smooth-deactivate-mark ()
     (deactivate-mark))
 
-  (defvar smooth--anchor-p nil)
+  (defun smooth-deactivate-mark-if-no-anchor ()
+    (unless smooth--anchor-p
+  	(smooth-deactivate-mark)))
 
   (defun smooth-activate-anchor ()
     (interactive)
@@ -394,6 +402,7 @@ Read the system path from shell.
   (defun smooth-activate-anchor-line ()
     (interactive)
     (setq smooth--anchor-p t)
+    (message "Anchor set")
     (save-excursion
   	(when (use-region-p)
   	  (goto-char (mark)))
@@ -423,6 +432,30 @@ Read the system path from shell.
   	  (kill-region (region-beginning) (region-end))
   	(delete-char count t)))
 
+  (defun smooth-yank (count)
+    (interactive "p")
+    (if (use-region-p)
+  	  (kill-ring-save (region-beginning) (region-end))
+  	(kill-new (char-to-string (char-after)))))
+
+  (defun smooth-put (count)
+    (interactive "p")
+    (when (use-region-p)
+  	(delete-region (region-beginning) (region-end)))
+    (yank))
+
+  (defun smooth-open-line-below ()
+    (interactive)
+    (end-of-line)
+    (newline)
+    (indent-according-to-mode))
+
+  (defun smooth-open-line-above ()
+    (interactive)
+    (beginning-of-line)
+    (open-line 1)
+    (indent-according-to-mode))
+
   (defun smooth-escape ()
     (interactive)
     (cond
@@ -438,12 +471,6 @@ Read the system path from shell.
 
      ;; 3. Enter ryo-modal-mode
      (t (smooth-normal-mode))))
-
-  (defun smooth-keyboard-quit ()
-    (interactive)
-    (pulsar-pulse-line-red)
-    (smooth-deactivate-anchor)
-    (keyboard-quit))
 #+end_src
 
 #+begin_src elisp :tangle no :noweb-ref smooth-old-config
@@ -498,280 +525,76 @@ Read the system path from shell.
 
 ** smooth-motion
 
-#+begin_src elisp :tangle no :noweb yes :noweb-ref smooth-motion
-  <<defun-smooth-motion>>
+#+begin_src elisp :tangle no :noweb-ref smooth-motion
+  ("%" mark-whole-buffer :first '(smooth-deactivate-anchor))
+  ("v" smooth-activate-anchor)
+  ("V" smooth-activate-anchor-line)
+  ("," pop-to-mark-command :then '(smooth-deactivate-anchor))
 
-  (ryo-modal-keys
-   ("v" smooth-activate-anchor)
-   ("V" smooth-activate-anchor-line)
-   ("," smooth-back))
+  ("h" backward-char :first '(smooth-deactivate-mark-if-no-anchor))
+  ("j" next-line :first '(smooth-deactivate-mark-if-no-anchor))
+  ("k" previous-line :first '(smooth-deactivate-mark-if-no-anchor))
+  ("l" forward-char :first '(smooth-deactivate-mark-if-no-anchor))
 
-  (ryo-modal-keys
-   ("h" smooth-left)
-   ("j" smooth-down)
-   ("k" smooth-up)
-   ("l" smooth-right))
+  ("H" backward-word :first '(smooth-activate-mark-if-no-anchor))
+  ("J" forward-paragraph :first '(smooth-activate-mark-if-no-anchor))
+  ("K" backward-paragraph :first '(smooth-activate-mark-if-no-anchor))
+  ("L" forward-word :first '(smooth-activate-mark-if-no-anchor))
 
-  (ryo-modal-keys
-   ("b" smooth-word-left)
-   ("f" smooth-word-right))
-
-  (ryo-modal-keys
-   ("H" smooth-line-left)
-   ("J" smooth-paragraph-down)
-   ("K" smooth-paragraph-up)
-   ("L" smooth-line-right))
-
-  (ryo-modal-keys
-   ("%" mark-whole-buffer :first '(smooth-deactivate-anchor)))
-#+end_src
-
-#+begin_src elisp :tangle no :noweb-ref defun-smooth-motion
-  (defun smooth-back ()
-    (interactive)
-    (pop-to-mark-command)
-    (smooth-deactivate-anchor))
-
-  (defun smooth-left (count)
-    (interactive "p")
-    (unless smooth--anchor-p
-  	(smooth-deactivate-mark))
-    (backward-char count))
-
-  (defun smooth-down (count)
-    (interactive "p")
-    (unless smooth--anchor-p
-  	(smooth-deactivate-mark))
-    (next-line count))
-
-  (defun smooth-up (count)
-    (interactive "p")
-    (unless smooth--anchor-p
-  	(smooth-deactivate-mark))
-    (previous-line count))
-
-  (defun smooth-right (count)
-    (interactive "p")
-    (unless smooth--anchor-p
-  	(smooth-deactivate-mark))
-    (forward-char count))
-
-  (defun smooth-word-left (count)
-    (interactive "p")
-    (unless smooth--anchor-p
-  	(smooth-activate-mark))
-    (backward-word count))
-
-  (defun smooth-word-right (count)
-    (interactive "p")
-    (unless smooth--anchor-p
-  	(smooth-activate-mark))
-    (forward-word count))
-
-  (defun smooth-line-left (count)
-    (interactive "p")
-    (unless smooth--anchor-p
-  	(smooth-activate-mark))
-    (beginning-of-line count))
-
-  (defun smooth-line-right (count)
-    (interactive "p")
-    (unless smooth--anchor-p
-  	(smooth-activate-mark))
-    (end-of-line count))
-
-  (defun smooth-paragraph-down (count)
-    (interactive "p")
-    (unless smooth--anchor-p
-  	(smooth-activate-mark))
-    (forward-paragraph count))
-
-  (defun smooth-paragraph-up (count)
-    (interactive "p")
-    (unless smooth--anchor-p
-  	(smooth-activate-mark))
-    (backward-paragraph count))
+  ("g h" move-beginning-of-line :first '(smooth-activate-mark-if-no-anchor))
+  ("g j" end-of-buffer :first '(smooth-activate-mark-if-no-anchor))
+  ("g k" beginning-of-buffer :first '(smooth-activate-mark-if-no-anchor))
+  ("g l" move-end-of-line :first '(smooth-activate-mark-if-no-anchor))
 #+end_src
 
 ** smooth-insert
 
-#+begin_src elisp :tangle no :noweb yes :noweb-ref smooth-insert
-  <<defun-smooth-insert>>
+#+begin_src elisp :tangle no :noweb-ref smooth-insert
+  ("i" smooth-insert-mode)
+  ("a" smooth-insert-mode :first '(forward-char))
+  ("o" smooth-insert-mode :first '(smooth-open-line-below))
+  ("c" smooth-insert-mode :first '(smooth-kill))
 
-  (ryo-modal-keys
-   ("i" smooth-insert)
-   ("a" smooth-append)
-   ("o" smooth-open-line-below)
-   ("c" smooth-change))
-
-  (ryo-modal-keys
-   ("I" smooth-insert-beginning)
-   ("A" smooth-append-end)
-   ("O" smooth-open-line-above))
-#+end_src
-
-#+begin_src elisp :tangle no :noweb-ref defun-smooth-insert
-  (defun smooth-insert ()
-    (interactive)
-    (smooth-insert-mode))
-
-  (defun smooth-insert-beginning ()
-    (interactive)
-    (beginning-of-line)
-    (smooth-insert-mode))
-
-  (defun smooth-append ()
-    (interactive)
-    (forward-char)
-    (smooth-insert-mode))
-
-  (defun smooth-append-end ()
-    (interactive)
-    (end-of-line)
-    (smooth-insert-mode))
-
-  (defun smooth-open-line-below ()
-    (interactive)
-    (end-of-line)
-    (open-line 1)
-    (forward-line)
-    (indent-according-to-mode)
-    (smooth-insert-mode))
-
-  (defun smooth-open-line-above ()
-    (interactive)
-    (beginning-of-line)
-    (open-line 1)
-    (indent-according-to-mode)
-    (smooth-insert-mode))
-
-  (defun smooth-change (count)
-    (interactive "p")
-    (smooth-kill count)
-    (smooth-insert-mode))
+  ("I" smooth-insert-mode :first '(move-beginning-of-line))
+  ("A" smooth-insert-mode :first '(move-end-of-line))
+  ("O" smooth-insert-mode :first '(smooth-open-line-above))
+  ("C" smooth-insert-mode :first '(kill-line))
 #+end_src
 
 ** smooth-editing
 
-#+begin_src elisp :tangle no :noweb yes :noweb-ref smooth-editing
-  <<defun-smooth-editing>>
-
-  (ryo-modal-keys
-   ("u" smooth-undo)
-   ("U" smooth-redo)
-   ("y" smooth-yank)
-   ("p" smooth-put)
-   ("P" smooth-put-menu)
-   ("d" smooth-delete))
+#+begin_src elisp :tangle no :noweb-ref smooth-editing
+  ("y" smooth-yank :then '(smooth-deactivate-mark))
+  ("p" smooth-put :then '(smooth-deactivate-mark))
+  ("u" undo-only :then '(smooth-deactivate-anchor))
+  ("U" undo-redo :then '(smooth-deactivate-anchor))
+  ("d" smooth-kill :then '(smooth-deactivate-anchor))
+  ("D" kill-line :then '(smooth-deactivate-anchor))
 #+end_src
 
-#+begin_src elisp :tangle no :noweb-ref defun-smooth-editing
-  (defun smooth-undo ()
-    (interactive)
-    (undo-only)
-    (smooth-deactivate-anchor))
-
-  (defun smooth-redo ()
-    (interactive)
-    (undo-redo)
-    (smooth-deactivate-anchor))
-
-  (defun smooth-yank (count)
-    (interactive "p")
-    (if (use-region-p)
-  	  (kill-ring-save (region-beginning) (region-end))
-  	(kill-new (char-to-string (char-after))))
-    (smooth-deactivate-anchor))
-
-  (defun smooth-put (count)
-    (interactive "p")
-    (when (use-region-p)
-  	(delete-region (region-beginning) (region-end)))
-    (yank)
-    (smooth-deactivate-anchor))
-
-  (defun smooth-put-menu (count)
-    (interactive "p")
-    (when (use-region-p)
-  	(delete-region (region-beginning) (region-end)))
-    (if (fboundp 'consult-yank-pop)
-  	  (consult-yank-pop)
-  	(yank-pop)))
-
-  (defun smooth-delete (count)
-    (interactive "p")
-    (smooth-kill count)
-    (smooth-deactivate-anchor))
+#+begin_src elisp :tangle no :noweb-ref eglot
+  ("r" eglot-rename :first '(smooth-deactivate-anchor))
 #+end_src
 
 ** smooth-goto
 
-#+begin_src elisp :tangle no :noweb yes :noweb-ref smooth-goto
-  <<defun-smooth-goto>>
-
-  (ryo-modal-keys
-   ("g h" smooth-goto-left)
-   ("g j" smooth-goto-down)
-   ("g k" smooth-goto-up)
-   ("g l" smooth-goto-right))
+#+begin_src elisp :tangle no :noweb-ref eglot
+  ("g i" eglot-find-implementation :first '(smooth-deactivate-anchor))
 #+end_src
 
-#+begin_src elisp :tangle no :noweb-ref defun-smooth-goto
-  (defun smooth-goto-left ()
-    (interactive)
-    (unless smooth--anchor-p
-  	(smooth-deactivate-mark))
-    (beginning-of-line))
-
-  (defun smooth-goto-down ()
-    (interactive)
-    (unless smooth--anchor-p
-  	(smooth-deactivate-mark))
-    (end-of-buffer))
-
-  (defun smooth-goto-up ()
-    (interactive)
-    (unless smooth--anchor-p
-  	(smooth-deactivate-mark))
-    (beginning-of-buffer))
-
-  (defun smooth-goto-right ()
-    (interactive)
-    (unless smooth--anchor-p
-  	(smooth-deactivate-mark))
-    (end-of-line))
+#+begin_src elisp :tangle no :noweb-ref xref
+  ("g d" xref-find-definitions :first '(smooth-deactivate-anchor))
+  ("g r" xref-find-references :first '(smooth-deactivate-anchor))
 #+end_src
 
-** smooth-lsp
+#+begin_src elisp :tangle no :noweb-ref consult
+  ("g m" consult-imenu :first '(smooth-deactivate-anchor))
+  ("g e" consult-flymake :first '(smooth-deactivate-anchor))
+#+end_src
 
-#+begin_src elisp :tangle no :noweb-ref smooth-lsp
-  (with-eval-after-load 'eglot
-    (ryo-modal-keys
-     ("r" eglot-rename :first '(smooth-deactivate-anchor))
-     ("g i" eglot-find-implementation :first '(smooth-deactivate-anchor))))
-
-  (with-eval-after-load 'xref
-    (ryo-modal-keys
-     ("g d" xref-find-definitions :first '(smooth-deactivate-anchor))
-     ("g r" xref-find-references :first '(smooth-deactivate-anchor))))
-
-  (with-eval-after-load 'imenu
-    (defun smooth-goto-menu ()
-  	(interactive)
-  	(if (fboundp 'consult-imenu)
-  		(consult-imenu)
-  	  (imenu)))
-    (ryo-modal-keys
-     ("g m" smooth-goto-menu :first '(smooth-deactivate-anchor))))
-
-  (with-eval-after-load 'flymake
-    (defun smooth-goto-error-menu ()
-  	(interactive)
-  	(if (fboundp 'consult-flymake)
-  		(consult-flymake)
-  	  (flymake-menu)))
-    (ryo-modal-keys
-     ("g e" smooth-goto-error-menu :first '(smooth-deactivate-anchor))))
+#+begin_src elisp :tangle no :noweb-ref flymake
+  ("e j" flymake-goto-next-error :name "goto next error")
+  ("e k" flymake-goto-prev-error :name "goto prev error")
 #+end_src
 
 * Movement and selection :h:j:k:l:f:g:v:w:semicolon:
@@ -1143,6 +966,8 @@ Completion are essential feature for modern text editor / IDE.
 
 #+begin_src elisp :noweb yes
   (use-package consult
+    :ryo
+    <<consult>>
     :custom
     (xref-show-xrefs-function #'consult-xref)
     (xref-show-definitions-function #'consult-xref))
@@ -1254,6 +1079,8 @@ system path and configure the following variable:
 
 #+begin_src elisp :noweb yes
   (use-package eglot
+    :ryo
+    <<eglot>>
     :hook
     (prog-mode . eglot-ensure)
     (prog-mode . (lambda () (add-hook 'before-save-hook 'eglot-format-buffer)))
@@ -1310,11 +1137,20 @@ Boost LSP performance with =eglot-booster=.
 
 ** flymake
 
-#+begin_src elisp
+#+begin_src elisp :noweb yes
   (use-package flymake
     :ryo
-    ("e j" flymake-goto-next-error :name "goto next error")
-    ("e k" flymake-goto-prev-error :name "goto prev error"))
+    <<flymake>>
+    )
+#+end_src
+
+** xref
+
+#+begin_src elisp :noweb yes
+  (use-package xref
+    :ryo
+    <<xref>>
+    )
 #+end_src
 
 * Programming language
