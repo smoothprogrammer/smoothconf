@@ -540,7 +540,7 @@ to my own liking.
           bindings)))
 
   (define-minor-mode smooth-mode
-    "Toggle smooth modal editing.")
+    "Toggle Smooth modal editing (Smooth mode).")
 
   (define-global-minor-mode global-smooth-mode smooth-mode
     (lambda () (smooth-mode 1)))
