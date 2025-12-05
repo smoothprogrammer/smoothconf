@@ -6,6 +6,7 @@
 
 * TODO Future
 
++ consider using punch-line
 + more tempel template (also move to its own section)
 + sql, nosql, redis client
 + consider using mwim
@@ -144,6 +145,12 @@ Lastly, try to use lazy load =use-package=.
 
 Emacs are featureful out of the box, but has a bad default configuration. This
 is an attempt to make a smooth default without 3rd party packages.
+
+Enable lexical binding.
+
+#+begin_src elisp
+  ;; -*- lexical-binding: t; -*-
+#+end_src
 
 Smooth zooming with =0 - += and its shift counter part key.
 
@@ -501,6 +508,47 @@ Visual indicator to help easily spot current line.
 Coming from Vim, modal editing is a must. In Emacs, we have options like [[https://github.com/emacs-evil/evil][evil]],
 [[https://github.com/jyp/boon][boon]], and [[https://github.com/meow-edit/meow][meow]]. But I really like [[https://github.com/Kungsgeten/ryo-modal][ryo-modal]] where I can customize modal editing
 to my own liking.
+
+** smooth
+
+#+begin_src elisp
+  (defvar smooth-mode-map (make-sparse-keymap))
+
+  (defun smooth--pulse (pulse)
+    (when (memq pulse '(red green yellow))
+      (let ((fn (intern (format "pulsar-pulse-line-%s" pulse))))
+        (when (fboundp fn)
+          (funcall fn)))))
+
+  (defmacro smooth-keys (&rest bindings)
+    `(progn
+       ,@(mapcar
+          (lambda (binding)
+            (let* ((key (nth 0 binding))
+                   (cmd (nth 1 binding))
+                   (args (cddr binding))
+                   (name (plist-get args :name))
+                   (pulse (plist-get args :pulse)))
+              `(progn
+                 (fset ',name
+                       (lambda ()
+                         (interactive)
+                         ,@(when pulse
+                             `((smooth--pulse ',pulse)))
+                         (call-interactively #',cmd)))
+                 (keymap-set smooth-mode-map ,key ',name))))
+          bindings)))
+
+  (define-minor-mode smooth-mode
+    "Toggle smooth modal editing.")
+
+  (define-global-minor-mode global-smooth-mode smooth-mode
+    (lambda () (smooth-mode 1)))
+
+  (smooth-keys
+   ("x" self-insert-command :name my-custom-command :pulse red)
+   ("y" self-insert-command :name my-custom-command :pulse green))
+#+end_src
 
 ** ryo-modal
 
