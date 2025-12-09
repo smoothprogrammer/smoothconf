@@ -316,6 +316,7 @@ and low contrast is a sweet spot for me.
 
 #+begin_src elisp
   (use-package doom-themes
+    :demand t
     :config
     (load-theme 'doom-solarized-light t)
     (doom-themes-org-config))
