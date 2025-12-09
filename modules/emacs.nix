@@ -31,11 +31,10 @@ let
     epkgs.golden-ratio
     epkgs.spacious-padding
     epkgs.pulsar
-    epkgs.ryo-modal
-    epkgs.avy
+    epkgs.meow
+    epkgs.evil
     epkgs.helpful
     epkgs.which-key
-    epkgs.keycast
     epkgs.markdown-mode
     epkgs.otpp
     epkgs.harpoon
@@ -85,6 +84,8 @@ let
     epkgs.blamer
     epkgs.ledger-mode
     epkgs.jwt
+    epkgs.keycast
+    epkgs.avy
     ]);
 
   cfg = config.mod.emacs;

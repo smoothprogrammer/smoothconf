@@ -139,7 +139,7 @@ Less noise, more peace.
           use-short-answers t)
 #+end_src
 
-Lastly, try to use lazy load =use-package=.
+Lastly, defer loading a package using =use-package=.
 
 * Better default
 
@@ -243,6 +243,8 @@ Read the system path from shell.
 
 #+begin_src elisp
   (use-package exec-path-from-shell
+    :custom
+    (exec-path-from-shell-warn-duration-millis 500)
     :config
     (when (or (memq window-system '(mac ns x)) (daemonp))
       (dolist (var '("PATH"
@@ -272,8 +274,7 @@ Read the system path from shell.
 
 #+begin_src elisp
   (use-package envrc
-    :hook
-    (after-init . envrc-global-mode)
+    :hook (after-init . envrc-global-mode)
     :custom
     (envrc-debug t))
 #+end_src
@@ -326,8 +327,7 @@ Doom modeline to complement the themes.
 
 #+begin_src elisp
   (use-package doom-modeline
-    :hook
-    (after-init . doom-modeline-mode)
+    :hook (after-init . doom-modeline-mode)
     :custom
     (doom-modeline-workspace-name nil))
 #+end_src
@@ -499,8 +499,8 @@ Visual indicator to help easily spot current line.
 #+end_src
 
 #+begin_src elisp
-  (use-package pulsar)
-  ;; TODO: add keyword :pulse to ryo-modal for activating the pulse in that command.
+  (use-package pulsar
+    :defer t)
 #+end_src
 
 * TODO Smooth modal
@@ -509,249 +509,134 @@ Coming from Vim, modal editing is a must. In Emacs, we have options like [[https
 [[https://github.com/jyp/boon][boon]], and [[https://github.com/meow-edit/meow][meow]]. But I really like [[https://github.com/Kungsgeten/ryo-modal][ryo-modal]] where I can customize modal editing
 to my own liking.
 
-** smooth
-
-#+begin_src elisp
-  (defvar smooth-mode-map (make-sparse-keymap))
-
-  (defun smooth--pulse (pulse)
-    (when (memq pulse '(red green yellow))
-      (let ((fn (intern (format "pulsar-pulse-line-%s" pulse))))
-        (when (fboundp fn)
-          (funcall fn)))))
-
-  (defmacro smooth-keys (&rest bindings)
-    `(progn
-       ,@(mapcar
-          (lambda (binding)
-            (let* ((key (nth 0 binding))
-                   (cmd (nth 1 binding))
-                   (args (cddr binding))
-                   (name (plist-get args :name))
-                   (pulse (plist-get args :pulse)))
-              `(progn
-                 (fset ',name
-                       (lambda ()
-                         (interactive)
-                         ,@(when pulse
-                             `((smooth--pulse ',pulse)))
-                         (call-interactively #',cmd)))
-                 (keymap-set smooth-mode-map ,key ',name))))
-          bindings)))
-
-  (define-minor-mode smooth-mode
-    "Toggle Smooth modal editing (Smooth mode).")
-
-  (define-global-minor-mode global-smooth-mode smooth-mode
-    (lambda () (smooth-mode 1)))
-
-  (smooth-keys
-   ("x" self-insert-command :name my-custom-command :pulse red)
-   ("y" self-insert-command :name my-custom-command :pulse green))
-#+end_src
-
-** ryo-modal
+We'll use meow and evil as a learning source and reference.
 
 #+begin_src nix :tangle no :noweb-ref epkgs
-  epkgs.ryo-modal
+  epkgs.meow
+  epkgs.evil
 #+end_src
+
+#+begin_src elisp
+  (use-package meow
+    :defer t)
+  (use-package evil
+    :defer t)
+#+end_src
+
+** smooth
 
 #+begin_src elisp :noweb yes
-  (use-package ryo-modal
-    :bind
-    ("<escape>" . smooth-escape)
-    :hook
-    (after-init . global-ryo-modal-mode)
-    :custom
-    (cursor-type 'bar)
-    (ryo-modal-cursor-type 'box)
-    :config
-    <<smooth-old-config>>
-    <<smooth-config>>
+  (defvar smooth--state nil)
 
-    (ryo-modal-keys
-     ("1" "M-1" :norepeat t)
-     ("2" "M-2" :norepeat t)
-     ("3" "M-3" :norepeat t)
-     ("4" "M-4" :norepeat t)
-     ("5" "M-5" :norepeat t)
-     ("6" "M-6" :norepeat t)
-     ("7" "M-7" :norepeat t)
-     ("8" "M-8" :norepeat t)
-     ("9" "M-9" :norepeat t)
-     ("0" "M-0" :norepeat t)
-     ("-" "M--" :norepeat t))
+  (defvar smooth-normal-map (make-sparse-keymap))
+  (defvar smooth-insert-map (make-sparse-keymap))
 
-    (ryo-modal-keys
-     <<smooth-motion>>
-     <<smooth-insert>>
-     <<smooth-editing>>
-     <<smooth-goto>>
-     )
+  (defun smooth--refresh-keymap ()
+    (let ((entry (assq 'smooth-mode minor-mode-overriding-map-alist)))
+      (cond
+       ((eq smooth--state 'normal)
+        (if entry
+            (setcdr entry smooth-normal-map)
+          (push `(smooth-mode . ,smooth-normal-map) minor-mode-overriding-map-alist)))
+       ((eq smooth--state 'insert)
+        (if entry
+            (setcdr entry smooth-insert-map)
+          (push `(smooth-mode . ,smooth-insert-map) minor-mode-overriding-map-alist)))
+       (t
+        (setq minor-mode-overriding-map-alist
+              (assq-delete-all 'smooth-mode minor-mode-overriding-map-alist))))))
 
-    (ryo-modal-keys
-     ("b" undefined)
-     ("B" undefined)
-     ("E" undefined)
-     ("f" undefined)
-     ("F" undefined)
-     ("G" undefined)
-     ("m" undefined)
-     ("M" undefined)
-     ("n" undefined)
-     ("N" undefined)
-     ("P" undefined)
-     ("q" quit-window)
-     ("Q" undefined)
-     ("R" undefined)
-     ("s" undefined)
-     ("S" undefined)
-     ("t" undefined)
-     ("T" undefined)
-     ("W" undefined)
-     ("x" execute-extended-command)
-     ("X" undefined)
-     ("Y" undefined)
-     ("z" undefined)
-     ("Z" undefined))
-
-    (ryo-modal-keys
-     ("(" undefined)
-     (")" undefined)
-     ("{" undefined)
-     ("}" undefined)
-     ("[" undefined)
-     ("]" undefined)
-     ("<" undefined)
-     (">" undefined)
-     ("'" undefined)
-     ("\"" undefined))
-
-    (ryo-modal-keys
-     ("<escape>" smooth-keyboard-quit)
-     ("`" undefined)
-     ("~" undefined)
-     ("!" undefined)
-     ("@" undefined)
-     ("#" undefined)
-     ("$" undefined)
-     ("^" undefined)
-     ("&" undefined)
-     ("*" undefined)
-     ("_" undefined)
-     ("=" undefined)
-     ("+" undefined)
-     ("\\" undefined)
-     ("|" undefined)
-     ;; (";" :name "avy")
-     (":" undefined)
-     ("." undefined)
-     ("/" undefined)
-     ("?" undefined)))
-#+end_src
-
-** smooth-config
-
-#+begin_src elisp :tangle no :noweb-ref smooth-config
-  (defvar smooth--anchor-p nil)
-
-  (defun smooth-activate-mark ()
-    (push-mark (point) t t))
-
-  (defun smooth-activate-mark-if-no-anchor ()
-    (unless smooth--anchor-p
-  	(smooth-activate-mark)))
-
-  (defun smooth-deactivate-mark ()
-    (deactivate-mark))
-
-  (defun smooth-deactivate-mark-if-no-anchor ()
-    (unless smooth--anchor-p
-  	(smooth-deactivate-mark)))
-
-  (defun smooth-activate-anchor ()
+  (defun smooth-enter-normal-state ()
     (interactive)
-    (setq smooth--anchor-p t)
-    (message "Anchor set")
-    (unless (use-region-p)
-  	(smooth-activate-mark)))
+    (setq-local smooth--state 'normal)
+    (setq-local cursor-type 'bar)
+    (focus-mode 0)
+    (smooth--refresh-keymap))
 
-  (defun smooth-activate-anchor-line ()
+  (defun smooth-enter-insert-state ()
     (interactive)
-    (setq smooth--anchor-p t)
-    (message "Anchor set")
-    (save-excursion
-  	(when (use-region-p)
-  	  (goto-char (mark)))
-  	(beginning-of-line)
-  	(smooth-activate-mark))
-    (forward-line))
+    (setq-local smooth--state 'insert)
+    (setq-local cursor-type 'bar)
+    (focus-mode 1)
+    (smooth--refresh-keymap))
 
-  (defun smooth-deactivate-anchor ()
+  (defun smooth-reset-state ()
+    (kill-local-variable 'smooth--state)
+    (kill-local-variable 'cursor-type)
+    (smooth--refresh-keymap))
+
+  (defvar smooth--hist-backward-stack nil)
+  (defvar smooth--hist-forward-stack nil)
+
+  (defun smooth--hist-make-entry ()
+    (let* ((win (selected-window))
+  		 (buf (window-buffer win))
+  		 (pos (window-point win)))
+      (list :window win :buffer buf :point pos)))
+
+  (defun smooth--hist-jump-to (entry)
+    (let ((win (plist-get entry :window))
+  		(buf (plist-get entry :buffer))
+  		(pos (plist-get entry :point)))
+      (cond
+       ((window-live-p win)
+        (select-window win)
+        (switch-to-buffer buf)
+        (goto-char pos))
+       (t
+        (switch-to-buffer buf)
+        (goto-char pos)))))
+
+  (defun smooth--hist-record ()
     (interactive)
-    (setq smooth--anchor-p nil)
-    (smooth-deactivate-mark))
+    (push (smooth--hist-make-entry) smooth--hist-backward-stack)
+    (setq smooth--hist-forward-stack nil))
 
-  (defun smooth-pulse-red ()
-    (when (fboundp 'pulsar-pulse-line-red)
-  	(pulsar-pulse-line-red)))
-
-  (defun smooth-pulse-green ()
-    (when (fboundp 'pulsar-pulse-line-green)
-  	(pulsar-pulse-line-green)))
-
-  (defun smooth-pulse-yellow ()
-    (when (fboundp 'pulsar-pulse-line-yellow)
-  	(pulsar-pulse-line-yellow)))
-
-  (defun smooth-normal-mode ()
+  (defun smooth--hist-backward ()
     (interactive)
-    (smooth-pulse-green)
-    (ryo-modal-mode 1))
+    (if (null smooth--hist-backward-stack)
+        (message "No older position")
+      (push (smooth--hist-make-entry) smooth--hist-forward-stack)
+      (smooth--hist-jump-to (pop smooth--hist-backward-stack))))
 
-  (defun smooth-insert-mode ()
+  (defun smooth--hist-forward ()
     (interactive)
-    (smooth-pulse-yellow)
-    (smooth-deactivate-anchor)
-    (ryo-modal-mode 0))
+    (if (null smooth--hist-forward-stack)
+        (message "No newer position")
+      (push (smooth--hist-make-entry) smooth--hist-backward-stack)
+      (smooth--hist-jump-to (pop smooth--hist-forward-stack))))
 
-  (defun smooth-keyboard-quit ()
-    (interactive)
-    (smooth-pulse-red)
-    (smooth-deactivate-anchor)
-    (keyboard-quit))
-
-  (defun smooth-kill (count)
-    (interactive "p")
-    (if (use-region-p)
-  	  (kill-region (region-beginning) (region-end))
-  	(delete-char count t)))
-
-  (defun smooth-yank (count)
-    (interactive "p")
-    (if (use-region-p)
-  	  (kill-ring-save (region-beginning) (region-end))
-  	(kill-new (char-to-string (char-after)))))
-
-  (defun smooth-put (count)
-    (interactive "p")
-    (when (use-region-p)
-  	(delete-region (region-beginning) (region-end)))
-    (yank))
-
-  (defun smooth-open-line-below ()
+  (defun smooth--open-line-below ()
     (interactive)
     (end-of-line)
     (newline)
     (indent-according-to-mode))
 
-  (defun smooth-open-line-above ()
+  (defun smooth--open-line-above ()
     (interactive)
     (beginning-of-line)
     (open-line 1)
     (indent-according-to-mode))
 
-  (defun smooth-escape ()
+  (defun smooth--yank (count)
+    (interactive "p")
+    (if (use-region-p)
+        (kill-ring-save (region-beginning) (region-end))
+      (kill-new (char-to-string (char-after)))))
+
+  (defun smooth--put (count)
+    (interactive "p")
+    (when (use-region-p)
+      (delete-region (region-beginning) (region-end)))
+    (yank))
+
+  (defun smooth--kill (count)
+    (interactive "p")
+    (if (use-region-p)
+        (kill-region (region-beginning) (region-end))
+      (delete-char count t)))
+
+  (defun smooth--escape ()
     (interactive)
     (cond
      ;; 1. Corfu popup is visible
@@ -765,210 +650,283 @@ to my own liking.
         (minibuffer-keyboard-quit)))
 
      ;; 3. Enter ryo-modal-mode
-     (t (smooth-normal-mode))))
+     (t (smooth-enter-normal-state))))
+
+  (defun smooth--pulse (pulse)
+    (when (memq pulse '(red green blue))
+      (let ((fn (intern (format "pulsar-pulse-line-%s" pulse))))
+        (when (fboundp fn)
+          (funcall fn)))))
+
+  (defun smooth--resolve-select (select)
+    (cl-case select
+      (activate
+       (push-mark (point) t t))
+      (deactivate
+       (deactivate-mark))
+      (extend
+       (unless (use-region-p) (push-mark (point) t t)))))
+
+  (defmacro smooth-keys (&rest forms)
+    (let ((keymap nil)
+  		(expansions nil))
+      (dolist (form forms)
+        (unless (consp form)
+  		(error "smooth-keys: invalid form: %S" form))
+        (let ((state (plist-get form :state)))
+  		(cond
+  		 (state
+            (setq keymap (intern (format "smooth-%s-map" state))))
+  		 (t
+  		  (unless keymap
+  			(error "smooth-keys: key binding appears before setting state"))
+  		  (let* ((key (nth 0 form))
+  				 (cmd (nth 1 form))
+  				 (args (cddr form))
+  				 (name (plist-get args :name))
+  				 (select (plist-get args :select))
+  				 (insert (plist-get args :insert))
+  				 (record (plist-get args :record))
+  				 (pulse (plist-get args :pulse)))
+  			(if (not name)
+  				(push `(keymap-set ,keymap ,key #',cmd) expansions)
+  			  (let ((sym (intern (format "smooth:%s" name))))
+  				(push
+  				 `(progn
+  					(fset ',sym
+  						  (lambda ()
+  							(interactive)
+  							,@(when (and pulse (eq cmd 'keyboard-quit))
+  								`((smooth--pulse ',pulse)))
+  							,@(when (and select (not insert))
+  								`((smooth--resolve-select ',select)))
+  							,@(when (and record (not insert))
+  								`((smooth--hist-record)))
+  							,@(unless (eq cmd 'ignore)
+  								`((call-interactively #',cmd)))
+  							,@(when insert
+  								`((smooth--resolve-select 'deactivate)
+  								  (smooth-enter-insert-state)))
+  							,@(when (and pulse (not (eq cmd 'keyboard-quit)))
+  								`((smooth--pulse ',pulse)))))
+  					(keymap-set ,keymap ,key #',sym))
+  				 expansions))))))))
+      `(progn ,@(nreverse expansions))))
+
+  (with-eval-after-load 'use-package-core
+    (unless (member :smooth use-package-keywords)
+      (setq use-package-keywords (use-package-list-insert :smooth use-package-keywords :bind)))
+    (when (boundp 'use-package-deferring-keywords)
+      (add-to-list 'use-package-deferring-keywords :smooth t))
+    (defun use-package-normalize/:smooth (name keyword args)
+      args)
+    (defun use-package-handler/:smooth (name keyword args rest state)
+      (use-package-concat
+       (use-package-process-keywords name rest state)
+       `((smooth-keys ,@args)))))
+
+  (define-minor-mode smooth-mode
+    "Toggle Smooth modal editing (Smooth mode)."
+    :keymap nil
+    (if smooth-mode
+  	  (if (and (minibufferp))
+  		  (smooth-enter-insert-state)
+  		(smooth-enter-normal-state))
+      (smooth-reset-state)))
+
+  (define-global-minor-mode global-smooth-mode smooth-mode
+    (lambda ()
+      (smooth-mode 1)))
+
+  (smooth-keys
+   <<smooth-default>>
+   <<smooth-motion>>
+   <<smooth-insert>>
+   <<smooth-editing>>
+   )
+
+  (add-hook 'after-init-hook 'global-smooth-mode)
 #+end_src
 
-#+begin_src elisp :tangle no :noweb-ref smooth-old-config
-  (defvar smooth/modal-blacklist
-    '((predicate . minibufferp)
-      (mode . eshell-mode)
-      (mode . term-mode)
-      (mode . vterm-mode)
-      (mode . vc-git-log-edit-mode))
-    "Alist of conditions where `ryo-modal-mode` should not be enabled.")
+** smooth-default
 
-  (defun smooth/modal-blacklisted-p ()
-    "Return non-nil if current buffer should not enable `ryo-modal-mode`."
-    (cl-some
-     (lambda (entry)
-  	 (pcase entry
-         (`(predicate . ,fn) (funcall fn))
-         (`(mode . ,mode) (eq major-mode mode))))
-     smooth/modal-blacklist))
+#+begin_src elisp :tangle no :noweb-ref smooth-default
+  (:state insert)
+  ("<escape>" smooth--escape :name escape-insert :pulse green)
+  ("ESC" smooth--escape :name escape-insert :pulse green)
 
-  (define-globalized-minor-mode global-ryo-modal-mode
-    ryo-modal-mode
-    (lambda ()
-      (unless (smooth/modal-blacklisted-p)
-        (ryo-modal-mode 1))))
+  (:state normal)
+  ("<escape>" smooth--escape :name escape-normal :select deactivate :pulse red)
+  ("ESC" smooth--escape :name escape :select deactivate :pulse red)
+  ("<delete>" undefined)
+  ("DEL" undefined)
+  ("<return>" undefined)
+  ("RET" undefined)
+  ;; ("<space>" undefined)
+  ;; ("SPC" undefined)
 
-  (defvar smooth-hist-backward-stack nil)
-  (defvar smooth-hist-forward-stack nil)
+  (:state normal)
+  ("1" digit-argument)
+  ("2" undefined)
+  ("3" undefined)
+  ("4" undefined)
+  ("5" undefined)
+  ("6" undefined)
+  ("7" undefined)
+  ("8" undefined)
+  ("9" undefined)
+  ("0" undefined)
 
-  (defun smooth-hist-make-entry ()
-    (let* ((win (selected-window))
-  		 (buf (window-buffer win))
-  		 (pos (window-point win)))
-  	(list :window win :buffer buf :point pos)))
+  (:state normal)
+  ("`" undefined)
+  ("~" undefined)
+  ("!" undefined)
+  ("@" undefined)
+  ("#" undefined)
+  ("$" undefined)
+  ("%" undefined)
+  ("^" undefined)
+  ("&" undefined)
+  ("*" undefined)
+  ("(" undefined)
+  (")" undefined)
+  ("-" undefined)
+  ("_" undefined)
+  ("=" undefined)
+  ("+" undefined)
+  ("[" undefined)
+  ("{" undefined)
+  ("]" undefined)
+  ("}" undefined)
+  ("\\" undefined)
+  ("|" undefined)
+  (";" undefined)
+  (":" undefined)
+  ("'" undefined)
+  ("\"" undefined)
+  ("," undefined)
+  ("<" undefined)
+  ("." undefined)
+  (">" undefined)
+  ("/" undefined)
+  ("?" undefined)
 
-  (defun smooth-hist-jump-to (entry)
-    (let ((win (plist-get entry :window))
-  		(buf (plist-get entry :buffer))
-  		(pos (plist-get entry :point)))
-  	(cond
-  	 ((window-live-p win)
-  	  (select-window win)
-  	  (switch-to-buffer buf)
-  	  (goto-char pos))
-  	 (t
-  	  (switch-to-buffer buf)
-  	  (goto-char pos)))))
+  (:state normal)
+  ("a" undefined)
+  ("b" undefined)
+  ("c" undefined)
+  ("d" undefined)
+  ;; ("e" undefined)
+  ("f" undefined)
+  ;; ("g" undefined)
+  ("h" undefined)
+  ("i" undefined)
+  ("j" undefined)
+  ("k" undefined)
+  ("l" undefined)
+  ("m" undefined)
+  ("n" undefined)
+  ("o" undefined)
+  ("p" undefined)
+  ("q" quit-window)
+  ("r" undefined)
+  ("s" undefined)
+  ("t" undefined)
+  ("u" undefined)
+  ("v" undefined)
+  ;; ("w" undefined)
+  ("x" execute-extended-command)
+  ("y" undefined)
+  ("z" undefined)
 
-  (defun smooth-hist-record ()
-    (interactive)
-    (push (smooth-hist-make-entry) smooth-hist-backward-stack)
-    (setq smooth-hist-forward-stack nil))
-
-  (defun smooth-hist-backward ()
-    (interactive)
-    (if (null smooth-hist-backward-stack)
-  	  (message "No older position")
-  	(push (smooth-hist-make-entry) smooth-hist-forward-stack)
-  	(smooth-hist-jump-to (pop smooth-hist-backward-stack))))
-
-  (defun smooth-hist-forward ()
-    (interactive)
-    (if (null smooth-hist-forward-stack)
-  	  (message "No newer position")
-  	(push (smooth-hist-make-entry) smooth-hist-backward-stack)
-  	(smooth-hist-jump-to (pop smooth-hist-forward-stack))))
+  (:state normal)
+  ("A" undefined)
+  ("B" undefined)
+  ("C" undefined)
+  ("D" undefined)
+  ("E" undefined)
+  ("F" undefined)
+  ;; ("G" undefined)
+  ("H" undefined)
+  ("I" undefined)
+  ("J" undefined)
+  ("K" undefined)
+  ("L" undefined)
+  ("M" undefined)
+  ("N" undefined)
+  ("O" undefined)
+  ("P" undefined)
+  ("Q" undefined)
+  ("R" undefined)
+  ("S" undefined)
+  ("T" undefined)
+  ("U" undefined)
+  ("V" undefined)
+  ("W" undefined)
+  ("X" undefined)
+  ("Y" undefined)
+  ("Z" undefined)
 #+end_src
 
 ** smooth-motion
 
 #+begin_src elisp :tangle no :noweb-ref smooth-motion
-  ("%" mark-whole-buffer :first '(smooth-deactivate-anchor))
-  ("v" smooth-activate-anchor)
-  ("V" smooth-activate-anchor-line)
-  ("," pop-to-mark-command :then '(smooth-deactivate-anchor))
+  (:state normal)
+  ("h" backward-char :name left :select deactivate)
+  ("j" next-line :name down :select deactivate)
+  ("k" previous-line :name up :select deactivate)
+  ("l" forward-char :name right :select deactivate)
+  ("b" backward-word :name word-left :select activate)
+  ("f" forward-word :name word-right :select activate)
+  ("g h" move-beginning-of-line :name line-begin :record t :select activate)
+  ("g j" end-of-buffer :name buffer-end :record t :select activate)
+  ("g k" beginning-of-buffer :name buffer-begin :record t :select activate)
+  ("g l" move-end-of-line :name line-end :record t :select activate)
 
-  ("h" backward-char :first '(smooth-deactivate-mark-if-no-anchor))
-  ("j" next-line :first '(smooth-deactivate-mark-if-no-anchor))
-  ("k" previous-line :first '(smooth-deactivate-mark-if-no-anchor))
-  ("l" forward-char :first '(smooth-deactivate-mark-if-no-anchor))
+  ("H" backward-char :name extend-left :select extend)
+  ("J" next-line :name extend-down :select extend)
+  ("K" previous-line :name extend-up :select extend)
+  ("L" forward-char :name extend-right :select extend)
+  ("B" backward-word :name extend-word-left :select extend)
+  ("F" forward-word :name extend-word-right :select extend)
+  ("G H" move-beginning-of-line :name extend-line-begin :select extend)
+  ("G J" end-of-buffer :name extend-buffer-end :select extend)
+  ("G K" beginning-of-buffer :name extend-buffer-begin :select extend)
+  ("G L" move-end-of-line :name extend-line-end :select extend)
 
-  ("H" backward-word :first '(smooth-activate-mark-if-no-anchor))
-  ("J" forward-paragraph :first '(smooth-activate-mark-if-no-anchor))
-  ("K" backward-paragraph :first '(smooth-activate-mark-if-no-anchor))
-  ("L" forward-word :first '(smooth-activate-mark-if-no-anchor))
-
-  ("g h" move-beginning-of-line :first '(smooth-activate-mark-if-no-anchor))
-  ("g j" end-of-buffer :first '(smooth-activate-mark-if-no-anchor))
-  ("g k" beginning-of-buffer :first '(smooth-activate-mark-if-no-anchor))
-  ("g l" move-end-of-line :first '(smooth-activate-mark-if-no-anchor))
+  ("%" mark-whole-buffer :name whole-buffer :record t)
+  ("," smooth--hist-backward :name back :select deactivate)
+  ("." smooth--hist-forward :name forward :select deactivate)
 #+end_src
 
 ** smooth-insert
 
 #+begin_src elisp :tangle no :noweb-ref smooth-insert
-  ("i" smooth-insert-mode)
-  ("a" smooth-insert-mode :first '(forward-char))
-  ("o" smooth-insert-mode :first '(smooth-open-line-below))
-  ("c" smooth-insert-mode :first '(smooth-kill))
+  ("i" ignore :name insert :insert t :pulse blue)
+  ("a" forward-char :name append :insert t :pulse blue)
+  ("o" smooth--open-line-below :name open-line-below :insert t :pulse blue)
+  ("c" smooth--kill :name change :insert t :pulse blue)
 
-  ("I" smooth-insert-mode :first '(move-beginning-of-line))
-  ("A" smooth-insert-mode :first '(move-end-of-line))
-  ("O" smooth-insert-mode :first '(smooth-open-line-above))
-  ("C" smooth-insert-mode :first '(kill-line))
+  ("I" move-beginning-of-line :name insert-begin :insert t :pulse blue)
+  ("A" move-end-of-line :name append-end :insert t :pulse blue)
+  ("O" smooth--open-line-above :name open-line-above :insert t :pulse blue)
+  ("C" kill-line :name change-end :insert t :pulse blue)
 #+end_src
 
 ** smooth-editing
 
 #+begin_src elisp :tangle no :noweb-ref smooth-editing
-  ("y" smooth-yank :then '(smooth-deactivate-mark))
-  ("p" smooth-put :then '(smooth-deactivate-mark))
-  ("u" undo-only :then '(smooth-deactivate-anchor))
-  ("U" undo-redo :then '(smooth-deactivate-anchor))
-  ("d" smooth-kill :then '(smooth-deactivate-anchor))
-  ("D" kill-line :then '(smooth-deactivate-anchor))
+  (:state normal)
+  ("u" undo-only :name undo)
+  ("U" undo-redo :name redo)
+  ("y" smooth--yank :name yank)
+  ("p" smooth--put :name put)
+  ("d" smooth--kill :name delete)
+  ("D" kill-line :name delete-line)
 #+end_src
 
 #+begin_src elisp :tangle no :noweb-ref eglot
   ("r" eglot-rename :first '(smooth-deactivate-anchor))
-#+end_src
-
-** smooth-goto
-
-#+begin_src elisp :tangle no :noweb-ref smooth-goto
-  ("w h" windmove-left :then '(smooth-pulse-green))
-  ("w j" windmove-down :then '(smooth-pulse-green))
-  ("w k" windmove-up :then '(smooth-pulse-green))
-  ("w l" windmove-right :then '(smooth-pulse-green))
-#+end_src
-
-#+begin_src elisp :tangle no :noweb-ref eglot
-  ("g i" eglot-find-implementation :first '(smooth-deactivate-anchor))
-#+end_src
-
-#+begin_src elisp :tangle no :noweb-ref xref
-  ("g d" xref-find-definitions :first '(smooth-deactivate-anchor))
-  ("g r" xref-find-references :first '(smooth-deactivate-anchor))
-#+end_src
-
-#+begin_src elisp :tangle no :noweb-ref consult
-  ("g m" consult-imenu :first '(smooth-deactivate-anchor))
-  ("g e" consult-flymake :first '(smooth-deactivate-anchor))
-#+end_src
-
-#+begin_src elisp :tangle no :noweb-ref flymake
-  ("e j" flymake-goto-next-error :name "goto next error")
-  ("e k" flymake-goto-prev-error :name "goto prev error")
-#+end_src
-
-** smooth-project
-
-#+begin_src elisp :tangle no :noweb-ref project
-  ("SPC p" project-switch-project :name "project")
-  ("SPC SPC d" project-dired :name "root directory")
-  ("SPC d" dired-jump :name "directory")
-  ("SPC SPC f" project-find-file :name "root file")
-  ("SPC f" find-file :name "file")
-  ("SPC c" project-compile  :name "compile")
-  ("SPC e" project-eshell :name "eshell")
-  ("SPC b" project-switch-to-buffer :name "buffer")
-#+end_src
-
-#+begin_src elisp :tangle no :noweb-ref harpoon
-  ("SPC a" harpoon-add-file)
-  ("SPC o" harpoon-toggle-file)
-
-  ("SPC 1" harpoon-go-to-1)
-  ("SPC 2" harpoon-go-to-2)
-  ("SPC 3" harpoon-go-to-3)
-  ("SPC 4" harpoon-go-to-4)
-  ("SPC 4" harpoon-go-to-5)
-#+end_src
-
-** smooth-help
-
-#+begin_src elisp :tangle no :noweb-ref helpful
-  ("SPC h"
-   (("h" helpful-at-point :name "describe at point")
-    ("m" describe-mode :name "describe mode")
-    ("v" helpful-variable :name "describe variable")
-    ("f" helpful-callable :name "describe function")
-    ("k" helpful-key :name "describe key")
-    ("x" helpful-command :name "describe command")
-    ("j" pp-macroexpand-last-sexp))
-   :name "help")
-#+end_src
-
-** smooth-avy
-
-[[https://karthinks.com/software/avy-can-do-anything/][Avy can do anything]]. However, most of the time, I only use =avy= for jump only.
-
-#+begin_src nix :tangle no :noweb-ref epkgs
-  epkgs.avy
-#+end_src
-
-#+begin_src elisp :noweb yes
-  (use-package avy
-    :ryo
-    (";" avy-goto-char-2 :then '(smooth-pulse-green))
-    :custom
-    (avy-single-candidate-jump nil)
-    (avy-style 'words)
-    (avy-dispatch-alist nil))
 #+end_src
 
 * Help system
@@ -979,11 +937,17 @@ to my own liking.
   epkgs.helpful
 #+end_src
 
-#+begin_src elisp :noweb yes
+#+begin_src elisp :noweb
   (use-package helpful
-    :ryo
-    <<helpful>>
-    )
+    :smooth
+    (:state normal)
+    ("SPC h h" helpful-at-point :name describe-at-point)
+    ("SPC h m" describe-mode :name describe-mode)
+    ("SPC h v" helpful-variable :name describe-variable)
+    ("SPC h f" helpful-callable :name describe-function)
+    ("SPC h k" helpful-key :name describe-key)
+    ("SPC h x" helpful-command :name describe-command)
+    ("SPC h j" pp-macroexpand-last-sexp :name expand-macro))
 #+end_src
 
 ** which-key
@@ -994,14 +958,7 @@ to my own liking.
 
 #+begin_src elisp
   (use-package which-key
-    :hook
-    (after-init . which-key-mode))
-#+end_src
-
-** keycast
-
-#+begin_src nix :tangle no :noweb-ref epkgs
-  epkgs.keycast
+    :hook (after-init . which-key-mode))
 #+end_src
 
 ** markdown-mode
@@ -1012,8 +969,7 @@ to my own liking.
 
 #+begin_src elisp
   (use-package markdown-mode
-    :mode
-    (rx ".md" eos))
+    :mode (rx ".md" eos))
 #+end_src
 
 * Project
@@ -1022,8 +978,16 @@ to my own liking.
 
 #+begin_src elisp :noweb yes
   (use-package project
-    :ryo
-    <<project>>
+    :smooth
+    (:state normal)
+    ("SPC p" project-switch-project :name "project")
+    ("SPC SPC d" project-dired :name "root directory")
+    ("SPC d" dired-jump :name "directory")
+    ("SPC SPC f" project-find-file :name "root file")
+    ("SPC f" find-file :name "file")
+    ("SPC c" project-compile  :name "compile")
+    ("SPC e" project-eshell :name "eshell")
+    ("SPC b" project-switch-to-buffer :name "buffer")
     :custom
     (project-switch-commands #'smooth/project-auto-buffer)
     :config
@@ -1045,11 +1009,10 @@ to my own liking.
 
 #+begin_src elisp :noweb yes
   (use-package otpp
-    :ryo
-    ("SPC j"
-     (("e" smooth/open-emacs-config :name "open emacs config")
-  	("w" smooth/open-work-readme :name "open work README"))
-     :name "jump to special file")
+    :smooth
+    (:state normal)
+    ("SPC j e" smooth/open-emacs-config :name open-emacs-config)
+    ("SPC j w" smooth/open-work-readme :name open-work-readme)
     :hook
     (after-init . otpp-mode)
     (after-init . otpp-override-mode)
@@ -1077,9 +1040,15 @@ to my own liking.
 #+begin_src elisp :noweb yes
   (use-package harpoon
     :defer t
-    :ryo
-    <<harpoon>>
-    )
+    :smooth
+    (:state normal)
+    ("SPC a" harpoon-add-file)
+    ("SPC o" harpoon-toggle-file)
+    ("SPC 1" harpoon-go-to-1)
+    ("SPC 2" harpoon-go-to-2)
+    ("SPC 3" harpoon-go-to-3)
+    ("SPC 4" harpoon-go-to-4)
+    ("SPC 4" harpoon-go-to-5))
 #+end_src
 
 * Completion
@@ -1100,8 +1069,10 @@ Completion are essential feature for modern text editor / IDE.
 
 #+begin_src elisp :noweb yes
   (use-package consult
-    :ryo
-    <<consult>>
+    :smooth
+    (:state normal)
+    ("g m" consult-imenu :first '(smooth-deactivate-anchor))
+    ("g e" consult-flymake :first '(smooth-deactivate-anchor))
     :custom
     (xref-show-xrefs-function #'consult-xref)
     (xref-show-definitions-function #'consult-xref))
@@ -1166,8 +1137,9 @@ system path and configure the following variable:
 
 #+begin_src elisp :noweb yes
   (use-package eglot
-    :ryo
-    <<eglot>>
+    :smooth
+    (:state normal)
+    ("g i" eglot-find-implementation :first '(smooth-deactivate-anchor))
     :hook
     (prog-mode . eglot-ensure)
     (prog-mode . (lambda () (add-hook 'before-save-hook 'eglot-format-buffer)))
@@ -1217,8 +1189,8 @@ Boost LSP performance with =eglot-booster=.
 
 #+begin_src elisp :noweb yes
   (use-package eldoc-box
-    :ryo
-    ;; <<eldoc-box>>
+    ;; :smooth
+    ;; ;; <<eldoc-box>>
     )
 #+end_src
 
@@ -1226,18 +1198,20 @@ Boost LSP performance with =eglot-booster=.
 
 #+begin_src elisp :noweb yes
   (use-package flymake
-    :ryo
-    <<flymake>>
-    )
+    :smooth
+    (:state normal)
+    ("e j" flymake-goto-next-error :name "goto next error")
+    ("e k" flymake-goto-prev-error :name "goto prev error"))
 #+end_src
 
 ** xref
 
 #+begin_src elisp :noweb yes
   (use-package xref
-    :ryo
-    <<xref>>
-    )
+    :smooth
+    (:state normal)
+    ("g d" xref-find-definitions :first '(smooth-deactivate-anchor))
+    ("g r" xref-find-references :first '(smooth-deactivate-anchor)))
 #+end_src
 
 * Programming language
@@ -1415,11 +1389,9 @@ the box.
 #+end_src
 
 #+begin_src elisp :tangle no :noweb-ref org-insert
-  ("SPC i"
-   (("t" org-insert-structure-template :name "insert template")
-    ("h" org-babel-insert-header-arg :name "insert header")
-    ("l" org-insert-link :name "insert link"))
-   :name "org insert")
+  ("SPC i t" org-insert-structure-template :name org-insert-template)
+  ("SPC i h" org-babel-insert-header-arg :name org-insert-header)
+  ("SPC i l" org-insert-link :name org-insert-link)
 #+end_src
 
 #+begin_src elisp :tangle no :noweb-ref babel
@@ -1430,11 +1402,11 @@ the box.
 
 #+begin_src elisp :noweb yes
   (use-package org
-    :ryo
-    (:mode 'org-mode)
-    <<org>>
-    <<org-insert>>
-    <<babel>>
+    ;; :ryo
+    ;; (:mode 'org-mode)
+    ;; <<org>>
+    ;; <<org-insert>>
+    ;; <<babel>>
     :hook (after-save . org-auto--tangle-and-reload)
     :custom
     ;; Edit settings.
@@ -1459,12 +1431,16 @@ the box.
     (defun org-auto--tangle-and-reload ()
       (when (derived-mode-p 'org-mode)
         (let ((auto-tangle (org-auto--find-keywords-value "auto-tangle"))
-              (auto-reload (org-auto--find-keywords-value "auto-reload")))
+              (auto-reload (org-auto--find-keywords-value "auto-reload"))
+  			(ops '()))
           (when (string= auto-tangle "t")
-            (org-babel-tangle))
+            (org-babel-tangle)
+  		  (push "tangled" ops))
           (when auto-reload
             (load-file auto-reload)
-  		  (message "auto reload"))))))
+  		  (push "reloaded" ops))
+  		(when ops
+  		  (message "Auto: %s" (string-join (nreverse ops) " and ")))))))
 #+end_src
 
 ** org-modern
@@ -1629,8 +1605,8 @@ Register missing major mode for some programing languages.
 
 #+begin_src elisp :noweb yes
   (use-package magit
-    :ryo
-    <<magit>>
+    ;; :smooth
+    ;; <<magit>>
     :custom
     (auto-revert-check-vc-info t))
 #+end_src
@@ -1658,8 +1634,8 @@ Register missing major mode for some programing languages.
 
 #+begin_src elisp :noweb yes
   (use-package blamer
-    :ryo
-    <<blamer>>
+    ;; :smooth
+    ;; <<blamer>>
     )
 #+end_src
 
@@ -1690,4 +1666,42 @@ Register missing major mode for some programing languages.
 #+begin_src elisp
   (use-package jwt
     :defer t)
+#+end_src
+
+* Others
+
+** keycast
+
+#+begin_src nix :tangle no :noweb-ref epkgs
+  epkgs.keycast
+#+end_src
+** windmove
+
+#+begin_src elisp
+  (use-package windmove
+    :smooth
+    (:state normal)
+    ("w h" windmove-left)
+    ("w j" windmove-down)
+    ("w k" windmove-up)
+    ("w l" windmove-right))
+#+end_src
+** avy
+
+[[https://karthinks.com/software/avy-can-do-anything/][Avy can do anything]]. However, most of the time, I only use =avy= for jump only.
+
+#+begin_src nix :tangle no :noweb-ref epkgs
+  epkgs.avy
+#+end_src
+
+#+begin_src elisp :noweb yes
+  (use-package avy
+    :smooth
+    (:state normal)
+    (";" avy-goto-char-2 :name avy :pulse green)
+    (":" avy-goto-char-2 :name extend-avy :select extend :pulse green)
+    :custom
+    (avy-single-candidate-jump nil)
+    (avy-style 'words)
+    (avy-dispatch-alist nil))
 #+end_src
