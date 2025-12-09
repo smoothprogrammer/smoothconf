@@ -381,8 +381,7 @@ Doom modeline to complement the themes.
 
 #+begin_src elisp
   (use-package vertico
-    :hook
-    (after-init . vertico-mode)
+    :hook (after-init . vertico-mode)
     :bind
     (:map vertico-map
           ("C-j" . vertico-next)
@@ -392,24 +391,6 @@ Doom modeline to complement the themes.
           ("M-DEL" . vertico-directory-delete-word))
     :custom
     (vertico-cycle t))
-#+end_src
-
-** TODO vertico-posframe :completion:
-
-TODO: Evaluate whether I need this or not.
-
-#+begin_src nix :tangle no :noweb-ref epkgs
-  epkgs.vertico-posframe
-#+end_src
-
-#+begin_src elisp
-  (use-package vertico-posframe
-    :hook
-    (after-init . vertico-posframe-mode)
-    :custom
-    (vertico-posframe-parameters
-     '((left-fringe . 8)
-       (right-fringe . 8))))
 #+end_src
 
 ** marginalia :completion:
@@ -422,8 +403,7 @@ Add annotation to the minibuffer.
 
 #+begin_src elisp
   (use-package marginalia
-    :hook
-    (after-init . marginalia-mode))
+    :hook (after-init . marginalia-mode))
 #+end_src
 
 ** nerd-icons-completion :completion:font:
@@ -438,7 +418,7 @@ Fix =nerd-icons= doesn't affect minibuffer.
   (use-package nerd-icons-completion
     :after marginalia
     :hook
-    (after-init . nerd-icons-completion-mode)
+    (marginalia-mode . nerd-icons-completion-mode)
     (marginalia-mode . nerd-icons-completion-marginalia-setup))
 #+end_src
 

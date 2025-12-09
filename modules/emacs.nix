@@ -24,7 +24,6 @@ let
     epkgs.doom-modeline
     epkgs.corfu
     epkgs.vertico
-    epkgs.vertico-posframe
     epkgs.marginalia
     epkgs.nerd-icons-completion
     epkgs.focus
