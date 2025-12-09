@@ -119,7 +119,11 @@ in
       enable = true;
       nix-direnv.enable = true;
     };
-    fonts.packages = [ pkgs.nerd-fonts.iosevka ];
+    fonts.packages = with pkgs.nerd-fonts; [
+      fira-code
+      jetbrains-mono
+      iosevka
+    ];
 
     mod.activationScripts.tangleEmacsConfig.text = ''
       ${emacs}/bin/emacs ${./.}/emacs.org \

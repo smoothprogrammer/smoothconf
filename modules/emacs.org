@@ -293,7 +293,11 @@ Who doesn't want a better UI?
 Nerd Fonts all the way.
 
 #+begin_src nix :tangle no :noweb-ref config
-  fonts.packages = [ pkgs.nerd-fonts.iosevka ];
+  fonts.packages = with pkgs.nerd-fonts; [
+    fira-code
+    jetbrains-mono
+    iosevka
+  ];
 #+end_src
 
 #+begin_src nix :tangle no :noweb-ref epkgs
@@ -302,8 +306,13 @@ Nerd Fonts all the way.
 
 #+begin_src elisp
   (use-package nerd-icons
+    :demand t
     :custom
-    (nerd-icons-font-family "Iosevka Nerd Font"))
+    (nerd-icons-font-family "FiraCode Nerd Font"))
+
+  (use-package faces
+    :config
+    (set-face-attribute 'default nil :font "FiraCode Nerd Font"))
 #+end_src
 
 ** doom-themes :theme:
