@@ -141,6 +141,10 @@ Less noise, more peace.
 
 Lastly, defer loading a package using =use-package=.
 
+#+begin_src elisp
+  (setq use-package-always-defer t)
+#+end_src
+
 * Better default
 
 Emacs are featureful out of the box, but has a bad default configuration. This
