@@ -1607,10 +1607,11 @@ Register missing major mode for some programing languages.
   epkgs.magit
 #+end_src
 
-#+begin_src elisp :noweb yes
+#+begin_src elisp
   (use-package magit
-    ;; :smooth
-    ;; <<magit>>
+    :smooth
+    (:state normal)
+    ("SPC g s" magit-status)
     :custom
     (auto-revert-check-vc-info t))
 #+end_src
