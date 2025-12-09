@@ -27,7 +27,6 @@ let
     epkgs.marginalia
     epkgs.nerd-icons-completion
     epkgs.focus
-    epkgs.golden-ratio
     epkgs.spacious-padding
     epkgs.pulsar
     epkgs.meow
@@ -85,6 +84,7 @@ let
     epkgs.jwt
     epkgs.keycast
     epkgs.avy
+    epkgs.golden-ratio
     ]);
 
   cfg = config.mod.emacs;

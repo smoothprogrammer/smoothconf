@@ -434,26 +434,6 @@ Focus around the point.
   (use-package focus)
 #+end_src
 
-** TODO golden-ratio :focus:
-
-Focus on the current window.
-
-#+begin_src nix :tangle no :noweb-ref epkgs
-  epkgs.golden-ratio
-#+end_src
-
-#+begin_src elisp
-  (use-package golden-ratio
-    :hook
-    (after-init . golden-ratio-mode)
-    :config
-    (advice-add 'windmove-left :after (lambda (&rest _) (golden-ratio)))
-    (advice-add 'windmove-down :after (lambda (&rest _) (golden-ratio)))
-    (advice-add 'windmove-up :after (lambda (&rest _) (golden-ratio)))
-    (advice-add 'windmove-right :after (lambda (&rest _) (golden-ratio)))
-    (advice-add 'avy-goto-char-2 :after (lambda (&rest _) (golden-ratio))))
-#+end_src
-
 ** spacious-padding
 
 Give Emacs some space to breath.
@@ -679,9 +659,9 @@ We'll use meow and evil as a learning source and reference.
   				 (cmd (nth 1 form))
   				 (args (cddr form))
   				 (name (plist-get args :name))
+  				 (record (plist-get args :record))
   				 (select (plist-get args :select))
   				 (insert (plist-get args :insert))
-  				 (record (plist-get args :record))
   				 (pulse (plist-get args :pulse)))
   			(if (not name)
   				(push `(keymap-set ,keymap ,key #',cmd) expansions)
@@ -693,10 +673,10 @@ We'll use meow and evil as a learning source and reference.
   							(interactive)
   							,@(when (and pulse (eq cmd 'keyboard-quit))
   								`((smooth--pulse ',pulse)))
-  							,@(when (and select (not insert))
-  								`((smooth--resolve-select ',select)))
   							,@(when (and record (not insert))
   								`((smooth--hist-record)))
+  							,@(when (and select (not insert))
+  								`((smooth--resolve-select ',select)))
   							,@(unless (eq cmd 'ignore)
   								`((call-interactively #',cmd)))
   							,@(when insert
@@ -1671,6 +1651,25 @@ Register missing major mode for some programing languages.
 #+begin_src nix :tangle no :noweb-ref epkgs
   epkgs.keycast
 #+end_src
+** avy
+
+[[https://karthinks.com/software/avy-can-do-anything/][Avy can do anything]]. However, most of the time, I only use =avy= for jump only.
+
+#+begin_src nix :tangle no :noweb-ref epkgs
+  epkgs.avy
+#+end_src
+
+#+begin_src elisp
+  (use-package avy
+    :smooth
+    (:state normal)
+    (";" avy-goto-char-2 :name avy :pulse green)
+    (":" avy-goto-char-2 :name extend-avy :select extend :pulse green)
+    :custom
+    (avy-single-candidate-jump nil)
+    (avy-style 'words)
+    (avy-dispatch-alist nil))
+#+end_src
 ** windmove
 
 #+begin_src elisp
@@ -1682,22 +1681,17 @@ Register missing major mode for some programing languages.
     ("w k" windmove-up)
     ("w l" windmove-right))
 #+end_src
-** avy
+** golden-ratio
 
-[[https://karthinks.com/software/avy-can-do-anything/][Avy can do anything]]. However, most of the time, I only use =avy= for jump only.
+Focus on the current window.
 
 #+begin_src nix :tangle no :noweb-ref epkgs
-  epkgs.avy
+  epkgs.golden-ratio
 #+end_src
 
-#+begin_src elisp :noweb yes
-  (use-package avy
+#+begin_src elisp
+  (use-package golden-ratio
     :smooth
     (:state normal)
-    (";" avy-goto-char-2 :name avy :pulse green)
-    (":" avy-goto-char-2 :name extend-avy :select extend :pulse green)
-    :custom
-    (avy-single-candidate-jump nil)
-    (avy-style 'words)
-    (avy-dispatch-alist nil))
+    ("+" golden-ratio))
 #+end_src
