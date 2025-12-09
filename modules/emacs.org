@@ -284,200 +284,6 @@ Read the system path from shell.
     (envrc-debug t))
 #+end_src
 
-* UI
-
-Who doesn't want a better UI?
-
-** nerd-icons :font:
-
-Nerd Fonts all the way.
-
-#+begin_src nix :tangle no :noweb-ref config
-  fonts.packages = with pkgs.nerd-fonts; [
-    fira-code
-    jetbrains-mono
-    iosevka
-  ];
-#+end_src
-
-#+begin_src nix :tangle no :noweb-ref epkgs
-  epkgs.nerd-icons
-#+end_src
-
-#+begin_src elisp
-  (use-package nerd-icons
-    :demand t
-    :custom
-    (nerd-icons-font-family "FiraCode Nerd Font"))
-
-  (use-package faces
-    :config
-    (set-face-attribute 'default nil :font "FiraCode Nerd Font"))
-#+end_src
-
-** doom-themes :theme:
-
-Not a fan of dark themes, but light themes also too bright. Solarized with warm
-and low contrast is a sweet spot for me.
-
-#+begin_src nix :tangle no :noweb-ref epkgs
-  epkgs.doom-themes
-#+end_src
-
-#+begin_src elisp
-  (use-package doom-themes
-    :demand t
-    :config
-    (load-theme 'doom-solarized-light t)
-    (doom-themes-org-config))
-#+end_src
-
-** doom-modeline :theme:
-
-Doom modeline to complement the themes.
-
-#+begin_src nix :tangle no :noweb-ref epkgs
-  epkgs.doom-modeline
-#+end_src
-
-#+begin_src elisp
-  (use-package doom-modeline
-    :hook (after-init . doom-modeline-mode)
-    :custom
-    (doom-modeline-workspace-name nil))
-#+end_src
-
-** corfu :completion:
-
-#+begin_src nix :tangle no :noweb-ref epkgs
-  epkgs.corfu
-#+end_src
-
-#+begin_src elisp
-  (use-package corfu
-    :hook
-    (after-init . global-corfu-mode)
-    (after-init . corfu-popupinfo-mode)
-    :bind
-    (:map corfu-map
-          ("C-j" . corfu-next)
-          ("C-k" . corfu-previous))
-    :custom
-    (corfu-cycle t)
-    (corfu-auto t)
-    (corfu-auto-delay 0.0)
-    (corfu-auto-prefix 2)
-    (corfu-popupinfo-delay 0.0)
-    (corfu-popupinfo-hide nil)
-    :config
-    (keymap-unset corfu-map "RET"))
-#+end_src
-
-** vertico :completion:
-
-#+begin_src nix :tangle no :noweb-ref epkgs
-  epkgs.vertico
-#+end_src
-
-#+begin_src elisp
-  (use-package vertico
-    :hook (after-init . vertico-mode)
-    :bind
-    (:map vertico-map
-          ("C-j" . vertico-next)
-          ("C-k" . vertico-previous)
-          ("RET" . vertico-directory-enter)
-          ("DEL" . vertico-directory-delete-char)
-          ("M-DEL" . vertico-directory-delete-word))
-    :custom
-    (vertico-cycle t))
-#+end_src
-
-** marginalia :completion:
-
-Add annotation to the minibuffer.
-
-#+begin_src nix :tangle no :noweb-ref epkgs
-  epkgs.marginalia
-#+end_src
-
-#+begin_src elisp
-  (use-package marginalia
-    :hook (after-init . marginalia-mode))
-#+end_src
-
-** nerd-icons-completion :completion:font:
-
-Fix =nerd-icons= doesn't affect minibuffer.
-
-#+begin_src nix :tangle no :noweb-ref epkgs
-  epkgs.nerd-icons-completion
-#+end_src
-
-#+begin_src elisp
-  (use-package nerd-icons-completion
-    :after marginalia
-    :hook
-    (marginalia-mode . nerd-icons-completion-mode)
-    (marginalia-mode . nerd-icons-completion-marginalia-setup))
-#+end_src
-
-** TODO focus :focus:
-
-Focus around the point.
-
-#+begin_src nix :tangle no :noweb-ref epkgs
-  epkgs.focus
-#+end_src
-
-#+begin_src elisp
-  (use-package focus)
-#+end_src
-
-** spacious-padding
-
-Give Emacs some space to breath.
-
-#+begin_src nix :tangle no :noweb-ref epkgs
-  epkgs.spacious-padding
-#+end_src
-
-#+begin_src elisp
-  (use-package spacious-padding
-    :hook
-    (after-init . spacious-padding-mode)
-    :custom
-    (spacious-padding-widths
-     '( :internal-border-width 15
-        :header-line-width 4
-        :mode-line-width 6
-        :tab-width 4
-        :right-divider-width 30
-        :scroll-bar-width 8
-        :fringe-width 4)))
-#+end_src
-
-** ansi-color
-
-#+begin_src elisp
-  (use-package ansi-color
-    :hook
-    (compilation-filter . ansi-color-compilation-filter))
-#+end_src
-
-** TODO pulsar
-
-Visual indicator to help easily spot current line.
-
-#+begin_src nix :tangle no :noweb-ref epkgs
-  epkgs.pulsar
-#+end_src
-
-#+begin_src elisp
-  (use-package pulsar
-    :defer t)
-#+end_src
-
 * TODO Smooth modal
 
 Coming from Vim, modal editing is a must. In Emacs, we have options like [[https://github.com/emacs-evil/evil][evil]],
@@ -902,6 +708,222 @@ We'll use meow and evil as a learning source and reference.
 
 #+begin_src elisp :tangle no :noweb-ref eglot
   ("r" eglot-rename :first '(smooth-deactivate-anchor))
+#+end_src
+
+* UI
+
+Who doesn't want a better UI?
+
+** nerd-icons :font:
+
+Nerd Fonts all the way.
+
+#+begin_src nix :tangle no :noweb-ref config
+  fonts.packages = with pkgs.nerd-fonts; [
+    fira-code
+    jetbrains-mono
+    iosevka
+  ];
+#+end_src
+
+#+begin_src nix :tangle no :noweb-ref epkgs
+  epkgs.nerd-icons
+#+end_src
+
+#+begin_src elisp
+  (use-package nerd-icons
+    :demand t
+    :custom
+    (nerd-icons-font-family "FiraCode Nerd Font"))
+
+  (use-package faces
+    :config
+    (set-face-attribute 'default nil :font "FiraCode Nerd Font"))
+#+end_src
+
+** doom-themes :theme:
+
+Not a fan of dark themes, but light themes also too bright. Solarized with warm
+and low contrast is a sweet spot for me.
+
+#+begin_src nix :tangle no :noweb-ref epkgs
+  epkgs.doom-themes
+#+end_src
+
+#+begin_src elisp
+  (use-package doom-themes
+    :demand t
+    :config
+    (load-theme 'doom-solarized-light t)
+    (doom-themes-org-config))
+#+end_src
+
+** doom-modeline :theme:
+
+Doom modeline to complement the themes.
+
+#+begin_src nix :tangle no :noweb-ref epkgs
+  epkgs.doom-modeline
+#+end_src
+
+#+begin_src elisp
+  (use-package doom-modeline
+    :hook (after-init . doom-modeline-mode)
+    :custom
+    (doom-modeline-workspace-name nil))
+#+end_src
+
+** corfu :completion:
+
+#+begin_src nix :tangle no :noweb-ref epkgs
+  epkgs.corfu
+#+end_src
+
+#+begin_src elisp
+  (use-package corfu
+    :hook
+    (after-init . global-corfu-mode)
+    (after-init . corfu-popupinfo-mode)
+    :bind
+    (:map corfu-map
+          ("C-j" . corfu-next)
+          ("C-k" . corfu-previous))
+    :custom
+    (corfu-cycle t)
+    (corfu-auto t)
+    (corfu-auto-delay 0.0)
+    (corfu-auto-prefix 2)
+    (corfu-popupinfo-delay 0.0)
+    (corfu-popupinfo-hide nil)
+    :config
+    (keymap-unset corfu-map "RET"))
+#+end_src
+
+** vertico :completion:
+
+#+begin_src nix :tangle no :noweb-ref epkgs
+  epkgs.vertico
+#+end_src
+
+#+begin_src elisp
+  (use-package vertico
+    :hook (after-init . vertico-mode)
+    :bind
+    (:map vertico-map
+          ("C-j" . vertico-next)
+          ("C-k" . vertico-previous)
+          ("RET" . vertico-directory-enter)
+          ("DEL" . vertico-directory-delete-char)
+          ("M-DEL" . vertico-directory-delete-word))
+    :custom
+    (vertico-cycle t))
+#+end_src
+
+** marginalia :completion:
+
+Add annotation to the minibuffer.
+
+#+begin_src nix :tangle no :noweb-ref epkgs
+  epkgs.marginalia
+#+end_src
+
+#+begin_src elisp
+  (use-package marginalia
+    :hook (after-init . marginalia-mode))
+#+end_src
+
+** nerd-icons-completion :completion:font:
+
+Fix =nerd-icons= doesn't affect minibuffer.
+
+#+begin_src nix :tangle no :noweb-ref epkgs
+  epkgs.nerd-icons-completion
+#+end_src
+
+#+begin_src elisp
+  (use-package nerd-icons-completion
+    :after marginalia
+    :hook
+    (marginalia-mode . nerd-icons-completion-mode)
+    (marginalia-mode . nerd-icons-completion-marginalia-setup))
+#+end_src
+
+** TODO focus :focus:
+
+Focus around the point.
+
+#+begin_src nix :tangle no :noweb-ref epkgs
+  epkgs.focus
+#+end_src
+
+#+begin_src elisp
+  (use-package focus)
+#+end_src
+
+** golden-ratio :focus:
+
+Focus on the current window.
+
+#+begin_src nix :tangle no :noweb-ref epkgs
+  epkgs.golden-ratio
+#+end_src
+
+#+begin_src elisp
+  (use-package golden-ratio
+    :smooth
+    (:state normal)
+    ("+" golden-ratio))
+#+end_src
+** windmove :window:
+
+#+begin_src elisp
+  (use-package windmove
+    :smooth
+    (:state normal)
+    ("w h" windmove-left)
+    ("w j" windmove-down)
+    ("w k" windmove-up)
+    ("w l" windmove-right))
+#+end_src
+** spacious-padding
+
+Give Emacs some space to breath.
+
+#+begin_src nix :tangle no :noweb-ref epkgs
+  epkgs.spacious-padding
+#+end_src
+
+#+begin_src elisp
+  (use-package spacious-padding
+    :hook (after-init . spacious-padding-mode)
+    :custom
+    (spacious-padding-widths
+     '( :internal-border-width 15
+        :header-line-width 4
+        :mode-line-width 6
+        :tab-width 4
+        :right-divider-width 30
+        :scroll-bar-width 8
+        :fringe-width 4)))
+#+end_src
+
+** ansi-color
+
+#+begin_src elisp
+  (use-package ansi-color
+    :hook (compilation-filter . ansi-color-compilation-filter))
+#+end_src
+
+** pulsar
+
+Visual indicator to help easily spot current line.
+
+#+begin_src nix :tangle no :noweb-ref epkgs
+  epkgs.pulsar
+#+end_src
+
+#+begin_src elisp
+  (use-package pulsar)
 #+end_src
 
 * Help system
@@ -1669,29 +1691,4 @@ Register missing major mode for some programing languages.
     (avy-single-candidate-jump nil)
     (avy-style 'words)
     (avy-dispatch-alist nil))
-#+end_src
-** windmove
-
-#+begin_src elisp
-  (use-package windmove
-    :smooth
-    (:state normal)
-    ("w h" windmove-left)
-    ("w j" windmove-down)
-    ("w k" windmove-up)
-    ("w l" windmove-right))
-#+end_src
-** golden-ratio
-
-Focus on the current window.
-
-#+begin_src nix :tangle no :noweb-ref epkgs
-  epkgs.golden-ratio
-#+end_src
-
-#+begin_src elisp
-  (use-package golden-ratio
-    :smooth
-    (:state normal)
-    ("+" golden-ratio))
 #+end_src

@@ -19,6 +19,8 @@ let
   emacs = minimalEmacs.pkgs.withPackages (epkgs: [
     epkgs.exec-path-from-shell
     epkgs.envrc
+    epkgs.meow
+    epkgs.evil
     epkgs.nerd-icons
     epkgs.doom-themes
     epkgs.doom-modeline
@@ -27,10 +29,9 @@ let
     epkgs.marginalia
     epkgs.nerd-icons-completion
     epkgs.focus
+    epkgs.golden-ratio
     epkgs.spacious-padding
     epkgs.pulsar
-    epkgs.meow
-    epkgs.evil
     epkgs.helpful
     epkgs.which-key
     epkgs.markdown-mode
@@ -84,7 +85,6 @@ let
     epkgs.jwt
     epkgs.keycast
     epkgs.avy
-    epkgs.golden-ratio
     ]);
 
   cfg = config.mod.emacs;
