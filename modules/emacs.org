@@ -658,7 +658,7 @@ We'll use meow and evil as a learning source and reference.
      ((and (bound-and-true-p corfu-mode)
         	 corfu--candidates)
       (corfu-quit)
-      (ryo-modal-mode))
+      (smooth-enter-normal-state))
 
      ;; 2. Minibuffer
      ((when (minibufferp)
