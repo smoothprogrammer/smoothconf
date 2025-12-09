@@ -247,6 +247,7 @@ Read the system path from shell.
 
 #+begin_src elisp
   (use-package exec-path-from-shell
+    :demand t
     :custom
     (exec-path-from-shell-warn-duration-millis 500)
     :config
