@@ -1485,6 +1485,7 @@ support]].
    '((emacs-lisp . t)
      (verb . t)))
   (setq org-confirm-babel-evaluate nil)
+  (setq org-babel-default-header-args:verb '((:noweb . "yes")))
 #+end_src
 
 Register missing major mode for some programing languages.
