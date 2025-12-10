@@ -954,6 +954,11 @@ Visual indicator to help easily spot current line.
     :hook (after-init . which-key-mode))
 #+end_src
 
+** keycast
+
+#+begin_src nix :tangle no :noweb-ref epkgs
+  epkgs.keycast
+#+end_src
 ** markdown-mode
 
 #+begin_src nix :tangle no :noweb-ref epkgs
@@ -1635,42 +1640,8 @@ Register missing major mode for some programing languages.
     )
 #+end_src
 
-* TODO Accounting
-
-** ledger-mode
-
-#+begin_src nix :tangle no :noweb-ref pkgs
-  pkgs.ledger
-#+end_src
-
-#+begin_src nix :tangle no :noweb-ref epkgs
-  epkgs.ledger-mode
-#+end_src
-
-#+begin_src elisp
-  (use-package ledger-mode)
-#+end_src
-
-* Misc
-
-** jwt
-
-#+begin_src nix :tangle no :noweb-ref epkgs
-  epkgs.jwt
-#+end_src
-
-#+begin_src elisp
-  (use-package jwt
-    :defer t)
-#+end_src
-
 * Others
 
-** keycast
-
-#+begin_src nix :tangle no :noweb-ref epkgs
-  epkgs.keycast
-#+end_src
 ** avy
 
 [[https://karthinks.com/software/avy-can-do-anything/][Avy can do anything]]. However, most of the time, I only use =avy= for jump only.
@@ -1689,4 +1660,28 @@ Register missing major mode for some programing languages.
     (avy-single-candidate-jump nil)
     (avy-style 'words)
     (avy-dispatch-alist nil))
+#+end_src
+** jwt
+
+#+begin_src nix :tangle no :noweb-ref epkgs
+  epkgs.jwt
+#+end_src
+
+#+begin_src elisp
+  (use-package jwt
+    :defer t)
+#+end_src
+
+** TODO ledger-mode
+
+#+begin_src nix :tangle no :noweb-ref pkgs
+  pkgs.ledger
+#+end_src
+
+#+begin_src nix :tangle no :noweb-ref epkgs
+  epkgs.ledger-mode
+#+end_src
+
+#+begin_src elisp
+  (use-package ledger-mode)
 #+end_src

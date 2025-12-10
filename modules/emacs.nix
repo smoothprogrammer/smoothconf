@@ -34,6 +34,7 @@ let
     epkgs.pulsar
     epkgs.helpful
     epkgs.which-key
+    epkgs.keycast
     epkgs.markdown-mode
     epkgs.otpp
     epkgs.harpoon
@@ -81,10 +82,9 @@ let
     epkgs.magit
     epkgs.diff-hl
     epkgs.blamer
-    epkgs.ledger-mode
-    epkgs.jwt
-    epkgs.keycast
     epkgs.avy
+    epkgs.jwt
+    epkgs.ledger-mode
     ]);
 
   cfg = config.mod.emacs;
