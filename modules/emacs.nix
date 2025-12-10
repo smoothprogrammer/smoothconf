@@ -51,7 +51,7 @@ let
     epkgs.erlang-ts
     epkgs.nix-ts-mode
     epkgs.geiser
-      epkgs.geiser-guile
+    epkgs.geiser-guile
     # lua-ts-mode is already emacs built-in major mode
     epkgs.org-modern
     (pkgs.emacsPackages.trivialBuild {
@@ -67,7 +67,7 @@ let
     epkgs.ox-hugo
     epkgs.org-present
     epkgs.org-roam
-      epkgs.org-roam-ui
+    epkgs.org-roam-ui
     epkgs.verb
     (pkgs.emacsPackages.trivialBuild {
       pname = "hurl-mode";
@@ -80,8 +80,8 @@ let
       };
     })
     epkgs.magit
-    epkgs.diff-hl
     epkgs.blamer
+    epkgs.diff-hl
     epkgs.avy
     epkgs.jwt
     epkgs.ledger-mode
@@ -100,8 +100,8 @@ in
         emacs
       pkgs.emacs-lsp-booster
       pkgs.go
-        pkgs.gopls
-        pkgs.delve
+      pkgs.gopls
+      pkgs.delve
       pkgs.gleam
       pkgs.beam28Packages.erlang
       pkgs.erlang-language-platform
