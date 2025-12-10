@@ -706,10 +706,6 @@ We'll use meow and evil as a learning source and reference.
   ("D" kill-line :name delete-line)
 #+end_src
 
-#+begin_src elisp :tangle no :noweb-ref eglot
-  ("r" eglot-rename :first '(smooth-deactivate-anchor))
-#+end_src
-
 * UI
 
 Who doesn't want a better UI?
@@ -1132,11 +1128,12 @@ system path and configure the following variable:
 + eglot-server-programs :: mapping between major mode and the LSP server
 + eglot-workspace-configuration :: configuration for the LSP server
 
-#+begin_src elisp :noweb yes
+#+begin_src elisp
   (use-package eglot
     :smooth
     (:state normal)
     ("g i" eglot-find-implementation :first '(smooth-deactivate-anchor))
+    ("r" eglot-rename :first '(smooth-deactivate-anchor))
     :hook
     (prog-mode . eglot-ensure)
     (prog-mode . (lambda () (add-hook 'before-save-hook 'eglot-format-buffer)))
