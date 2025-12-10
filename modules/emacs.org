@@ -710,7 +710,7 @@ We'll use meow and evil as a learning source and reference.
 
 Who doesn't want a better UI?
 
-** nerd-icons :font:
+** faces :font:
 
 Nerd Fonts all the way.
 
@@ -722,6 +722,16 @@ Nerd Fonts all the way.
   ];
 #+end_src
 
+#+begin_src elisp
+  (use-package faces
+    :config
+    (set-face-attribute 'default nil :font "FiraCode Nerd Font"))
+#+end_src
+
+** nerd-icons :font:
+
+Support Nerd Fonts for the icons.
+
 #+begin_src nix :tangle no :noweb-ref epkgs
   epkgs.nerd-icons
 #+end_src
@@ -731,10 +741,6 @@ Nerd Fonts all the way.
     :demand t
     :custom
     (nerd-icons-font-family "FiraCode Nerd Font"))
-
-  (use-package faces
-    :config
-    (set-face-attribute 'default nil :font "FiraCode Nerd Font"))
 #+end_src
 
 ** doom-themes :theme:
