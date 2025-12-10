@@ -1572,7 +1572,7 @@ Register missing major mode for some programing languages.
     :mode (rx ".hurl" eos))
 #+end_src
 
-* TODO Version control :SPC:g:
+* TODO Version control
 
 #+begin_src elisp :tangle no :noweb-ref magit
   ("SPC g"
