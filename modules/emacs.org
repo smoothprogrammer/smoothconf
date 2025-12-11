@@ -1,4 +1,4 @@
-#+title: Emacs Configurations
+z#+title: Emacs Configurations
 #+property: header-args:elisp :mkdirp yes :results silent :tangle ~/.emacs.d/init.el
 #+property: header-args:nix :results silent :tangle ./emacs.nix
 #+auto-tangle: t
@@ -300,7 +300,7 @@ We'll use meow and evil as a learning source and reference.
 #+begin_src elisp
   (use-package meow)
   (use-package evil)
-src
+#+end_src
 
 ** smooth
 
@@ -686,23 +686,27 @@ src
   ("j" next-line :name down :select deactivate)
   ("k" previous-line :name up :select deactivate)
   ("l" forward-char :name right :select deactivate)
-  ("b" backward-word :name word-left :select activate)
-  ("f" forward-word :name word-right :select activate)
   ("g h" move-beginning-of-line :name line-begin :record t :select deactivate)
   ("g j" end-of-buffer :name buffer-end :record t :select deactivate)
   ("g k" beginning-of-buffer :name buffer-begin :record t :select deactivate)
   ("g l" move-end-of-line :name line-end :record t :select deactivate)
+  ("b" backward-word :name word-left :select activate)
+  ("f" forward-word :name word-right :select activate)
+  ("[" backward-paragraph :name paragraph-up :select activate)
+  ("]" forward-paragraph :name paragraph-down :select activate)
 
   ("H" backward-char :name extend-left :select extend)
   ("J" next-line :name extend-down :select extend)
   ("K" previous-line :name extend-up :select extend)
   ("L" forward-char :name extend-right :select extend)
-  ("B" backward-word :name extend-word-left :select extend)
-  ("F" forward-word :name extend-word-right :select extend)
   ("G H" move-beginning-of-line :name extend-line-begin :record t :select extend)
   ("G J" end-of-buffer :name extend-buffer-end :record t :select extend)
   ("G K" beginning-of-buffer :name extend-buffer-begin :record t :select extend)
   ("G L" move-end-of-line :name extend-line-end :record t :select extend)
+  ("B" backward-word :name extend-word-left :select extend)
+  ("F" forward-word :name extend-word-right :select extend)
+  ("{" backward-paragraph :name extend-paragraph-up :select extend)
+  ("}" forward-paragraph :name extend-paragraph-down :select extend)
 
   ("%" mark-whole-buffer :name whole-buffer :record t)
   ("," smooth--hist-backward :name back :select deactivate)
