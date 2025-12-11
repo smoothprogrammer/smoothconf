@@ -1606,29 +1606,6 @@ Register missing major mode for some programing languages.
 
 * TODO Version control
 
-#+begin_src elisp :tangle no :noweb-ref magit
-  ("SPC g"
-   (("s" magit-status :name "status"))
-   :name "git")
-  (:mode 'magit-mode)
-  ("j" magit-section-forward)
-  ("k" magit-section-backward)
-  ("TAB" magit-section-toggle)
-  ("q" magit-mode-bury-buffer)
-  ("d" magit-diff-dwim)
-  ("a" magit-apply)
-  ("x" magit-discard)
-  ("s" magit-stage)
-  ("u" magit-unstage)
-  ("c c" magit-commit-create)
-  ("c a" magit-commit-amend)
-  ("p u" magit-push-current-to-upstream)
-#+end_src
-
-#+begin_src elisp :tangle no :noweb-ref blamer
-
-#+end_src
-
 ** magit
 
 #+begin_src nix :tangle no :noweb-ref epkgs
@@ -1640,6 +1617,19 @@ Register missing major mode for some programing languages.
     :smooth
     (:state normal)
     ("SPC g s" magit-status)
+    (:mode magit-mode)
+    ("j" magit-section-forward)
+    ("k" magit-section-backward)
+    ("TAB" magit-section-toggle)
+    ("q" magit-mode-bury-buffer)
+    ("d" magit-diff-dwim)
+    ("a" magit-apply)
+    ("x" magit-discard)
+    ("s" magit-stage)
+    ("u" magit-unstage)
+    ("c c" magit-commit-create)
+    ("c a" magit-commit-amend)
+    ("p u" magit-push-current-to-upstream)
     :custom
     (auto-revert-check-vc-info t))
 #+end_src
