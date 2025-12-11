@@ -884,18 +884,6 @@ Fix =nerd-icons= doesn't affect minibuffer.
     (marginalia-mode . nerd-icons-completion-marginalia-setup))
 #+end_src
 
-** TODO focus :focus:
-
-Focus around the point.
-
-#+begin_src nix :tangle no :noweb-ref epkgs
-  epkgs.focus
-#+end_src
-
-#+begin_src elisp
-  (use-package focus)
-#+end_src
-
 ** golden-ratio :focus:
 
 Focus on the current window.
@@ -923,6 +911,31 @@ Easier switching window.
     ("w k" windmove-up)
     ("w l" windmove-right))
 #+end_src
+** focus :focus:
+
+Focus around the point.
+
+#+begin_src nix :tangle no :noweb-ref epkgs
+  epkgs.focus
+#+end_src
+
+#+begin_src elisp
+  (use-package focus)
+#+end_src
+
+** pulsar :focus:
+
+Visual indicator to help easily spot current line.
+
+#+begin_src nix :tangle no :noweb-ref epkgs
+  epkgs.pulsar
+#+end_src
+
+#+begin_src elisp
+  (use-package pulsar
+    :demand t)
+#+end_src
+
 ** spacious-padding
 
 Give Emacs some space to breath.
@@ -952,19 +965,6 @@ Fix text in compilation buffer.
 #+begin_src elisp
   (use-package ansi-color
     :hook (compilation-filter . ansi-color-compilation-filter))
-#+end_src
-
-** pulsar
-
-Visual indicator to help easily spot current line.
-
-#+begin_src nix :tangle no :noweb-ref epkgs
-  epkgs.pulsar
-#+end_src
-
-#+begin_src elisp
-  (use-package pulsar
-    :demand t)
 #+end_src
 
 * Help system

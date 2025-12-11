@@ -28,10 +28,10 @@ let
     epkgs.vertico
     epkgs.marginalia
     epkgs.nerd-icons-completion
-    epkgs.focus
     epkgs.golden-ratio
-    epkgs.spacious-padding
+    epkgs.focus
     epkgs.pulsar
+    epkgs.spacious-padding
     epkgs.helpful
     epkgs.which-key
     epkgs.keycast
