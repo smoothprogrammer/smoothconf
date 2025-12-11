@@ -1143,6 +1143,7 @@ Completion are essential feature for modern text editor / IDE.
 
 #+begin_src elisp
   (use-package cape
+    :demand t
     :config
     (add-hook 'completion-at-point-functions #'cape-file)
     (add-hook 'completion-at-point-functions #'cape-elisp-block))
