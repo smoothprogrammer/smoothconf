@@ -298,11 +298,9 @@ We'll use meow and evil as a learning source and reference.
 #+end_src
 
 #+begin_src elisp
-  (use-package meow
-    :defer t)
-  (use-package evil
-    :defer t)
-#+end_src
+  (use-package meow)
+  (use-package evil)
+src
 
 ** smooth
 
