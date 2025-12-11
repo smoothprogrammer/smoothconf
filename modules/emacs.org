@@ -311,21 +311,36 @@ We'll use meow and evil as a learning source and reference.
 
   (defvar smooth-normal-map (make-sparse-keymap))
   (defvar smooth-insert-map (make-sparse-keymap))
+  (defvar smooth-mode-normal-maps nil
+    "List of (MODE . MAP) pairs for normal state.")
+  (defvar smooth-mode-insert-maps nil
+    "List of (MODE . MAP) pairs for insert state.")
+
+  (defun smooth--mode-p (mode)
+    (cond
+     ((eq mode major-mode) t)
+     ((derived-mode-p mode) t)
+     ((and (boundp mode) (symbol-value mode)) t)
+     (t nil)))
 
   (defun smooth--refresh-keymap ()
-    (let ((entry (assq 'smooth-mode minor-mode-overriding-map-alist)))
-      (cond
-       ((eq smooth--state 'normal)
-        (if entry
-            (setcdr entry smooth-normal-map)
-          (push `(smooth-mode . ,smooth-normal-map) minor-mode-overriding-map-alist)))
-       ((eq smooth--state 'insert)
-        (if entry
-            (setcdr entry smooth-insert-map)
-          (push `(smooth-mode . ,smooth-insert-map) minor-mode-overriding-map-alist)))
-       (t
-        (setq minor-mode-overriding-map-alist
-              (assq-delete-all 'smooth-mode minor-mode-overriding-map-alist))))))
+    (setq minor-mode-overriding-map-alist
+  		(assq-delete-all 'smooth-mode minor-mode-overriding-map-alist))
+    (cond
+     ((eq smooth--state 'normal)
+  	(let ((pair (seq-find (lambda (pair)
+  							(smooth--mode-p (car pair)))
+  						  smooth-mode-normal-maps)))
+  	  (push `(smooth-mode . ,smooth-normal-map) minor-mode-overriding-map-alist)
+  	  (when pair
+  		(push `(smooth-mode . ,(cdr pair)) minor-mode-overriding-map-alist))))
+     ((eq smooth--state 'insert)
+  	(let ((pair (seq-find (lambda (pair)
+  							(smooth--mode-p (car pair)))
+  						  smooth-mode-insert-maps)))
+  	  (push `(smooth-mode . ,smooth-insert-map) minor-mode-overriding-map-alist)
+  	  (when pair
+  		(push `(smooth-mode . ,(cdr pair)) minor-mode-overriding-map-alist))))))
 
   (defun smooth-enter-normal-state ()
     (interactive)
@@ -449,17 +464,20 @@ We'll use meow and evil as a learning source and reference.
        (unless (use-region-p) (push-mark (point) t t)))))
 
   (defmacro smooth-keys (&rest forms)
-    (let ((keymap nil)
+    (let ((state nil)
+  		(mode nil)
   		(expansions nil))
       (dolist (form forms)
         (unless (consp form)
   		(error "smooth-keys: invalid form: %S" form))
-        (let ((state (plist-get form :state)))
+        (let ((new-state (plist-get form :state))
+  			(new-mode (plist-get form :mode)))
   		(cond
-  		 (state
-            (setq keymap (intern (format "smooth-%s-map" state))))
+  		 ((or new-state new-mode)
+  		  (when new-state (setq state new-state))
+  		  (when new-mode (setq mode new-mode)))
   		 (t
-  		  (unless keymap
+  		  (unless state
   			(error "smooth-keys: key binding appears before setting state"))
   		  (let* ((key (nth 0 form))
   				 (cmd (nth 1 form))
@@ -468,7 +486,20 @@ We'll use meow and evil as a learning source and reference.
   				 (record (plist-get args :record))
   				 (select (plist-get args :select))
   				 (insert (plist-get args :insert))
-  				 (pulse (plist-get args :pulse)))
+  				 (pulse (plist-get args :pulse))
+  				 (keymap (if mode
+  							 `(cdr (assoc ',mode
+  										  ,(if (eq state 'normal)
+  											   'smooth-mode-normal-maps
+  											 'smooth-mode-insert-maps)))
+  						   (intern (format "smooth-%s-map" state)))))
+  			(when mode
+  			  (let ((table (if (eq state 'normal)
+  							   'smooth-mode-normal-maps
+  							 'smooth-mode-insert-maps)))
+  				(unless (assoc mode (symbol-value table))
+  				  (push (cons mode (make-sparse-keymap))
+  						(symbol-value table)))))
   			(if (not name)
   				(push `(keymap-set ,keymap ,key #',cmd) expansions)
   			  (let ((sym (intern (format "smooth:%s" name))))
@@ -492,7 +523,7 @@ We'll use meow and evil as a learning source and reference.
   								`((smooth--pulse ',pulse)))))
   					(keymap-set ,keymap ,key #',sym))
   				 expansions))))))))
-      `(progn ,@(nreverse expansions))))
+  	`(progn ,@(nreverse expansions))))
 
   (with-eval-after-load 'use-package-core
     (unless (member :smooth use-package-keywords)
