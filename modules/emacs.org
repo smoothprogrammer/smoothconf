@@ -1413,31 +1413,15 @@ the box.
 
 * TODO Org
 
-#+begin_src elisp :tangle no :noweb-ref org
-  ("SPC SPC c" org-ctrl-c-ctrl-c)
-  ;; insert structure template
-  ;; see: org-structure-template-alist
-#+end_src
-
-#+begin_src elisp :tangle no :noweb-ref org-insert
-  ("SPC i t" org-insert-structure-template :name org-insert-template)
-  ("SPC i h" org-babel-insert-header-arg :name org-insert-header)
-  ("SPC i l" org-insert-link :name org-insert-link)
-#+end_src
-
-#+begin_src elisp :tangle no :noweb-ref babel
-  ("SPC SPC t" org-babel-tangle)
-#+end_src
-
 ** org
 
 #+begin_src elisp
   (use-package org
-    ;; :ryo
-    ;; (:mode 'org-mode)
-    ;; <<org>>
-    ;; <<org-insert>>
-    ;; <<babel>>
+    :smooth
+    (:state normal :mode org-mode)
+    ("SPC i t" org-insert-structure-template)
+    ("SPC i h" org-babel-insert-header-arg)
+    ("SPC i l" org-insert-link)
     :hook (after-save . org-auto--tangle-and-reload)
     :custom
     ;; Edit settings.
