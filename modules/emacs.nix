@@ -53,6 +53,8 @@ let
     epkgs.geiser
     epkgs.geiser-guile
     # lua-ts-mode is already emacs built-in major mode
+    epkgs.zig-mode
+    epkgs.zig-ts-mode
     epkgs.org-modern
     (pkgs.emacsPackages.trivialBuild {
       pname = "org-modern-indent";
@@ -110,6 +112,8 @@ in
       pkgs.guile
       pkgs.luajit
       pkgs.lua-language-server
+      pkgs.zig
+      pkgs.zls
       pkgs.hurl
       pkgs.ledger
       ];

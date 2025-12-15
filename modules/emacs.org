@@ -1,4 +1,4 @@
-z#+title: Emacs Configurations
+#+title: Emacs Configurations
 #+property: header-args:elisp :mkdirp yes :results silent :tangle ~/.emacs.d/init.el
 #+property: header-args:nix :results silent :tangle ./emacs.nix
 #+auto-tangle: t
@@ -1413,6 +1413,27 @@ the box.
 
 #+begin_src elisp :tangle no :noweb-ref eglot-server-programs
   ((lua-ts-mode) . ("lua-language-server"))
+#+end_src
+
+** zig :noob:
+
+#+begin_src nix :tangle no :noweb-ref pkgs
+  pkgs.zig
+  pkgs.zls
+#+end_src
+
+#+begin_src nix :tangle no :noweb-ref epkgs
+  epkgs.zig-mode
+  epkgs.zig-ts-mode
+#+end_src
+
+#+begin_src elisp
+  (use-package zig-ts-mode
+    :mode (rx ".zig" eos))
+#+end_src
+
+#+begin_src elisp :tangle no :noweb-ref eglot-server-programs
+  ((zig-mode zig-ts-mode) . ("zls"))
 #+end_src
 
 * TODO Org
