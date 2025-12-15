@@ -1,5 +1,6 @@
 #+title: Smoothr Configuration
 #+property: header-args:nix :mkdirp yes :result silent :tangle ./configuration.nix
+#+auto-tangle: t
 
 * The config
 
@@ -190,6 +191,7 @@ See: https://github.com/nix-darwin/nix-darwin/issues/1041
   "godot"
   "robloxstudio"
   "roblox"
+  "opera-gx"
 #+end_src
 
 * Work

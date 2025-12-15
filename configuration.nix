@@ -59,6 +59,7 @@ with lib;
 	"godot"
 	"robloxstudio"
 	"roblox"
+	"opera-gx"
 	"slack"
 	"chatgpt"
 	"dbeaver-community"
