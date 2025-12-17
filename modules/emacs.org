@@ -570,8 +570,8 @@ We'll use meow and evil as a learning source and reference.
   ("ESC" smooth--escape :name escape :select deactivate :pulse red)
   ("<delete>" undefined)
   ("DEL" undefined)
-  ("<return>" undefined)
-  ("RET" undefined)
+  ;; ("<return>" undefined)
+  ;; ("RET" undefined)
   ;; ("<space>" undefined)
   ;; ("SPC" undefined)
 
