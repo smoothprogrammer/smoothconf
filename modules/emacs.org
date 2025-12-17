@@ -1133,8 +1133,7 @@ Completion are essential feature for modern text editor / IDE.
     :custom
     (completion-styles '(orderless basic))
     (completion-category-default nil)
-    (completion-category-overrides '((file (styles partial-completion))))
-    (orderless-matching-styles '(orderless-flex)))
+    (completion-category-overrides '((file (styles partial-completion)))))
 #+end_src
 
 ** cape
