@@ -1029,7 +1029,11 @@ Fix text in compilation buffer.
     ("SPC d" dired-jump :name "directory")
     ("SPC SPC f" project-find-file :name "root file")
     ("SPC f" find-file :name "file")
-    ("SPC c" project-compile  :name "compile")
+    ("SPC c" (lambda ()
+  			 (interactive)
+  			 (let ((current-prefix-arg '(4)))
+  			   (call-interactively #'project-compile)))
+     :name "compile")
     ("SPC e" project-eshell :name "eshell")
     ("SPC b" project-switch-to-buffer :name "buffer")
     :custom
