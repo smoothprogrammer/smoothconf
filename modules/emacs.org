@@ -1099,6 +1099,14 @@ Fix text in compilation buffer.
     ("SPC 4" harpoon-go-to-5))
 #+end_src
 
+** dired
+
+#+begin_src elisp
+  (use-package dired
+    :custom
+    (dired-create-destination-dirs 'ask))
+#+end_src
+
 * Completion
 
 Completion are essential feature for modern text editor / IDE.
