@@ -1104,7 +1104,9 @@ Fix text in compilation buffer.
 #+begin_src elisp
   (use-package dired
     :custom
-    (dired-create-destination-dirs 'ask))
+    (dired-create-destination-dirs 'ask)
+    (dired-clean-confirm-killing-deleted-buffers nil)
+    (dired-clean-up-buffers-too t))
 #+end_src
 
 * Completion
