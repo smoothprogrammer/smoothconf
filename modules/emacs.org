@@ -213,6 +213,12 @@ Limit the column to 80 character.
   (add-hook 'text-mode-hook 'auto-fill-mode)
 #+end_src
 
+Add newline at the end of file.
+
+#+begin_src elisp
+  (setq-default require-final-newline t)
+#+end_src
+
 Treat subword movement for camel case in programming mode.
 
 #+begin_src elisp
