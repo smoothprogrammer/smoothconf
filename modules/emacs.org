@@ -185,6 +185,12 @@ Replace active region when insert text.
   (delete-selection-mode t)
 #+end_src
 
+Disable TAB indentation and leave it to major mode.
+
+#+begin_src elisp
+  (setq-default indent-tabs-mode nil)
+#+end_src
+
 Make TAB do indent + complete.
 
 #+begin_src elisp
